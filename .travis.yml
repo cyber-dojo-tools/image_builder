@@ -9,7 +9,7 @@ script:
     # TODO: run tests
 
     # example run
-    - docker run --rm -it ${NAME} of.rb ALPHA
+    - docker run --rm -it ${NAME} ./of.rb ALPHA
 
     # push image to dockerhub
     - docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
