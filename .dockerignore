@@ -6,4 +6,6 @@
 
 #-----!Except these files
 
+!dependencies.rb
 !of.rb
+!verify.rb
