@@ -2,8 +2,9 @@ sudo: required
 services: docker
 
 script:
-    #- TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
-    - NAME=cyberdojolanguages/image_dependencies
+    - ORG_NAME=cyberdojofoundation
+    - TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
+    - NAME=${ORG_NAME}/${TAG_NAME}
     - docker build -t ${NAME} .
 
     # TODO: run tests
