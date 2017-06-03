@@ -1,0 +1,16 @@
+sudo: required
+services: docker
+
+script:
+    #- TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
+    - NAME=cyberdojolanguages/image_dependencies
+    - docker build -t ${NAME} .
+
+    # TODO: run tests
+
+    # example run
+    - docker run --rm -it ${NAME} of.rb ALPHA
+
+    # push image to dockerhub
+    - docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+    - docker push ${NAME}
