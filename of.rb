@@ -19,4 +19,5 @@ images = [
 
 
 puts ARGV[0]
+puts '~~~~~~~'
 puts images
