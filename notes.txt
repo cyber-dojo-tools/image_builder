@@ -1,0 +1,37 @@
+
+Plan
+----
+This repo that maintains a master list of dependency info.
+Specifically,
+o) the name of the language+TF repo
+o) the name of the docker image it builds (needed?)
+o) the name of the docker image they are built FROM
+
+
+Verifying
+---------
+Each language+TF repo as part of its .travis.yml script
+will check the correctness of its entry in this master
+list by passing it the names of...
+  o) the docker image it builds
+     - which it reads directly from the manifest.json file
+  o) the docker image it is built FROM
+     - which it reads directly from the first line of
+       its own Dockerfile)
+  o) its own language+TF repo
+
+
+Notifying
+---------
+Each language+TF repo, as part of its .travis.yml script
+will then ask this repo for the names of all the other
+language+TF repos it needs to notify (since they depend on
+it and it has just changed and successfully built a new image
+and pushed it to dockerhub).
+
+NB: I can stick with the javascript based notification
+I'm using although I should upgrade to using a POST which
+the travis API v3 now allows. See
+https://docs.travis-ci.com/user/triggering-builds/
+
+
