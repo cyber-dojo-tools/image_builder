@@ -8,6 +8,11 @@
 
 def dependencies
   [
+    [
+      'https://github.com/cyber-dojo-languages/elm',
+      'cyberdojofoundation/build-essential',
+      'cyberdojofoundation/elm-0.18.0'
+    ],
     [ 'https://github.com/cyber-dojo-languages/elm-test',
       'cyberdojofoundation/elm-0.18.0',
       'cyberdojofoundation/elm_test'

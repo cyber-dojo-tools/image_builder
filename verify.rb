@@ -14,9 +14,27 @@ def from
   from_line.split[1].strip
 end
 
+def base_language_repo?
+  File.exists?('/docker/image_name.sh') &&
+  !Dir.exists?('/start_point')
+end
+
+def language_plus_test_repo?
+  !File.exists?('/docker/image_name.sh') &&
+  Dir.exists?('/start_point')
+end
+
 def image_name
-  manifest = JSON.parse(IO.read('/start_point/manifest.json'))
-  manifest['image_name']
+  if base_language_repo?
+    lines = IO.read('/docker/image_name.sh').split("\n")
+    line = lines.find { |line| line.start_with? 'image_name=' }
+    return line.split[1].strip
+  end
+  if language_plus_test_repo?
+    manifest = JSON.parse(IO.read('/start_point/manifest.json'))
+    return manifest['image_name']
+  end
+  return nil
 end
 
 status = dependencies.include?([ repo_name, from, image_name ])
