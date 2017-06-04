@@ -8,8 +8,8 @@ run()
   local tag_name=$(basename ${my_dir}) # image_dependencies
   local name=${org_name}/${tag_name}
 
-  #local repo_name=https://github.com/cyber-dojo-languages/elm-test
-  local repo_name=${TRAVIS_REPO_SLUG}
+  local repo_name=https://github.com/cyber-dojo-languages/elm-test
+  #local repo_name=${TRAVIS_REPO_SLUG}
 
   if [ -d ${my_dir}/docker ]; then
     local docker_volume=--volume=${my_dir}/docker:/docker:ro
