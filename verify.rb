@@ -1,12 +1,33 @@
 #!/usr/bin/env ruby
 
 require_relative 'dependencies'
+require 'json'
 
-# This will take input naming a repo claims its current data is
-# and outputs whether that data agrees with the dependencies.
+def repo_name
+  ARGV[0]
+end
 
-puts "verify"
-puts '~~~~~~~'
-puts ARGV[0]
-puts '~~~~~~~'
-puts dependencies
+def from
+  dockerfile = IO.read('/docker/Dockerfile')
+  lines = dockerfile.split("\n")
+  from_line = lines.find { |line| line.start_with? 'FROM' }
+  from_line.split[1].strip
+end
+
+def image_name
+  manifest = JSON.parse(IO.read('/start_point/manifest.json'))
+  manifest['image_name']
+end
+
+status = dependencies.include?([ repo_name, from, image_name ])
+unless status
+  lines = [
+    'ERROR: cannot find dependency entry for',
+    "  repo_name:#{repo_name}",
+    "  from:#{from}",
+    "  image_name:#{image_name}"
+  ]
+  lines.each { |line| STDERR.puts line }
+end
+
+exit status

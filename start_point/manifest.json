@@ -1,0 +1,16 @@
+
+{
+  "visible_filenames": [
+   "src/Hiker.elm",
+   "tests/Tests.elm",
+   "tests/Main.elm",
+   "tests/elm-package.json",
+   "cyber-dojo.sh"
+  ],
+
+  "filename_extension" : ".elm",
+
+  "display_name": "Elm, ElmTest",
+
+  "image_name": "cyberdojofoundation/elm_test"
+}

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
 # each triple is
-#   [ repo-name,
-#     name of image it is built FROM,
-#     name of image it builds
+#   [ name of repo which builds a language+TF docker image,
+#     name of docker image it is built FROM,
+#     name of docker image it builds
 #   ]
 
 def dependencies
