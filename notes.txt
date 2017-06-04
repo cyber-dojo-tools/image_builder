@@ -28,6 +28,8 @@ will then ask this repo for the names of all the other
 language+TF repos it needs to notify (since they depend on
 it and it has just changed and successfully built a new image
 and pushed it to dockerhub).
+Better still, it will notify them _itself_.
+Yes. This repo is a "notifier".
 
 NB: I can stick with the javascript based notification
 I'm using although I should upgrade to using a POST which
