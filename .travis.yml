@@ -2,17 +2,16 @@ sudo: required
 services: docker
 
 script:
-    - ORG_NAME=cyberdojofoundation
-    - TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
-    - NAME=${ORG_NAME}/${TAG_NAME}
     - ./build.sh
-
     # TODO: run tests
 
     # example runs
-    - docker run --rm -it ${NAME} ./verify.rb arg
-    - docker run --rm -it ${NAME} ./of.rb arg
+    - ./run_verify.sh
+    #- docker run --rm -it ${NAME} ./of.rb arg
 
     # push image to dockerhub
     - docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
-    - docker push ${NAME}
+    - ORG_NAME=cyberdojofoundation
+    - TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
+    - NAME=${ORG_NAME}/${TAG_NAME}
+    #- docker push ${NAME}
