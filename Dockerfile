@@ -1,7 +1,4 @@
-#FROM cyberdojo/ruby
-#using sinatra for now, ruby has no JSON gem
-
-FROM cyberdojo/sinatra
+FROM cyberdojo/docker
 MAINTAINER Jon Jagger <jon@jaggersoft.com>
 
 COPY * /app/

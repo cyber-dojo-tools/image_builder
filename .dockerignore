@@ -7,5 +7,4 @@
 #-----!Except these files
 
 !dependencies.rb
-!of.rb
-!verify.rb
+!build_image.rb

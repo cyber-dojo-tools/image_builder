@@ -2,10 +2,10 @@
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
-run()
+build_image()
 {
   local org_name=cyberdojofoundation
-  local tag_name=$(basename ${my_dir}) # image_dependencies
+  local tag_name=$(basename ${my_dir}) # image_builder
   local name=${org_name}/${tag_name}
 
   local repo_name=https://github.com/cyber-dojo-languages/elm-test
@@ -23,9 +23,9 @@ run()
     -it \
     ${docker_volume} \
     ${start_point_volume} \
-    ${name} ./verify.rb ${repo_name}
+    ${name} ./build_image.rb ${repo_name}
 }
 
-run
+build_image
 exit_status=$?
 echo "exit_status=${exit_status}"

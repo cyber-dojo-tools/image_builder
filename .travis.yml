@@ -6,8 +6,7 @@ script:
     # TODO: run tests
 
     # example runs
-    - ./run_verify.sh
-    #- docker run --rm -it ${NAME} ./of.rb arg
+    - ./run_build_image.sh
 
     # push image to dockerhub
     - docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
