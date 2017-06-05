@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
@@ -21,15 +21,9 @@ build_image()
     ${volume_start_point} \
     cyberdojofoundation/image_builder \
       ./build_image.rb ${repo_name}
+
+  docker images
 }
-
-# ls -al /var/run
-# lrwxrwxrwx 1 root root 4 Nov 30  2016 /var/run -> /run
-
-# ls -al /run
-# srw-rw----  1 root       docker        0 Jun  5 20:58 docker.sock
-
-#find / -name "docker.dock"
 
 build_image ${1}
 exit_status=$?
