@@ -23,6 +23,8 @@ build_image()
 }
 
 ls -al /var/run
+ls -al /run
+find / -name "docker.dock"
 
 build_image ${1}
 exit_status=$?
