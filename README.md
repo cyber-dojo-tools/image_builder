@@ -2,6 +2,7 @@
 
 Work in progress. Not live yet.
 
+```
 Check dependency settings of image being rebuilt
 Create its docker image
 if [ -d /start_point ]; then
@@ -11,3 +12,4 @@ if [ -d /start_point ]; then
    Verify reda/mber/green saved-output are red/amber/green
 fi
 Notify all dependent repos
+```
