@@ -28,7 +28,7 @@ def image_name
   if base_language_repo?
     lines = IO.read('/docker/image_name.sh').split("\n")
     line = lines.find { |line| line.start_with? 'image_name=' }
-    return line.split[1].strip
+    return line.split('=')[1].strip
   end
   if language_plus_test_repo?
     manifest = JSON.parse(IO.read('/start_point/manifest.json'))
