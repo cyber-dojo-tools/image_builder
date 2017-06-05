@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
@@ -21,6 +21,8 @@ build_image()
     cyberdojofoundation/image_builder \
       ./build_image.rb ${repo_name}
 }
+
+ls -al /var/run
 
 build_image ${1}
 exit_status=$?
