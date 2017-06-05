@@ -6,10 +6,6 @@ build_image()
 {
   local repo_name=${1}
 
-  local org_name=cyberdojofoundation
-  local tag_name=$(basename ${my_dir}) # image_builder
-  local name=${org_name}/${tag_name}
-
   if [ -d ${my_dir}/docker ]; then
     local docker_volume=--volume=${my_dir}/docker:/docker:ro
   fi
@@ -22,7 +18,8 @@ build_image()
     -it \
     ${docker_volume} \
     ${start_point_volume} \
-    ${name} ./build_image.rb ${repo_name}
+    cyberdojofoundation/image_builder \
+      ./build_image.rb ${repo_name}
 }
 
 build_image ${1}
