@@ -1,15 +1,5 @@
 #!/usr/bin/env ruby
 
-# Check dependency settings of image being rebuilt
-# Create docker image
-# if [ -d /start_point ]; then
-#   Verify [ cyber-dojo start-point create name --git=REPO_NAME]
-#   Verify start_point is red
-#   Verify red/amber/green visible-files are red/amber/green
-#   Verify reda/mber/green saved-output is red/amber/green
-# fi
-# Notify all dependent repos
-
 require_relative 'dependencies'
 require 'json'
 
