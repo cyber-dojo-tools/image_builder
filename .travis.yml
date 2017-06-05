@@ -13,4 +13,4 @@ script:
     - ORG_NAME=cyberdojofoundation
     - TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
     - NAME=${ORG_NAME}/${TAG_NAME}
-    #- docker push ${NAME}
+    - docker push ${NAME}
