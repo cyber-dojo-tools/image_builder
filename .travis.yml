@@ -6,7 +6,8 @@ script:
     # TODO: run tests
 
     # example runs
-    - ./run_build_image.sh
+    - example=https://github.com/cyber-dojo-languages/elm-test
+    - ./run_build_image.sh ${example}
 
     # push image to dockerhub
     - docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
