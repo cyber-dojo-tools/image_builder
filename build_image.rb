@@ -239,6 +239,10 @@ end
 def trigger_dependent_repos
   banner __method__.to_s
   # TODO:
+  # NB: I can stick with the javascript based notification
+  # I'm using although I should upgrade to using a POST which
+  # the travis API v3 now allows. See
+  # https://docs.travis-ci.com/user/triggering-builds/
   banner_end
 end
 
