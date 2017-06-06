@@ -10,9 +10,23 @@ build_image()
 {
   local work_dir=$1
   shift
-
-  if [ ! -d ${work_dir}/docker ]; then
-    exit_fail "there is no docker/ directory"
+  if [ -z "${work_dir}" ]; then
+    exit_fail "you must pass the dir docker/ lives is as an arg"
+  fi
+  if [ ! -d "${work_dir}" ]; then
+    exit_fail "${work_dir}/ does not exist"
+  fi
+  if [ ! -d "${work_dir}/docker" ]; then
+    exit_fail "${work_dir}/docker/ does not exist"
+  fi
+  if [ -z "${DOCKER_USERNAME}" ]; then
+    exit_fail "DOCKER_USERNAME environment-variable not set"
+  fi
+  if [ -z "${DOCKER_PASSWORD}" ]; then
+    exit_fail "DOCKER_PASSWORD environment-variable not set"
+  fi
+  if [ -z "${REPO_URL}" ]; then
+    exit_fail "REPO_URL environment-variable not set"
   fi
 
   # docker.sock is needed is you are running on a local Docker Toolbox
@@ -25,11 +39,14 @@ build_image()
   docker run \
     --rm \
     -it \
+    --env DOCKER_USERNAME=${DOCKER_USERNAME} \
+    --env DOCKER_PASSWORD=${DOCKER_PASSWORD} \
+    --env REPO_URL=${REPO_URL} \
     ${volume_docker_socket} \
     ${volume_docker_src} \
     ${volume_start_point} \
     cyberdojofoundation/image_builder \
-      ./build_image.rb $*
+      ./build_image.rb
 }
 
 build_image $*

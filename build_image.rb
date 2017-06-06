@@ -3,16 +3,16 @@
 require_relative 'dependencies'
 require 'json'
 
-def repo_name
-  ARGV[0]
+def repo_url
+  ENV['REPO_URL']
 end
 
 def docker_username
-  ARGV[1]
+  ENV['DOCKER_USERNAME']
 end
 
 def docker_password
-  ARGV[2]
+  ENV['DOCKER_PASSWORD']
 end
 
 def from
@@ -51,11 +51,11 @@ def print_diagnostic(lines)
 end
 
 def verify_dependency_settings
-  status = dependencies.include?([ repo_name, from, image_name ])
+  status = dependencies.include?([ repo_url, from, image_name ])
   unless status
     print_diagnostic [
       'ERROR: cannot find dependency entry for',
-      "  repo_name:#{repo_name}",
+      "  repo_url:#{repo_url}",
       "  from:#{from}",
       "  image_name:#{image_name}"
     ]
