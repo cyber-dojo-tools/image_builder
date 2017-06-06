@@ -125,11 +125,8 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def check_images_red_amber_green_lambda_file
+  # TODO: improve diagnostics
   banner __method__.to_s
-  # check image has /usr/local/bin/red_amber_green.rb
-  # check it can be eval's into ruby
-  # check its a well-formed lambda
-  #
   rag_filename = '/usr/local/bin/red_amber_green.rb'
   output = assert_system "docker run --rm -it #{image_name} cat #{rag_filename}"
   fn = eval(output)
