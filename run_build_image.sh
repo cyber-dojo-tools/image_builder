@@ -35,9 +35,11 @@ build_image()
   if [ -d ${work_dir}/start_point ]; then
     local volume_start_point_dir=--volume=${work_dir}/start_point:/start_point:ro
   fi
+  if [ -d ${work_dir}/outputs ]; then
+    local volume_outputs_dir=--volume=${work_dir}/outputs:/outputs:ro
+  fi
 
   # TODO:volume for traffic_lights
-  # TODO:volume for outputs
   # TODO:version?
 
   docker run \
@@ -49,6 +51,7 @@ build_image()
     ${volume_docker_socket} \
     ${volume_docker_dir} \
     ${volume_start_point_dir} \
+    ${volume_outputs_dir} \
     cyberdojofoundation/image_builder \
       ./build_image.rb
 }
