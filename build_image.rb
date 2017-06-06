@@ -243,6 +243,13 @@ def trigger_dependent_git_repos
   # I'm using although I should upgrade to using a POST which
   # the travis API v3 now allows. See
   # https://docs.travis-ci.com/user/triggering-builds/
+
+  dependents = dependencies.select do |entry|
+    entry[1] == image_name
+  end
+  dependents.each do |dependent|
+    puts "notify:#{dependent[2]}"
+  end
   banner_end
 end
 
