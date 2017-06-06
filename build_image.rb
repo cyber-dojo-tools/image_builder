@@ -125,8 +125,8 @@ verify_dependency_settings
 build_the_image
 if test_framework_repo?
   check_start_point
-  #check_traffic_lights (using runner)
-  #check_outputs
+  #check_traffic_lights/ (using runner)
+  #check_outputs/
 end
 push_the_image
 

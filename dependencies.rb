@@ -8,6 +8,7 @@
 
 def dependencies
   [
+    # Elm
     [
       'https://github.com/cyber-dojo-languages/elm',
       'cyberdojofoundation/build-essential',
@@ -17,9 +18,15 @@ def dependencies
       'cyberdojofoundation/elm-0.18.0',
       'cyberdojofoundation/elm_test'
     ],
+    # Haskell
+    [
+      'https://github.com/cyber-dojo-languages/haskell',
+      'cyberdojofoundation/build-essential',
+      'cyberdojofoundation/haskell-7.6.3'
+    ],
     [ 'https://github.com/cyber-dojo-languages/haskell-hunit',
       'cyberdojofoundation/haskell-7.6.3',
       'cyberdojofoundation/haskell_hunit'
-    ]
+    ],
   ]
 end
