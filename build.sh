@@ -2,8 +2,6 @@
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
-org_name=cyberdojofoundation
-tag_name=$(basename ${my_dir})
-name=${org_name}/${tag_name}
-
-docker build --tag ${name} ${my_dir}
+ORG_NAME=cyberdojofoundation
+TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
+docker build --tag ${ORG_NAME}/${TAG_NAME} ${my_dir}

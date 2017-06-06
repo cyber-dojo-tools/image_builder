@@ -2,10 +2,4 @@ sudo: required
 services: docker
 
 script:
-    - ./build.sh
-    # TODO: run tests
-
-    - docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
-    - ORG_NAME=cyberdojofoundation
-    - TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
-    - docker push ${ORG_NAME}/${TAG_NAME}
+    - ./pipe_build_test_push.sh
