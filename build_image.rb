@@ -4,7 +4,7 @@ require_relative 'dependencies'
 require 'json'
 
 def success; 0; end
-def fail; 1; end
+def fail   ; 1; end
 
 def repo_url       ; ENV['REPO_URL'       ]; end
 def docker_username; ENV['DOCKER_USERNAME']; end
@@ -204,7 +204,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def push_the_image
+def push_the_image_to_dockerhub
   banner __method__.to_s
   command = [
     'docker login',
@@ -236,7 +236,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def trigger_dependent_repos
+def trigger_dependent_git_repos
   banner __method__.to_s
   # TODO:
   # NB: I can stick with the javascript based notification
@@ -257,6 +257,6 @@ if test_framework_repo?
   check_traffic_lights
 end
 
-push_the_image
-trigger_dependent_repos
+push_the_image_to_dockerhub
+trigger_dependent_git_repos
 
