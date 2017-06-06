@@ -31,10 +31,14 @@ build_image()
 
   # docker.sock is needed is you are running on a local Docker Toolbox
   local volume_docker_socket=--volume=/var/run/docker.sock:/var/run/docker.sock
-  local volume_docker_src=--volume=${work_dir}/docker:/docker:ro
+  local volume_docker_dir=--volume=${work_dir}/docker:/docker:ro
   if [ -d ${work_dir}/start_point ]; then
-    local volume_start_point=--volume=${work_dir}/start_point:/start_point:ro
+    local volume_start_point_dir=--volume=${work_dir}/start_point:/start_point:ro
   fi
+
+  # TODO:volume for traffic_lights
+  # TODO:volume for outputs
+  # TODO:version?
 
   docker run \
     --rm \
@@ -43,8 +47,8 @@ build_image()
     --env DOCKER_PASSWORD=${DOCKER_PASSWORD} \
     --env REPO_URL=${REPO_URL} \
     ${volume_docker_socket} \
-    ${volume_docker_src} \
-    ${volume_start_point} \
+    ${volume_docker_dir} \
+    ${volume_start_point_dir} \
     cyberdojofoundation/image_builder \
       ./build_image.rb
 }
