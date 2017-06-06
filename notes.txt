@@ -4,7 +4,7 @@ Plan
 This repo that maintains a master list of dependency info.
 Specifically,
 o) the name of the language+TF repo
-o) the name of the docker image it builds (needed?)
+o) the name of the docker image it builds
 o) the name of the docker image they are built FROM
 
 

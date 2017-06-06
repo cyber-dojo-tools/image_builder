@@ -7,6 +7,14 @@ def repo_name
   ARGV[0]
 end
 
+def docker_username
+  ARGV[1]
+end
+
+def docker_password
+  ARGV[2]
+end
+
 def from
   dockerfile = IO.read('/docker/Dockerfile')
   lines = dockerfile.split("\n")
@@ -16,7 +24,7 @@ end
 
 def base_language_repo?
   File.exists?('/docker/manifest.json') &&
-  !Dir.exists?('/start_point')
+    !Dir.exists?('/start_point')
 end
 
 def language_plus_test_repo?
@@ -26,39 +34,64 @@ end
 
 def image_name
   if base_language_repo?
-    manifest = JSON.parse(IO.read('/docker/manifest.json'))
-    return manifest['image_name']
+    manifest = IO.read('/docker/manifest.json')
+    json = JSON.parse(manifest)
+    return json['image_name']
   end
   if language_plus_test_repo?
-    manifest = JSON.parse(IO.read('/start_point/manifest.json'))
-    return manifest['image_name']
+    manifest = IO.read('/start_point/manifest.json')
+    json = JSON.parse(manifest)
+    return json['image_name']
   end
   return nil
+end
+
+def print_diagnostic(lines)
+  lines.each { |line| STDERR.puts line }
 end
 
 def verify_dependency_settings
   status = dependencies.include?([ repo_name, from, image_name ])
   unless status
-    lines = [
+    print_diagnostic [
       'ERROR: cannot find dependency entry for',
       "  repo_name:#{repo_name}",
       "  from:#{from}",
       "  image_name:#{image_name}"
     ]
-    lines.each { |line| STDERR.puts line }
+    exit status
+  end
+end
+
+def assert_system(command)
+  system(command)
+  status = $?.exitstatus
+  unless status == 0
+    print_diagnostic [
+      "FAILED:command:#{command}",
+      "exit_status == #{status}"
+    ]
     exit status
   end
 end
 
 def build_the_image
-  command = "cd /docker && docker build --tag #{image_name} ."
-  system(command)
-  status = $?.exitstatus
-  puts "exit_status of [docker build] == #{status}"
+  assert_system "cd /docker && docker build --tag #{image_name} ."
+end
+
+def push_the_image
+  command = [
+    'docker login',
+    "--username #{docker_username}",
+    "--password #{docker_password}"
+  ].join(' ')
+  assert_system command
+  assert_system "docker push #{image_name}"
+  assert_system 'docker logout'
 end
 
 verify_dependency_settings
 build_the_image
-
+push_the_image
 
 

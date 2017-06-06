@@ -5,13 +5,7 @@ script:
     - ./build.sh
     # TODO: run tests
 
-    # example runs
-    - example=https://github.com/cyber-dojo-languages/elm-test
-    - ./run_build_image.sh ${example}
-
-    # push image to dockerhub
-    - docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+    - docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
     - ORG_NAME=cyberdojofoundation
     - TAG_NAME=$(basename ${TRAVIS_REPO_SLUG})
-    - NAME=${ORG_NAME}/${TAG_NAME}
-    - docker push ${NAME}
+    - docker push ${ORG_NAME}/${TAG_NAME}
