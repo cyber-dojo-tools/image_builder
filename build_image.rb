@@ -255,7 +255,7 @@ def push_the_image_to_dockerhub
     ]
     exit fail
   end
-
+  print_diagnostic [ "pushing #{image_name}" ], STDOUT
   assert_system "docker push #{image_name}"
   assert_system 'docker logout'
   banner_end
