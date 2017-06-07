@@ -46,48 +46,65 @@
 
 def dependencies
   cdl = 'https://github.com/cyber-dojo-languages'
+  cdf = 'cyberdojofoundation'
   [
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Alpine 3.4
     [ "#{cdl}/alpine-language-base-3.4",
       'alpine:3.4',
-      'cyberdojofoundation/alpine-language_base:3.4'
+      "#{cdf}/alpine-language_base:3.4"
     ],
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Chapel
+    [ "#{cdl}/chapel-1.15.0",
+      "#{cdf}/alpine_language_base:3.4",
+      "#{cdf}/chapel:1.15.0"
+    ],
+    [ "#{cdl}/chapel-assert",
+      "#{cdf}/chapel:1.15.0",
+      "#{cdf}/chapel_assert"
+    ]
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Elixir
+    [ "#{cdl}/elixir-1.2.5",
+      "#{cdf}/alpine_language_base:3.4",
+      "#{cdf}/elixir:1.2.5"
+    ],
+    [ "#{cdl}/elixir-exunit",
+      "#{cdf}/elixir:1.2.5",
+      "#{cdf}/elixir_exunit"
+    ],
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Ubuntu-14-04
     [ "#{cdl}/ubuntu-build-essential-14.04",
       'ubuntu:14.04',
-      'cyberdojofoundation/ubuntu-build-essential:14.04'
+      "#{cdf}/ubuntu-build-essential:14.04"
     ],
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Elm
     [ "#{cdl}/elm-0.18.0",
-      'cyberdojofoundation/ubuntu-build-essential:14.04',
-      'cyberdojofoundation/elm:0.18.0'
+      "#{cdf}/ubuntu-build-essential:14.04",
+      "#{cdf}/elm:0.18.0"
     ],
     [ "#{cdl}/elm-test",
-      'cyberdojofoundation/elm:0.18.0',
-      'cyberdojofoundation/elm_test'
+      "#{cdf}/elm:0.18.0",
+      "#{cdf}/elm_test"
     ],
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Haskell
     [ "#{cdl}/haskell-7.6.3",
-      'cyberdojofoundation/ubuntu-build-essential:14.04',
-      'cyberdojofoundation/haskell:7.6.3'
+      "#{cdf}/ubuntu-build-essential:14.04",
+      "#{cdf}/haskell:7.6.3"
     ],
     [ "#{cdl}/haskell-hunit",
-      'cyberdojofoundation/haskell:7.6.3',
-      'cyberdojofoundation/haskell_hunit'
+      "#{cdf}/haskell:7.6.3",
+      "#{cdf}/haskell_hunit"
     ],
   ]
 end
