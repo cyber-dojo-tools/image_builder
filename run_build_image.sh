@@ -42,8 +42,6 @@ build_image()
     local volume_traffic_lights_dir=--volume=${work_dir}/traffic_lights:/traffic_lights:ro
   fi
 
-  # TODO:version?
-
   docker run \
     --rm \
     -it \
