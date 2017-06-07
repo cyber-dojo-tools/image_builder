@@ -7,24 +7,33 @@
 #   ]
 
 def dependencies
+  cdl = 'https://github.com/cyber-dojo-languages'
   [
+    # - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Ubuntu-14-04
+    [ "#{cdl}/ubuntu-14-04-build-essential",
+      'ubuntu:14.04',
+      'cyberdojofoundation/ubuntu-14-04-build-essential'
+    ],
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Elm
-    [
-      'https://github.com/cyber-dojo-languages/elm',
+    [ "#{cdl}/elm",
       'cyberdojofoundation/build-essential',
       'cyberdojofoundation/elm-0.18.0'
     ],
-    [ 'https://github.com/cyber-dojo-languages/elm-test',
+    [ "#{cdl}/elm-test",
       'cyberdojofoundation/elm-0.18.0',
       'cyberdojofoundation/elm_test'
     ],
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Haskell
-    [
-      'https://github.com/cyber-dojo-languages/haskell',
+    [ "#{cdl}/haskell",
       'cyberdojofoundation/build-essential',
       'cyberdojofoundation/haskell-7.6.3'
     ],
-    [ 'https://github.com/cyber-dojo-languages/haskell-hunit',
+    [ "#{cdl}/haskell-hunit",
       'cyberdojofoundation/haskell-7.6.3',
       'cyberdojofoundation/haskell_hunit'
     ],
