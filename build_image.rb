@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-# TODO: display version numbers?
-
 require_relative 'dependencies'
 require 'json'
 

@@ -1,0 +1,19 @@
+
+# display version numbers
+# - - - - - - - - - - - -
+# the base-language versions be gathered from the dependency table
+# I can split the table into named sections and create a section for the
+# base-language entries and then the version numbers
+# can be harvested from that.
+
+# TODO: add checks that the version numbers of
+# the repo-name and the image-name match up.
+
+# TODO: add check that the repo-names version
+# numbers use -1.2.3 format.
+
+# TODO: add check that the image-names for
+# base images use version numbers use :1.2.3 format.
+
+# TODO: add check that the image-names for
+# language+test images do NOT use version numbers.
