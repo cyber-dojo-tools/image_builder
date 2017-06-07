@@ -65,7 +65,7 @@ def dependencies
     [ "#{cdl}/chapel-assert",
       "#{cdf}/chapel:1.15.0",
       "#{cdf}/chapel_assert"
-    ]
+    ],
 
     # - - - - - - - - - - - - - - - - - - - - - - - - -
     # Elixir
