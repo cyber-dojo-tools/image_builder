@@ -60,13 +60,13 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def print(lines, stream)
-  lines.each { |line| stream.puts line }
-end
+def print(lines, stream); lines.each { |line| stream.puts line }; end
 
-def print_diagnostic(lines)
-  print(lines, STDERR)
-end
+def print_diagnostic(lines); print(lines, STDERR); end
+
+def print_warning(lines); print_diagnostic(['WARNING'] + lines); end
+
+def print_failed(lines); print_diagnostic(['FAILED'] + lines); end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -88,10 +88,7 @@ def assert_system(command)
   output = `#{command}`
   status = $?.exitstatus
   unless status == success
-    print_diagnostic [
-      "FAILED:command:#{command}",
-      "exit_status == #{status}"
-    ]
+    print_failed [ command, "exit_status == #{status}" ]
     exit fail
   end
   output
@@ -103,10 +100,10 @@ def verify_dependency_settings
   banner __method__.to_s
   found = dependencies.include?([ repo_url, from, image_name ])
   unless found
-    print_diagnostic [
-      'ERROR: cannot find dependency entry for',
-      "  repo_url:#{repo_url}",
-      "  from:#{from}",
+    print_failed [
+      'cannot find dependency entry for',
+      "    repo_url:#{repo_url}",
+      "        from:#{from}",
       "  image_name:#{image_name}"
     ]
     exit fail
@@ -131,10 +128,8 @@ def check_images_red_amber_green_lambda_file
   output = assert_system "docker run --rm -it #{image_name} cat #{rag_filename}"
   fn = eval(output)
   rag = fn.call(stdout='ssd', stderr='sdsd', status=42)
-  unless [:red,:amber,:green].include? rag
-    print_diagnostic([
-      "FAILED:image #{image_name}'s #{rag_filename} not in [:red,:amber,:green]"
-    ])
+  unless rag == :amber
+    print_failed([ "image #{image_name}'s #{rag_filename} did not produce :amber" ])
     exit fail
   end
   banner_end
@@ -142,7 +137,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_start_point
+def check_start_point_can_be_created
   banner __method__.to_s
   script = 'cyber-dojo'
   url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
@@ -151,8 +146,16 @@ def check_start_point
   name = 'checking'
   assert_system "./#{script} start-point create #{name} --git=#{repo_url}"
   assert_system "./#{script} start-point rm #{name}"
+  banner_end
+end
 
-  # TODO: check start_point is red
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def check_start_point_is_red
+  banner __method__.to_s
+
+  # runner_stateless
+  # run(image_name, kata_id, avatar_name, visible_files, max_seconds)
 
   banner_end
 end
@@ -162,7 +165,7 @@ end
 def check_outputs_colour(rag)
   dir = "#{outputs_dir}/#{rag}"
   if !Dir.exists? dir
-    print_diagnostic([ "WARNING: no #{dir}/ dir" ])
+    print_warning([ "no #{dir}/ dir" ])
   else
     #TODO:
   end
@@ -171,7 +174,7 @@ end
 def check_outputs
   banner __method__.to_s
   if !Dir.exists? outputs_dir
-    print_diagnostic([ "WARNING: no #{outputs}/ dir" ])
+    print_warning([ "no #{outputs}/ dir" ])
     return
   end
   check_outputs_colour('red')
@@ -185,7 +188,7 @@ end
 def check_traffic_lights_colour(rag)
   dir = "#{traffic_lights_dir}/#{rag}"
   if !Dir.exists? dir
-    print_diagnostic([ "WARNING: no #{dir}/ dir" ])
+    print_warning([ "no #{dir}/ dir" ])
   else
     # TODO:
   end
@@ -194,7 +197,7 @@ end
 def check_traffic_lights
   banner __method__.to_s
   if !Dir.exists? traffic_lights_dir
-    print_diagnostic([ "WARNING: no #{traffic_lights}/ dir" ])
+    print_warning([ "no #{traffic_lights}/ dir" ])
     return
   end
   check_traffic_lights_colour('amber')
@@ -204,26 +207,21 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def docker_login_cmd(username, password)
+  [ 'docker login',
+      "--username #{username}",
+      "--password #{password}"
+  ].join(' ')
+end
+
 def push_the_image_to_dockerhub
   banner __method__.to_s
-  command = [
-    'docker login',
-    "--username #{docker_username}",
-    "--password #{docker_password}"
-  ].join(' ')
-
   # careful not to show password if command fails
-  `#{command}`
+  `#{docker_login_cmd(docker_username, docker_password)}`
   status = $?.exitstatus
   unless status == success
-    secure = 'secure'
-    redacted = [
-      'docker login',
-      "--username [#{secure}]",
-      "--password [#{secure}]"
-    ].join(' ')
-    print_diagnostic([
-      "FAILED:command:#{redacted}",
+    print_failed([
+      "#{docker_login_cmd('secure','secure')}",
       "exit_status == #{status}"
     ])
     exit fail
@@ -259,7 +257,8 @@ verify_dependency_settings
 build_the_image
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
-  check_start_point
+  check_start_point_can_be_created
+  check_start_point_is_red
   check_outputs
   check_traffic_lights
 end
