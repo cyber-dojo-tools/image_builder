@@ -14,7 +14,7 @@ build_image()
     exit_fail "you must pass the working-dir as an arg"
   fi
   if [ ! -d "${work_dir}" ]; then
-    exit_fail "${work_dir}/ does not exist"
+    exit_fail "${work_dir} dir does not exist"
   fi
   if [ -z "${DOCKER_USERNAME}" ]; then
     exit_fail "DOCKER_USERNAME environment-variable not set"

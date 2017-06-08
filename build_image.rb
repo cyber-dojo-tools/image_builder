@@ -101,12 +101,14 @@ def check_required_directory_structure
     exit fail
   end
 
+=begin
+  # ? do red/amber/green test dynamically using s/6 * 9/6 * 7/
   if test_framework_repo?
     required_dirs = [
       "#{outputs_dir}/red",
       "#{outputs_dir}/amber",
       "#{outputs_dir}/green",
-      "#{traffic_lights_dir}/amber", # do dynamically? s/6 * 9/6 * 7/
+      "#{traffic_lights_dir}/amber",
       "#{traffic_lights_dir}/green",
     ]
     missing_dirs = required_dirs.select { |dir| !Dir.exists? dir }
@@ -117,6 +119,7 @@ def check_required_directory_structure
       exit fail
     end
   end
+=end
   banner_end
 end
 
