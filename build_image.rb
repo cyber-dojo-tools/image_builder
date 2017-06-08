@@ -171,7 +171,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def build_the_image
-  !Dir.exists?(docker_dir)
+  if !Dir.exists?(docker_dir)
     return
   end
   banner __method__.to_s

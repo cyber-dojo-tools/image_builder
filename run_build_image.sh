@@ -28,7 +28,7 @@ build_image()
 
   # docker.sock is needed is you are running on a local Docker Toolbox
   local volume_docker_socket=--volume=/var/run/docker.sock:/var/run/docker.sock
-  if [ ! -d "${work_dir}/docker" ]; then
+  if [ -d "${work_dir}/docker" ]; then
     local volume_docker_dir=--volume=${work_dir}/docker:/docker:ro
   fi
   if [ -d ${work_dir}/start_point ]; then
