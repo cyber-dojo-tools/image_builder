@@ -27,7 +27,7 @@
 #
 # base-entries
 # - - - - - - -
-# These are for images which are, or helps to create,
+# These are for images which are, or help to create,
 # base language repos which do not include a test
 # framework. These DO have version numbers.
 # Examples
