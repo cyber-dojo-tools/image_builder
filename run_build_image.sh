@@ -11,13 +11,10 @@ build_image()
   local work_dir=$1
   shift
   if [ -z "${work_dir}" ]; then
-    exit_fail "you must pass the dir docker/ lives is as an arg"
+    exit_fail "you must pass the working-dir as an arg"
   fi
   if [ ! -d "${work_dir}" ]; then
     exit_fail "${work_dir}/ does not exist"
-  fi
-  if [ ! -d "${work_dir}/docker" ]; then
-    exit_fail "${work_dir}/docker/ does not exist"
   fi
   if [ -z "${DOCKER_USERNAME}" ]; then
     exit_fail "DOCKER_USERNAME environment-variable not set"
@@ -31,7 +28,9 @@ build_image()
 
   # docker.sock is needed is you are running on a local Docker Toolbox
   local volume_docker_socket=--volume=/var/run/docker.sock:/var/run/docker.sock
-  local volume_docker_dir=--volume=${work_dir}/docker:/docker:ro
+  if [ ! -d "${work_dir}/docker" ]; then
+    local volume_docker_dir=--volume=${work_dir}/docker:/docker:ro
+  fi
   if [ -d ${work_dir}/start_point ]; then
     local volume_start_point_dir=--volume=${work_dir}/start_point:/start_point:ro
   fi

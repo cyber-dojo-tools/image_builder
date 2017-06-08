@@ -55,34 +55,49 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def docker_image_src?
+  File.exists?("#{docker_dir}/Dockerfile")
+end
+
+def language_repo_markerfile
+  # A language repo always has a /docker/image_name.json file
+  # and never has a /start_point/ dir.
+  "#{docker_dir}/image_name.json"
+end
+
+def test_framework_repo_markerfile
+  # If a test-framework repo is re-using an existing docker-image then
+  #   /docker/ dir won't exist.
+  # If a test-framework has its own docker-image then
+  #   /docker/Dockerfile will exist but
+  #   /docker/image_name.json will not.
+  # This is simply to avoid duplication because the image_name
+  # is also specified in the start-point's manifest file.
+  # And a test-framework always has a /start_point/ dir.
+  "#{start_point_dir}/manifest.json"
+end
+
 def language_repo?
-  File.exists?("#{docker_dir}/image_name.json")
+  File.exists? language_repo_markerfile
 end
 
 def test_framework_repo?
-  Dir.exists?(start_point_dir)
+  File.exists? test_framework_repo_markerfile
 end
 
 def check_required_directory_structure
   banner __method__.to_s
-
-  dockerfile = "#{docker_dir}/Dockerfile"
-  if !File.exists? dockerfile
-    print_failed [ "no #{dockerfile}" ]
-    exit fail
-  end
-
   either_or = [
-    "#{docker_dir}/image_name.json must exist",
+    "#{language_repo_markerfile} must exist",
     'or',
-    "#{start_point_dir}/ must exist"
+    "#{test_framework_repo_markerfile} must exist"
   ]
   if !language_repo? && !test_framework_repo?
-    print_failed either_or + [ 'neither do' ]
+    print_failed either_or + [ 'neither do.' ]
     exit fail
   end
   if language_repo? && test_framework_repo?
-    print_failed either_or + [ 'but not both' ]
+    print_failed either_or + [ 'but not both.' ]
     exit fail
   end
 
@@ -91,7 +106,7 @@ def check_required_directory_structure
       "#{outputs_dir}/red",
       "#{outputs_dir}/amber",
       "#{outputs_dir}/green",
-      "#{traffic_lights_dir}/amber",
+      "#{traffic_lights_dir}/amber", # do dynamically? s/6 * 9/6 * 7/
       "#{traffic_lights_dir}/green",
     ]
     missing_dirs = required_dirs.select { |dir| !Dir.exists? dir }
@@ -119,16 +134,17 @@ end
 
 def json_image_name(filename)
   manifest = IO.read(filename)
+  # TODO: better diagnostics on failure
   json = JSON.parse(manifest)
   json['image_name']
 end
 
 def image_name
   if language_repo?
-    return json_image_name("#{docker_dir}/image_name.json")
+    return json_image_name(language_repo_markerfile)
   end
   if test_framework_repo?
-    return json_image_name("#{start_point_dir}/manifest.json")
+    return json_image_name(test_framework_repo_markerfile)
   end
 end
 
@@ -152,6 +168,9 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def build_the_image
+  !Dir.exists?(docker_dir)
+    return
+  end
   banner __method__.to_s
   assert_system "cd #{docker_dir} && docker build --tag #{image_name} ."
   banner_end
@@ -191,7 +210,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_start_point_is_red
+def check_start_point_src_is_red
   banner __method__.to_s
 
   # use runner_stateless
@@ -248,7 +267,7 @@ def push_the_image_to_dockerhub
   status = $?.exitstatus
   unless status == success
     print_failed [
-      "#{docker_login_cmd('secure','secure')}",
+      "#{docker_login_cmd('[secure]','[secure]')}",
       "exit_status == #{status}"
     ]
     exit fail
@@ -280,15 +299,19 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_directory_structure
-verify_my_dependencies
-build_the_image
+if docker_image_src?
+  verify_my_dependencies
+  build_the_image
+end
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
   check_start_point_can_be_created
-  check_start_point_is_red
+  check_start_point_src_is_red
   check_outputs
   check_traffic_lights
 end
-push_the_image_to_dockerhub
-trigger_dependent_git_repos
+if docker_image_src?
+  push_the_image_to_dockerhub
+  trigger_dependent_git_repos
+end
 
