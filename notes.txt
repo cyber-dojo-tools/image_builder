@@ -17,3 +17,9 @@
 
 # TODO: add check that the image-names for
 # language+test images do NOT use version numbers.
+# Is this what I want?
+# I could a version number here and then _also_
+# tag the image as latest (and push that)
+# (possibly with a command line option).
+# Orthogonal to that, what version number do I use?
+# The language's or the test framework's? Or both?
