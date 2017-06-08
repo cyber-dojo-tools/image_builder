@@ -33,6 +33,8 @@ build_image()
   fi
   if [ -d ${work_dir}/start_point ]; then
     local volume_start_point_dir=--volume=${work_dir}/start_point:/start_point:ro
+    # TODO: check this exists
+    local volume_start_point_file=--volume=${work_dir}/start_point_type.json:/start_point_type.json:ro
   fi
   if [ -d ${work_dir}/outputs ]; then
     local volume_outputs_dir=--volume=${work_dir}/outputs:/outputs:ro
@@ -50,6 +52,7 @@ build_image()
     ${volume_docker_socket} \
     ${volume_docker_dir} \
     ${volume_start_point_dir} \
+    ${volume_start_point_file} \
     ${volume_outputs_dir} \
     ${volume_traffic_lights_dir} \
     cyberdojofoundation/image_builder \
