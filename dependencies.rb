@@ -126,7 +126,7 @@ def dependencies
       "#{cdf}/swift:3.1"
     ],
     [ "#{cdl}/swift-xctest",
-      "#{cdf}/swift:3.1"
+      "#{cdf}/swift:3.1",
       "#{cdf}/swift_xctest"
     ]
 
