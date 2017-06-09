@@ -6,11 +6,8 @@ exit_fail()
   exit 1
 }
 
-work_dir=$1
+work_dir=${1:-`PWD`}
 
-if [ -z "${work_dir}" ]; then
-  exit_fail "you must pass the working-dir as an arg"
-fi
 if [ ! -d "${work_dir}" ]; then
   exit_fail "${work_dir} dir does not exist"
 fi
