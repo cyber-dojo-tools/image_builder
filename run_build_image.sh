@@ -14,12 +14,6 @@ fi
 if [ ! -d "${work_dir}" ]; then
   exit_fail "${work_dir} dir does not exist"
 fi
-if [ -z "${DOCKER_USERNAME}" ]; then
-  exit_fail "DOCKER_USERNAME environment-variable not set"
-fi
-if [ -z "${DOCKER_PASSWORD}" ]; then
-  exit_fail "DOCKER_PASSWORD environment-variable not set"
-fi
 if [ -z "${REPO_URL}" ]; then
   exit_fail "REPO_URL environment-variable not set"
 fi

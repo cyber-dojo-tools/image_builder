@@ -8,9 +8,12 @@ def fail   ; 1; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def docker_username_env_var; 'DOCKER_USERNAME'; end
+def docker_password_env_var; 'DOCKER_PASSWORD'; end
+
 def repo_url       ; ENV['REPO_URL'       ]; end
-def docker_username; ENV['DOCKER_USERNAME']; end
-def docker_password; ENV['DOCKER_PASSWORD']; end
+def docker_username; ENV[docker_username_env_var]; end
+def docker_password; ENV[docker_password_env_var]; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -31,7 +34,7 @@ def print_failed(lines); print_diagnostic(['FAILED'] + lines); end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def banner_line; '=' * 42; end
-def banner(title); print([ '', banner_line, title.upcase, ], STDOUT); end
+def banner(title); print([ '', banner_line, title, ], STDOUT); end
 def banner_end; print([ 'OK', banner_line ], STDOUT); end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -122,6 +125,23 @@ def check_required_directory_structure
     end
   end
 =end
+  banner_end
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def check_docker_push_env_vars
+  banner __method__.to_s
+  if docker_image_src?
+    if docker_username == ''
+      print_failed [ "#{docker_username_env_var} env-var not set" ]
+      exit fail
+    end
+    if docker_password == ''
+      print_filed [ "#{docker_password_env_var} env-var not set" ]
+      exit fail
+    end
+  end
   banner_end
 end
 
@@ -304,8 +324,11 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_directory_structure
+
 if docker_image_src?
+  check_docker_push_env_vars
   verify_my_dependencies
+  #TODO: check I can [docker login] _before_ building the image
   build_the_image
 end
 if test_framework_repo?
@@ -317,6 +340,7 @@ if test_framework_repo?
 end
 if docker_image_src?
   push_the_image_to_dockerhub
+  #TODO: need to check for GITHUB_TOKEN env-var
   trigger_dependent_git_repos
 end
 
