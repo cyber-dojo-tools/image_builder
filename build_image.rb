@@ -8,10 +8,11 @@ def fail   ; 1; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def repo_url; cdl + '/' + ENV['WORK_DIR'].split('/')[-1]; end
+
 def docker_username_env_var; 'DOCKER_USERNAME'; end
 def docker_password_env_var; 'DOCKER_PASSWORD'; end
 
-def repo_url       ; ENV['REPO_URL'       ]; end
 def docker_username; ENV[docker_username_env_var]; end
 def docker_password; ENV[docker_password_env_var]; end
 

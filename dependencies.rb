@@ -43,9 +43,11 @@
 #   cyberdojofoundation/haskell_hunit
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def cdl
+  'https://github.com/cyber-dojo-languages'
+end
 
 def dependencies
-  cdl = 'https://github.com/cyber-dojo-languages'
   cdf = 'cyberdojofoundation'
   [
 
