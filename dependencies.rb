@@ -128,6 +128,10 @@ def dependencies
     [ "#{cdl}/swift-xctest",
       "#{cdf}/swift:3.1",
       "#{cdf}/swift_xctest"
+    ],
+    [ "#{cdl}/swift-swordfish",
+      "#{cdf}/swift:3.1",
+      "#{cdf}/swift_swordfish"
     ]
 
   ]
