@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORK_DIR=${1:-`PWD`}
+WORK_DIR=${1:-`pwd`}
 
 if [ ! -d "${WORK_DIR}" ]; then
   echo "FAILED: ${WORK_DIR} dir does not exist"
