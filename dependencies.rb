@@ -6,8 +6,7 @@
 #     2.name of docker image it is built FROM,
 #     3.name of docker image it builds
 #   ]
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#
 # 1. repo-name
 #    I'd like the repo-name to be named, eg,
 #    "#{cdl}/alpine-language-base:3.4
@@ -16,32 +15,43 @@
 #    "#{cdl}/alpine-language-base-3.4
 #
 # 2. FROM-name
-#    This is exactly as it appears in the Dockerfile
-#    This does use a :version-number
+#    As it appears in the Dockerfile
 #
 # 3. image-name
-#    This also does use a :version-number
+#    As it appears in the relevant json file.
+#
+# Each github repo (1st entry in the triple) has a travis script
+# which first checks its actual dependency (from the source)
+# exactly match its entry in these dependencies.
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# There are two kinds of triples:
-#
-# base-entries
-# - - - - - - -
-# These are for images which are, or help to create,
-# base language repos which do not include a test
-# framework. These DO have version numbers.
-# Examples
+# language triples
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Some triples are for images which are, or help to create,
+# base language repos which do not include a test framework.
+# Their image names have version numbers, for example:
 #   cyberdojofoundation/elm:0.18.0
 #   cyberdojofoundation/haskell:7.6.3
-#
-# language-entries
-# - - - - - - - - -
-# These are for images which do include a test
-# framwork. These do NOT have version numbers.
-# Examples
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# test triples
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Some triples are for images which do include a test
+# framwork. They may also have their own image too
+# but some do not as they use another test framework's.
+# Their image names do not have version numbers, for example:
 #   cyberdojofoundation/elm_test
 #   cyberdojofoundation/haskell_hunit
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# version numbers
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# The idea is that when a test-framework's docker image is
+# successfully updated to a new version of its base language
+# (or a newer version of the test framework) then its  docker
+# image-name does not change. This decouples such changes
+# from the start-points which do not have to also be updated.
+
 
 def cdl
   'https://github.com/cyber-dojo-languages'
