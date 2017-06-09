@@ -175,7 +175,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def verify_my_dependencies
+def check_my_dependencies
   banner __method__.to_s
   found = dependencies.include?([ repo_url, from, image_name ])
   unless found
@@ -285,7 +285,7 @@ def docker_login_cmd(username, password)
   ].join(' ')
 end
 
-def push_the_image_to_dockerhub
+def docker_login_ready_to_push_image
   banner __method__.to_s
   # careful not to show password if command fails
   `#{docker_login_cmd(docker_username, docker_password)}`
@@ -297,6 +297,11 @@ def push_the_image_to_dockerhub
     ]
     exit fail
   end
+  banner_end
+end
+
+def push_the_image_to_dockerhub
+  banner __method__.to_s
   print([ "pushing #{image_name}" ], STDOUT)
   assert_system "docker push #{image_name}"
   assert_system 'docker logout'
@@ -327,8 +332,8 @@ check_required_directory_structure
 
 if docker_image_src?
   check_docker_push_env_vars
-  verify_my_dependencies
-  #TODO: check I can [docker login] _before_ building the image
+  check_my_dependencies
+  docker_login_ready_to_push_image
   build_the_image
 end
 if test_framework_repo?
