@@ -29,7 +29,7 @@ def traffic_lights_dir; root_dir + '/traffic_lights'; end
 def print(lines, stream); lines.each { |line| stream.puts line }; end
 def print_diagnostic(lines); print(lines, STDERR); end
 def print_warning(lines); print_diagnostic(['WARNING'] + lines); end
-def print_failed(lines); print_diagnostic(['FAILED'] + lines); end
+def print_failed(lines); print_diagnostic(['FAILED'] + lines); exit fail; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -44,7 +44,6 @@ def assert_system(command)
   status = $?.exitstatus
   unless status == success
     print_failed [ command, "exit_status == #{status}" ]
-    exit fail
   end
 end
 
@@ -53,7 +52,6 @@ def assert_backtick(command)
   status = $?.exitstatus
   unless status == success
     print_failed [ command, "exit_status == #{status}" ]
-    exit fail
   end
   output
 end
@@ -99,11 +97,9 @@ def check_required_directory_structure
   ]
   if !language_repo? && !test_framework_repo?
     print_failed either_or + [ 'neither do.' ]
-    exit fail
   end
   if language_repo? && test_framework_repo?
     print_failed either_or + [ 'but not both.' ]
-    exit fail
   end
 
 =begin
@@ -135,11 +131,9 @@ def check_docker_push_env_vars
   if docker_image_src?
     if docker_username == ''
       print_failed [ "#{docker_username_env_var} env-var not set" ]
-      exit fail
     end
     if docker_password == ''
       print_filed [ "#{docker_password_env_var} env-var not set" ]
-      exit fail
     end
   end
   banner_end
@@ -185,7 +179,6 @@ def check_my_dependencies
       "        from:#{from}",
       "  image_name:#{image_name}"
     ]
-    exit fail
   end
   banner_end
 end
@@ -213,7 +206,6 @@ def check_images_red_amber_green_lambda_file
   rag = fn.call(stdout='ssd', stderr='sdsd', status=42)
   unless rag == :amber
     print_failed [ "image #{image_name}'s #{rag_filename} did not produce :amber" ]
-    exit fail
   end
   banner_end
 end
@@ -295,7 +287,6 @@ def docker_login_ready_to_push_image
       "#{docker_login_cmd('[secure]','[secure]')}",
       "exit_status == #{status}"
     ]
-    exit fail
   end
   banner_end
 end
