@@ -125,6 +125,10 @@ def dependencies
       "#{cdf}/ubuntu-build-essential:14.04",
       "#{cdf}/swift:3.1"
     ],
+    [ "#{cdl}/swift-xctest",
+      "#{cdf}/swift:3.1"
+      "#{cdf}/swift_xctest"
+    ],
 
   ]
 end
