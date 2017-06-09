@@ -170,15 +170,20 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def quoted(s)
+  '"' + s + '"'
+end
+
 def check_my_dependencies
   banner __method__.to_s
   found = dependencies.include?([ repo_url, from, image_name ])
   unless found
     print_failed [
       'cannot find dependency entry for',
-      "    repo_url:#{repo_url}",
-      "        from:#{from}",
-      "  image_name:#{image_name}"
+      "[ #{quoted(repo_url)},",
+      "  #{quoted(from)},",
+      "  #{quoted(image_name)}",
+      ']'
     ]
   end
   banner_end

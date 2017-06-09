@@ -118,5 +118,13 @@ def dependencies
       "#{cdf}/haskell:7.6.3",
       "#{cdf}/haskell_hunit"
     ],
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Swift
+    [ "#{cdl}/swift-3.1",
+      "#{cdf}/ubuntu-build-essential:14.04",
+      "#{cdf}/swift:3.1"
+    ],
+
   ]
 end
