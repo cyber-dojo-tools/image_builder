@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+# TODO: every repo has to have a /docker/Dockerfile
+#       even if it is just a single FROM line.
+
 require_relative 'dependencies'
 require 'json'
 
@@ -126,21 +129,6 @@ def check_required_directory_structure
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_docker_push_env_vars
-  banner __method__.to_s
-  if docker_image_src?
-    if docker_username == ''
-      print_failed [ "#{docker_username_env_var} env-var not set" ]
-    end
-    if docker_password == ''
-      print_filed [ "#{docker_password_env_var} env-var not set" ]
-    end
-  end
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def from
@@ -235,10 +223,8 @@ end
 
 def check_start_point_src_is_red
   banner __method__.to_s
-
-  # use runner_stateless
+  # docker pull cyberdojo/runner_stateless
   # run(image_name, kata_id, avatar_name, visible_files, max_seconds)
-
   banner_end
 end
 
@@ -283,8 +269,16 @@ def docker_login_cmd(username, password)
   ].join(' ')
 end
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def docker_login_ready_to_push_image
   banner __method__.to_s
+  if docker_username == ''
+    print_failed [ "#{docker_username_env_var} env-var not set" ]
+  end
+  if docker_password == ''
+    print_filed [ "#{docker_password_env_var} env-var not set" ]
+  end
   # careful not to show password if command fails
   `#{docker_login_cmd(docker_username, docker_password)}`
   status = $?.exitstatus
@@ -328,9 +322,8 @@ end
 check_required_directory_structure
 
 if docker_image_src?
-  check_docker_push_env_vars
-  check_my_dependencies
   docker_login_ready_to_push_image
+  check_my_dependencies
   build_the_image
 end
 if test_framework_repo?
