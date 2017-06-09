@@ -14,10 +14,12 @@ def docker_password; ENV['DOCKER_PASSWORD']; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def         docker_dir; '/docker'     ; end
-def    start_point_dir; '/start_point'; end
-def        outputs_dir; '/outputs'; end
-def traffic_lights_dir; '/traffic_lights'; end
+def           root_dir; '/language'; end
+
+def         docker_dir; root_dir + '/docker'     ; end
+def    start_point_dir; root_dir + '/start_point'; end
+def        outputs_dir; root_dir + '/outputs'; end
+def traffic_lights_dir; root_dir + '/traffic_lights'; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
