@@ -43,14 +43,54 @@ def my_dependents
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# triple
+# Each triple is
+#   [ 1. name of repo which builds a docker image,
+#     2. name of docker image it is built FROM,
+#     3. name of docker image it builds
+#   ]
+#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# language triples
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Some triples are for images which are, or help to create,
+# base language repos which do not include a test framework.
+# Their image names do have version numbers, eg:
+#   cyberdojofoundation/elm:0.18.0
+#   cyberdojofoundation/haskell:7.6.3
+#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# test triples
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Some triples are for images which do include a test framework.
+# Their image names do not have version numbers, eg:
+#   cyberdojofoundation/elm_test
+#   cyberdojofoundation/haskell_hunit
+#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# version numbers
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# The idea is that when a test-framework's docker image is
+# successfully updated to a new version of its base language
+# (or a newer version of the test framework) then its docker
+# image-name does not change. This decoupling means the
+# start-points do not have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def repo_url
+  # I'd like the repo-name to be named, eg,
+  #   ".../alpine-language-base:3.4
+  #  but github does not allow a colon in the repo name
+  #  so I'm using
+  #   ".../alpine-language-base-3.4
+  #
+  # Each repo has a travis script which checks that its
+  # actual dependency (from its source) exactly
+  # matches its entry in the dependencies list below.
   cdl + '/' + ENV['WORK_DIR'].split('/')[-1]
 end
 
 def from
+  # As it appears in the Dockerfile
   dockerfile = IO.read(docker_marker_file)
   lines = dockerfile.split("\n")
   from_line = lines.find { |line| line.start_with? 'FROM' }
@@ -58,6 +98,7 @@ def from
 end
 
 def image_name
+  # As it appears in the relevant json file.
   if language_repo?
     return json_image_name(language_repo_marker_file)
   end
@@ -75,56 +116,7 @@ def json_image_name(filename)
   json['image_name']
 end
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Each triple is
-#   [ 1.name of repo which builds a docker image,
-#     2.name of docker image it is built FROM,
-#     3.name of docker image it builds
-#   ]
-#
-# 1. repo-name
-#    I'd like the repo-name to be named, eg,
-#    "#{cdl}/alpine-language-base:3.4
-#    but github does not allow a colon in the repo name
-#    so I'm using
-#    "#{cdl}/alpine-language-base-3.4
-#
-# 2. FROM-name
-#    As it appears in the Dockerfile
-#
-# 3. image-name
-#    As it appears in the relevant json file.
-#
-# Each github repo (1st entry in the triple) has a travis script
-# which first checks its actual dependency (from the source)
-# exactly matches its entry in these dependencies.
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# language triples
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Some triples are for images which are, or help to create,
-# base language repos which do not include a test framework.
-# Their image names have version numbers, for example:
-#   cyberdojofoundation/elm:0.18.0
-#   cyberdojofoundation/haskell:7.6.3
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# test triples
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Some triples are for images which do include a test framework.
-# Their image names do not have version numbers, for example:
-#   cyberdojofoundation/elm_test
-#   cyberdojofoundation/haskell_hunit
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# version numbers
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# The idea is that when a test-framework's docker image is
-# successfully updated to a new version of its base language
-# (or a newer version of the test framework) then its docker
-# image-name does not change. This decoupling means the
-# start-points do not have to also be updated.
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def cdl
   'https://github.com/cyber-dojo-languages'
