@@ -45,7 +45,7 @@ def check_start_point_can_be_created
   assert_system "chmod +x #{script}"
   name = 'checking'
   assert_system "./#{script} start-point create #{name} --git=#{repo_url}"
-  #TODO: ensure always removed
+  # TODO: ensure always removed
   assert_system "./#{script} start-point rm #{name}"
   banner_end
 end
@@ -54,8 +54,11 @@ end
 
 def check_start_point_src_is_red
   banner __method__.to_s
-  # docker pull cyberdojo/runner_stateless
+  # assert_system 'docker pull cyberdojo/runner_stateless'
+  # Also need to bring the server up
+
   # run(image_name, kata_id, avatar_name, visible_files, max_seconds)
+
   banner_end
 end
 
@@ -105,10 +108,7 @@ end
 
 def trigger_dependent_git_repos
   banner __method__.to_s
-  dependents = dependencies.select do |entry|
-    entry[1] == image_name
-  end
-  dependents.each do |dependent|
+  my_dependents.each do |dependent|
     puts "notify:#{dependent[2]}"
     # TODO:
     # NB: I can stick with the javascript based notification
@@ -135,6 +135,5 @@ if test_framework_repo?
 end
 
 push_the_image_to_dockerhub
-#TODO: need to check for GITHUB_TOKEN env-var
 trigger_dependent_git_repos
 

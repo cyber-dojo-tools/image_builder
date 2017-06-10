@@ -11,6 +11,12 @@ def check_my_dependency
       ']'
     ]
   end
+  unless my_dependents == []
+    if github_token == ''
+      warning ["#{github_token_env_var} env-var not set" ]
+      #failed ["#{github_token_env_var} env-var not set" ]
+    end
+  end
   banner_end
 end
 
@@ -20,11 +26,29 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def github_token
+  ENV[github_token_env_var]
+end
+
+def github_token_env_var
+  'GITHUB_TOKEN'
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def my_dependents
+  dependencies.select do |triple|
+    triple[1] == image_name
+  end
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# triple
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def repo_url
   cdl + '/' + ENV['WORK_DIR'].split('/')[-1]
 end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def from
   dockerfile = IO.read(docker_marker_file)
@@ -32,8 +56,6 @@ def from
   from_line = lines.find { |line| line.start_with? 'FROM' }
   from_line.split[1].strip
 end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def image_name
   if language_repo?
@@ -43,6 +65,8 @@ def image_name
     return json_image_name(test_framework_repo_marker_file)
   end
 end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def json_image_name(filename)
   manifest = IO.read(filename)
@@ -73,7 +97,7 @@ end
 #
 # Each github repo (1st entry in the triple) has a travis script
 # which first checks its actual dependency (from the source)
-# exactly match its entry in these dependencies.
+# exactly matches its entry in these dependencies.
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # language triples
@@ -87,9 +111,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # test triples
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Some triples are for images which do include a test
-# framwork. They may also have their own image too
-# but some do not as they use another test framework's.
+# Some triples are for images which do include a test framework.
 # Their image names do not have version numbers, for example:
 #   cyberdojofoundation/elm_test
 #   cyberdojofoundation/haskell_hunit
@@ -99,9 +121,9 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # The idea is that when a test-framework's docker image is
 # successfully updated to a new version of its base language
-# (or a newer version of the test framework) then its  docker
-# image-name does not change. This decouples such changes
-# from the start-points which do not have to also be updated.
+# (or a newer version of the test framework) then its docker
+# image-name does not change. This decoupling means the
+# start-points do not have to also be updated.
 
 
 def cdl
