@@ -12,18 +12,23 @@
 #      --interactive \
 #      --tty \
 #      --volume=/var/run/docker.sock:/var/run/docker.sock \
-#      cyberdojofoundation/image_builder ./spike-curl-run.sh
+#      cyberdojofoundation/image_builder \
+#      ./spike-curl-run.sh `docker-machine ip default`
 #
 # I'm using Docker Toolbox so in the curl I have to use
-# the IP address I get from the default VM
+# (and pass in) the IP address I get from the default VM.
+# This will be different on Travis (I assume).
+# Travis sets the TRAVIS environment-variable so I will
+# need to determine the correct IP address when on Travis.
+# if [ -v TRAVIS ];
 #
-#   $ docker-machine ip default
-#   192..168.99.100
-#
-# This will be different on Travis...
+# Is this making things overly complicated?
+# docker-compose is available in Docker Toolbox and also
+# in Travis. Could use that (like web) and use Ruby library
+# to do Http.
 
+IP_ADDRESS=$1
 PORT=4597
-IP_ADDRESS=192.168.99.100
 NAME=cyber-dojo-runner
 
 docker run \
