@@ -1,4 +1,55 @@
-#!/usr/bin/env ruby
+
+def check_my_dependency
+  banner __method__.to_s
+  found = dependencies.include?([ repo_url, from, image_name ])
+  unless found
+    failed [
+      'cannot find dependency entry for',
+      "[ #{quoted(repo_url)},",
+      "  #{quoted(from)},",
+      "  #{quoted(image_name)}",
+      ']'
+    ]
+  end
+  banner_end
+end
+
+def quoted(s)
+  '"' + s + '"'
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def repo_url
+  cdl + '/' + ENV['WORK_DIR'].split('/')[-1]
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def from
+  dockerfile = IO.read(docker_marker_file)
+  lines = dockerfile.split("\n")
+  from_line = lines.find { |line| line.start_with? 'FROM' }
+  from_line.split[1].strip
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def image_name
+  if language_repo?
+    return json_image_name(language_repo_marker_file)
+  end
+  if test_framework_repo?
+    return json_image_name(test_framework_repo_marker_file)
+  end
+end
+
+def json_image_name(filename)
+  manifest = IO.read(filename)
+  # TODO: better diagnostics on failure
+  json = JSON.parse(manifest)
+  json['image_name']
+end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Each triple is

@@ -6,5 +6,10 @@
 
 #-----!Except these files
 
-!dependencies.rb
+!assert.rb
 !build_image.rb
+!check_my_dependency.rb
+!check_required_files_exist.rb
+!dir_names.rb
+!docker_login.rb
+!logger.rb

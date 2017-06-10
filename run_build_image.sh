@@ -13,8 +13,9 @@ docker run \
     --tty \
     --env DOCKER_USERNAME=${DOCKER_USERNAME} \
     --env DOCKER_PASSWORD=${DOCKER_PASSWORD} \
+    --env GITHUB_TOKEN=${GITHUB_TOKEN} \
     --env WORK_DIR=${WORK_DIR} \
     --volume=/var/run/docker.sock:/var/run/docker.sock \
-    --volume=${WORK_DIR}:/language:ro \
+    --volume=${WORK_DIR}:/repo:ro \
     cyberdojofoundation/image_builder \
       ./build_image.rb
