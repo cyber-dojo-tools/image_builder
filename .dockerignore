@@ -13,3 +13,5 @@
 !dir_names.rb
 !docker_login.rb
 !logger.rb
+
+!spike-curl-run.sh

@@ -54,11 +54,7 @@ end
 
 def check_start_point_src_is_red
   banner __method__.to_s
-  # assert_system 'docker pull cyberdojo/runner_stateless'
-  # Also need to bring the server up
-
-  # run(image_name, kata_id, avatar_name, visible_files, max_seconds)
-
+  # See spike-curl-run.sh
   banner_end
 end
 
