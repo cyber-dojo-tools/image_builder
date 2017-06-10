@@ -1,8 +1,5 @@
 #!/usr/bin/env ruby
 
-# TODO: every repo has to have a /docker/Dockerfile
-#       even if it is just a single FROM line.
-
 require_relative 'assert'
 require_relative 'check_my_dependency'
 require_relative 'check_required_files_exist'
