@@ -9,6 +9,11 @@ services:
     image: cyberdojofoundation/image_builder
     container_name: cyber-dojo-image-builder
     entrypoint: /bin/bash
+    environment:
+      - DOCKER_USERNAME
+      - DOCKER_PASSWORD
+      - GITHUB_TOKEN
+      - WORK_DIR
     stdin_open: true
     tty: true
     mem_limit: 2G
@@ -17,6 +22,7 @@ services:
     depends_on:
       - runner_stateless
     volumes:
+      - ${WORK_DIR}:/repo:ro
       - /var/run/docker.sock:/var/run/docker.sock
 
   runner_stateless:
