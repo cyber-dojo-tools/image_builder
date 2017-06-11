@@ -9,11 +9,6 @@ services:
     image: cyberdojofoundation/image_builder
     container_name: cyber-dojo-image-builder
     entrypoint: /bin/bash
-    environment:
-      - DOCKER_USERNAME
-      - DOCKER_PASSWORD
-      - GITHUB_TOKEN
-      - WORK_DIR
     stdin_open: true
     tty: true
     mem_limit: 2G

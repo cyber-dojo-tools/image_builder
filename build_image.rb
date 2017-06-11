@@ -54,7 +54,11 @@ end
 
 def check_start_point_src_is_red
   banner __method__.to_s
-  # See spike-curl-run.sh
+
+  # See spike-curl-run.sh for details
+  # But actually use http_service class from
+  # eg, runner/client/src
+
   banner_end
 end
 

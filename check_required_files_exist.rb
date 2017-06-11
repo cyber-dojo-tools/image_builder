@@ -3,7 +3,7 @@ def check_required_files_exist
   banner __method__.to_s
 
   if !docker_image_src?
-    failed [ "#{docker_image_marker_file} must exist" ]
+    failed [ "#{docker_marker_file} must exist" ]
   end
   either_or = [
     "#{language_repo_marker_file} must exist",
