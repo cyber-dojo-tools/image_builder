@@ -1,0 +1,29 @@
+
+version: '2'
+
+services:
+
+  image_builder:
+    build:
+      context: .
+    image: cyberdojofoundation/image_builder
+    container_name: cyber-dojo-image-builder
+    mem_limit: 2G
+    memswap_limit: 2G
+    restart: "no"
+    depends_on:
+      - runner_stateless
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  runner_stateless:
+    user: root
+    image: cyberdojo/runner_stateless
+    container_name: cyber-dojo-runner-stateless
+    read_only: true
+    tmpfs: /tmp
+    mem_limit: 2G
+    memswap_limit: 2G
+    restart: "no"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

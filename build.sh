@@ -1,7 +1,6 @@
 #!/bin/bash
+set -e
 
-my_dir="$( cd "$( dirname "${0}" )" && pwd )"
+readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
+docker-compose --file ${MY_DIR}/docker-compose.yml build
 
-ORG_NAME=cyberdojofoundation
-TAG_NAME=$(basename ${my_dir})
-docker build --tag ${ORG_NAME}/${TAG_NAME} ${my_dir}
