@@ -12,6 +12,6 @@
 !check_required_files_exist.rb
 !dir_names.rb
 !docker_login.rb
+!http_service.rb
 !logger.rb
-
-!spike-curl-run.sh
+!runner_service.rb
