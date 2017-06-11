@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-
-docker-compose run image_builder /app/spike-curl-run.sh
+docker exec cyber-dojo-image-builder /app/spike-curl-run.sh
 
 # TODO: shunit2
 # use test/good_language

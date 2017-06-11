@@ -8,6 +8,9 @@ services:
       context: .
     image: cyberdojofoundation/image_builder
     container_name: cyber-dojo-image-builder
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
     mem_limit: 2G
     memswap_limit: 2G
     restart: "no"

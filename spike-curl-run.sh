@@ -13,6 +13,7 @@ run() {
   local json=$1
   local port=4597
   curl \
+   --silent \
    -H 'Content-Type: application/json' \
    -H 'Accept: application/json' \
    -d "${json}" \
