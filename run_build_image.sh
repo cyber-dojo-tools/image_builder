@@ -27,6 +27,7 @@ if [ ! -f ${WORK_DIR}/${UP_SCRIPT} ]; then
   chmod +x ${WORK_DIR}/${UP_SCRIPT}
 fi
 
+docker pull cyberdojofoundation/image_builder
 ${WORK_DIR}/up.sh
 
 docker exec \
