@@ -23,16 +23,26 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_images_red_amber_green_lambda_file
-  # TODO: improve diagnostics
-  banner __method__.to_s
+def call_rag_lambda(stdout, stderr, status)
   rag_filename = '/usr/local/bin/red_amber_green.rb'
   cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
   src = assert_backtick cat_rag_filename
   fn = eval(src)
-  rag = fn.call(stdout='ssd', stderr='sdsd', status=42)
-  unless rag == :amber
-    failed [ "image #{image_name}'s #{rag_filename} did not produce :amber" ]
+  fn.call(stdout, stderr, status)
+end
+
+def check_images_red_amber_green_lambda_file
+  # TODO: improve diagnostics
+  banner __method__.to_s
+  colour = call_rag_lambda(stdout='ssd', stderr='sdsd', status=42)
+  unless colour == :amber
+    failed [
+      "image #{image_name}'s #{rag_filename} sanity check did not produce :amber",
+      "colour == #{colour}",
+      "stdout == #{stdout}",
+      "stderr == #{stderr}",
+      "status == #{status}"
+    ]
   end
   banner_end
 end
@@ -69,8 +79,16 @@ def check_start_point_src_is_red_amber_green
   kata_id = '6F4F4E4759'
   avatar_name = 'salmon'
   runner = RunnerServiceStateless.new
-  json = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds=10)
-  puts json
+  sss = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds=10)
+  colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
+  unless colour == :red
+    failed [ 'start_point files are not red',
+      "colour == #{colour}",
+      "stdout == #{stdout}",
+      "stderr == #{stderr}",
+      "status == #{status}"
+    ]
+  end
   banner_end
 end
 
@@ -90,8 +108,9 @@ def check_start_point_src_is_red_amber_green_runner_statefull_runner
   runner = RunnerServiceStatefull.new
   runner.kata_new(image_name, kata_id)
   runner.avatar_new(image_name, kata_id, avatar_name, visible_files)
-  json = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
-  puts json
+  sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
+  colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
+  puts colour
   banner_end
 end
 
