@@ -65,6 +65,18 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO: check red/amber/green for runner and runner_stateless
+# For a while I was pondering whether to check amber/green
+# by doing s/6 * 9/6 * 7/ -> green (for example)
+# The problem with this approach is doesnt work for some
+# languages (eg that have infix notation * 6 7)
+# To solve that I considered adding
+#   traffic_lights/amber
+#   traffic_lights/green
+# subdirs which contain source files which will replace
+# start_point files completely.
+# I think the best solution is to make the default using
+# the s/6 * 9/6 * 7/ solution _unless_ the traffic_lights
+# sub-dirs exist, in which case, they will be used.
 
 def check_start_point_src_is_red_amber_green
   # Stateless runner
