@@ -1,11 +1,10 @@
 #!/bin/bash
-#set -e
-set -x
+set -e
 
 # Runs image-builder on source living in WORK_DIR which
 # can be passed as $1 and default to the current work directory.
 
-# TODO: Simpler and cleaner toput docker-compose inside image_builder
+# TODO: Simpler and cleaner to put docker-compose inside image_builder
 # (like commander) which has three services, builder,runner,runner_stateless
 
 export WORK_DIR=${1:-`pwd`}
@@ -30,18 +29,6 @@ fi
 
 docker pull cyberdojofoundation/image_builder
 ${WORK_DIR}/up.sh
-
-#--env GITHUB_TOKEN=${GITHUB_TOKEN} \
-#--env=DOCKER_USERNAME=${DOCKER_USERNAME} \
-#--env=DOCKER_PASSWORD=${DOCKER_PASSWORD} \
-#--env=WORK_DIR=${WORK_DIR} \
-
-echo "about to docker exec"
-echo "DOCKER_USERNAME=:${DOCKER_USERNAME}:"
-echo "WORK_DIR=:${WORK_DIR}:"
-
-docker --version
-docker exec --help
 
 # [docker exec] on Travis does not have --env option
 docker exec \
