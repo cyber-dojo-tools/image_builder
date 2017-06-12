@@ -7,11 +7,11 @@ require_relative 'dir_names'
 require_relative 'docker_login'
 require_relative 'http_service'
 require_relative 'logger'
-require_relative 'runner_service'
+require_relative 'runner_service_statefull'
+require_relative 'runner_service_stateless'
 require 'json'
 
 def success; 0; end
-def fail   ; 1; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -53,20 +53,43 @@ def check_start_point_can_be_created
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# TODO: check red/amber/green for runner and runner_stateless
 
-def check_start_point_src_is_red
+def check_start_point_src_is_red_amber_green
+  # Stateless runner
   banner __method__.to_s
-  # TODO: get visible-files from start_point/
-  runner = RunnerService.new
-  json = runner.run(
-    image_name='cyberdojofoundation/swift_swordfish',
-    kata_id='6F4F4E4759',
-    avatar_name='salmon',
-    visible_files={
-      'cyber-dojo.sh' => 'pwd'
-    },
-    max_seconds=10
-  )
+  # start-point has already been verified
+  manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
+  visible_files = {}
+  manifest['visible_filenames'].each do |filename|
+    visible_files[filename] = IO.read(start_point_dir + '/' + filename)
+  end
+  image_name = manifest['image_name']
+  kata_id = '6F4F4E4759'
+  avatar_name = 'salmon'
+  runner = RunnerServiceStateless.new
+  json = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds=10)
+  puts json
+  banner_end
+end
+
+
+def check_start_point_src_is_red_amber_green_runner_statefull_runner
+  # TODO: avatar_old, kata_old  to clean-up
+  banner __method__.to_s
+  # start-point has already been verified
+  manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
+  visible_files = {}
+  manifest['visible_filenames'].each do |filename|
+    visible_files[filename] = IO.read(start_point_dir + '/' + filename)
+  end
+  image_name = manifest['image_name']
+  kata_id = '6F4F4E4759'
+  avatar_name = 'salmon'
+  runner = RunnerServiceStatefull.new
+  runner.kata_new(image_name, kata_id)
+  runner.avatar_new(image_name, kata_id, avatar_name, visible_files)
+  json = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
   puts json
   banner_end
 end
@@ -86,20 +109,6 @@ end
 def check_outputs
   banner __method__.to_s
   ['red','amber','green'].each { |rag| check_outputs_colour rag }
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_traffic_lights_colour(rag)
-  dir = "#{traffic_lights_dir}/#{rag}"
-  # TODO: run() and use lambda on output
-end
-
-def check_traffic_lights
-  banner __method__.to_s
-  check_traffic_lights_colour 'amber'
-  check_traffic_lights_colour 'green'
   banner_end
 end
 
@@ -138,9 +147,8 @@ build_the_image
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
   check_start_point_can_be_created
-  check_start_point_src_is_red
+  check_start_point_src_is_red_amber_green
   check_outputs
-  check_traffic_lights
 end
 
 push_the_image_to_dockerhub

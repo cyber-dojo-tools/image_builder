@@ -14,4 +14,5 @@
 !docker_login.rb
 !http_service.rb
 !logger.rb
-!runner_service.rb
+!runner_service_statefull.rb
+!runner_service_stateless.rb

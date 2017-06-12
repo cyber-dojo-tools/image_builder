@@ -21,5 +21,6 @@ export WORK_DIR=${1:-`pwd`}
 docker-compose --file ${MY_DIR}/docker-compose.yml up -d
 # crude wait for services
 sleep 1
-check_up 'cyber-dojo-runner-stateless'
 check_up 'cyber-dojo-image-builder'
+check_up 'cyber-dojo-runner'
+check_up 'cyber-dojo-runner-stateless'

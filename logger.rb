@@ -13,7 +13,7 @@ end
 
 def failed(lines)
   log(['FAILED'] + lines)
-  exit fail
+  exit 1
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

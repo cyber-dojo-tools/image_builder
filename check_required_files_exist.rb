@@ -32,7 +32,7 @@ def check_required_files_exist
       failed [ "no #{dir}/ dir" ]
     end
     unless missing_dirs == []
-      exit fail
+      failed [ ... ]
     end
   end
 =end
