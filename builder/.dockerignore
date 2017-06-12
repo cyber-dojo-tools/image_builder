@@ -16,3 +16,6 @@
 !logger.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb
+
+# smoke test
+!spike-curl-run.sh

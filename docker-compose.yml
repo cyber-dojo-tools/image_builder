@@ -5,7 +5,7 @@ services:
 
   image_builder:
     build:
-      context: .
+      context: builder
     image: cyberdojofoundation/image_builder
     container_name: cyber-dojo-image-builder
     entrypoint: /bin/bash
