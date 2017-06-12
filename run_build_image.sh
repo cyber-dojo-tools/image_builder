@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+#set -e
+set -x
 
 # Runs image-builder on source living in WORK_DIR which
 # can be passed as $1 and default to the current work directory.
