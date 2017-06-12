@@ -7,7 +7,7 @@ set -e
 # TODO: Simpler and cleaner to put docker-compose inside image_builder
 # (like commander) which has three services, builder,runner,runner_stateless
 
-export WORK_DIR=${1:-`pwd`}
+readonly WORK_DIR=${1:-`pwd`}
 
 if [ ! -d ${WORK_DIR} ]; then
   echo "FAILED: ${WORK_DIR} dir does not exist"
@@ -27,6 +27,7 @@ if [ ! -f ${WORK_DIR}/${UP_SCRIPT} ]; then
   chmod +x ${WORK_DIR}/${UP_SCRIPT}
 fi
 
+# don't try to build image_builder
 docker pull cyberdojofoundation/image_builder
 ${WORK_DIR}/up.sh
 
@@ -36,7 +37,8 @@ docker exec \
   --tty \
   cyber-dojo-image-builder \
     bash -c \
-    "export DOCKER_USERNAME=${DOCKER_USERNAME} && \
-     export DOCKER_PASSWORD=${DOCKER_PASSWORD} && \
-     export WORK_DIR=${WORK_DIR} && \
-     /app/build_image.rb"
+    "env \
+       DOCKER_USERNAME=${DOCKER_USERNAME} \
+       DOCKER_PASSWORD=${DOCKER_PASSWORD} \
+       WORK_DIR=${WORK_DIR} \
+         /app/build_image.rb"
