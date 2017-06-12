@@ -30,7 +30,7 @@ fi
 docker pull cyberdojofoundation/image_builder
 ${WORK_DIR}/up.sh
 
-#--env GITHUB_TOKEN \
+#--env GITHUB_TOKEN=${GITHUB_TOKEN} \
 echo "about to docker exec"
 echo "DOCKER_USERNAME=:${DOCKER_USERNAME}:"
 echo "WORK_DIR=:${WORK_DIR}:"
@@ -38,7 +38,7 @@ echo "WORK_DIR=:${WORK_DIR}:"
 docker exec \
   --interactive \
   --tty \
-  --env DOCKER_USERNAME \
-  --env DOCKER_PASSWORD \
-  --env WORK_DIR \
+  --env DOCKER_USERNAME=${DOCKER_USERNAME} \
+  --env DOCKER_PASSWORD=${DOCKER_PASSWORD} \
+  --env WORK_DIR=${WORK_DIR} \
   cyber-dojo-image-builder /app/build_image.rb
