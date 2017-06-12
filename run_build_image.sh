@@ -1,30 +1,33 @@
 #!/bin/bash
 set -e
 
-readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
+# Runs image-builder on source living in WORK_DIR which
+# can be passed as $1 and default to the current work directory.
+
+# TODO: Simpler and cleaner toput docker-compose inside image_builder
+# (like commander) which has three services, builder,runner,runner_stateless
+
 export WORK_DIR=${1:-`pwd`}
 
-if [ ! -d "${WORK_DIR}" ]; then
+if [ ! -d ${WORK_DIR} ]; then
   echo "FAILED: ${WORK_DIR} dir does not exist"
   exit 1
 fi
 
-# Can't call up.sh from .travis.yml
-# because language repos curl only this script and up.sh
-# lives in the image_builder repo.
-# And up.sh in turn relies on docker-compose.yml
-# Solutions?
-# 1.
-# Embed up.sh and docker-compose.yml inside the image_builder
-# image, then this script can
-#   docker pull cyberdojofoundation/image_builder
-#   extract up.sh from it
-#   extract docker-compose.yml from it
-#
-# 2. Put docker-compose inside image_builder (like commander)
-# which has three services, builder,runner,runner_stateless
+readonly URL=https://raw.githubusercontent.com/cyber-dojo-languages/image_builder/master
 
-${MY_DIR}/up.sh
+readonly COMPOSE_YML=docker-compose.yml
+if [ ! -f ${WORK_DIR}/${COMPOSE_YML} ]; then
+  curl ${URL}/${COMPOSE_YML} > ${WORK_DIR}/${COMPOSE_YML}
+fi
+
+readonly UP_SCRIPT=up.sh
+if [ ! -f ${WORK_DIR}/${UP_SCRIPT} ]; then
+  curl ${URL}/${UP_SCRIPT} > ${WORK_DIR}/${UP_SCRIPT}
+  chmod +x ${WORK_DIR}/${UP_SCRIPT}
+fi
+
+${WORK_DIR}/up.sh
 
 docker exec \
   --interactive \
