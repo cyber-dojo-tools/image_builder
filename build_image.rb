@@ -40,6 +40,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def check_start_point_can_be_created
+  # TODO: Try the curl several times before failing.
   banner __method__.to_s
   script = 'cyber-dojo'
   url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"

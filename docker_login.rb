@@ -8,6 +8,7 @@ def docker_password; ENV[docker_password_env_var]; end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def docker_login_cmd(username, password)
+  # TODO: Try this several times before failing
   [ 'docker login',
       "--username #{username}",
       "--password #{password}"

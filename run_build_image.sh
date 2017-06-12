@@ -9,6 +9,21 @@ if [ ! -d "${WORK_DIR}" ]; then
   exit 1
 fi
 
+# Can't call up.sh from .travis.yml
+# because language repos curl only this script and up.sh
+# lives in the image_builder repo.
+# And up.sh in turn relies on docker-compose.yml
+# Solutions?
+# 1.
+# Embed up.sh and docker-compose.yml inside the image_builder
+# image, then this script can
+#   docker pull cyberdojofoundation/image_builder
+#   extract up.sh from it
+#   extract docker-compose.yml from it
+#
+# 2. Put docker-compose inside image_builder (like commander)
+# which has three services, builder,runner,runner_stateless
+
 ${MY_DIR}/up.sh
 
 docker exec \
