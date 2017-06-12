@@ -31,6 +31,9 @@ docker pull cyberdojofoundation/image_builder
 ${WORK_DIR}/up.sh
 
 #--env GITHUB_TOKEN \
+echo "about to docker exec"
+echo "DOCKER_USERNAME=:${DOCKER_USERNAME}:"
+echo "WORK_DIR=:${WORK_DIR}:"
 
 docker exec \
   --interactive \
