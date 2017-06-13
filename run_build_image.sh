@@ -25,4 +25,4 @@ docker run \
    --volume=${SRC_DIR}:${SRC_DIR}:ro \
    --volume=/var/run/docker.sock:/var/run/docker.sock \
      cyberdojofoundation/image_builder \
-       /app/build_image.sh
+       /app/build_image.rb

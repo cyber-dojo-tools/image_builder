@@ -5,4 +5,4 @@
 #-----!Except these files
 
 !docker-compose.yml
-!build_image.sh
+!build_image.rb
