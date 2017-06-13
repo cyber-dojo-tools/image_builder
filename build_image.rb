@@ -21,7 +21,7 @@ def shell(command)
   log( [ "command=:#{command}:"] )
   log( [ "status=:#{status}:" ])
   log( [ "output=:#{output}:" ])
-  return output, status
+  return output.strip, status
 end
 
 def assert_shell(command)
@@ -29,7 +29,7 @@ def assert_shell(command)
   unless status == success
     failed [ command, "exit_status == #{status}", output ]
   end
-  output
+  output.strip
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -59,23 +59,34 @@ def create_src_dir_volume
         'cyberdojo/runner',
           'sh'
   ].join(space)
-  cid = assert_shell(command).strip
-
-  assert_shell("docker cp #{src_dir}/. #{cid}:/repo")
-  assert_shell("docker rm -f #{cid}")
+  cid = assert_shell(command)
+  assert_shell "docker cp #{src_dir}/. #{cid}:/repo"
+  assert_shell "docker rm -f #{cid}"
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def docker_compose(command)
-  assert_shell "docker-compose --file #{my_dir}/docker-compose.yml #{command}"
+  assert_shell([
+    'docker-compose',
+      "--file #{my_dir}/docker-compose.yml",
+        command
+  ].join(space))
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def up?(service_name)
-  up,_ = shell("docker ps --all --filter status=running --format '{{.Names}}' | grep ^#{service_name}$")
-  up.strip == service_name
+  command = [
+    'docker ps',
+      '--all',
+      '--filter status=running',
+      "--format '{{.Names}}'",
+        '|',
+           "grep ^#{service_name}$"
+  ].join(space)
+  up,_ = shell(command)
+  up == service_name
 end
 
 def wait_till_up(service_name)
@@ -97,8 +108,15 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def exited?(service_name)
-  exited,_ = shell("docker ps --all --format '{{.Names}}' | grep ^#{service_name}$")
-  exited.strip != service_name
+  command = [
+    'docker ps',
+      '--all',
+      "--format '{{.Names}}'",
+        '|',
+           "grep ^#{service_name}$"
+  ].join(space)
+  exited,_ = shell(command)
+  exited != service_name
 end
 
 def wait_till_exited(service_name)
