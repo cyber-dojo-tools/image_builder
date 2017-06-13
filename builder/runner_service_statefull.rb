@@ -21,9 +21,18 @@ class RunnerServiceStatefull
     post(__method__, *args)
   end
 
-  private
+  def avatar_old(image_name, kata_id, avatar_name)
+    args  = [image_name, kata_id]
+    args += [avatar_name]
+    post(__method__, *args)
+  end
 
-  attr_reader :image_name, :kata_id
+  def kata_old(image_name, kata_id)
+    args  = [image_name, kata_id]
+    post(__method__, *args)
+  end
+
+  private
 
   include HttpService
   def hostname; 'runner'; end

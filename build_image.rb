@@ -47,7 +47,7 @@ def assert_system(command)
   system(command)
   status = $?.exitstatus
   unless status == success
-    failed [ command, "exit_status == #{status}", output ]
+    failed [ command, "exit_status == #{status}" ]
   end
 end
 

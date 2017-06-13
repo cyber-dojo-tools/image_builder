@@ -105,8 +105,8 @@ def check_start_point_src_is_red_runner_statefull
   runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
   sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
   colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
-  # TODO: runner.avatar_old
-  # TODO: runner.kata_old
+  runner.avatar_old(image_name, kata_id, avatar_name)
+  runner.kata_old(image_name, kata_id)
   unless colour == :red
     failed [ 'start_point files are not red',
       "colour == #{colour}",
@@ -168,7 +168,7 @@ if test_framework_repo?
   check_images_red_amber_green_lambda_file
   #check_start_point_can_be_created
   check_start_point_src_is_red_runner_stateless
-  #check_start_point_src_is_red_runner_statefull
+  check_start_point_src_is_red_runner_statefull
   check_saved_traffic_lights_filesets
 end
 
