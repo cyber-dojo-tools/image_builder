@@ -64,14 +64,6 @@ def check_start_point_can_be_created
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# TODO:
-# If /6 * 9/ can be found in the start-point then
-#   check that /6 * 7/ is green
-#   check that /6 * 9sdsd/ is amber
-# If traffic_lights/ sub-dirs exist, test them too
-#   ... assume they contain complete filesets?
-# If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
-# then treat that as an error?
 
 def check_start_point_src_is_red
   # Stateless runner
@@ -130,6 +122,18 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def check_saved_traffic_lights_filesets
+  # If /6 * 9/ can be found in the start-point then
+  #   check that /6 * 7/ is green
+  #   check that /6 * 9sdsd/ is amber
+  # If traffic_lights/ sub-dirs exist, test them too
+  #   ... assume they contain complete filesets?
+  # If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
+  # then treat that as an error?
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def push_the_image_to_dockerhub
   banner __method__.to_s
   print([ "pushing #{image_name}" ], STDOUT)
@@ -164,7 +168,7 @@ if test_framework_repo?
   check_images_red_amber_green_lambda_file
   #check_start_point_can_be_created
   check_start_point_src_is_red
-  #check_saved_traffic_lights_filesets
+  check_saved_traffic_lights_filesets
 end
 
 #push_the_image_to_dockerhub
