@@ -1,0 +1,8 @@
+#-----Ignore everything
+
+*
+
+#-----!Except these files
+
+!docker-compose2.yml
+!build_image.sh
