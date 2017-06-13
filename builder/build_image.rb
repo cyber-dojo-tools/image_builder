@@ -54,11 +54,7 @@ end
 
 def check_images_red_amber_green_lambda_file
   banner __method__.to_s
-  sss = {
-    'stdout' => 'sdd',
-    'stderr' => 'sdsd',
-    'status' => 42
-  }
+  sss = { 'stdout' => 'sdd', 'stderr' => 'sdsd', 'status' => 42 }
   assert_rag(:amber, sss, "#{rag_filename} sanity check")
   banner_end
 end
@@ -109,7 +105,6 @@ def check_start_point_src_is_red_runner_statefull
   runner.kata_new(image_name, kata_id)
   runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
   sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds)
-  colour = call_rag_lambda(sss)
   runner.avatar_old(image_name, kata_id, avatar_name)
   runner.kata_old(image_name, kata_id)
   assert_rag(:red, sss, "dir == #{start_point_dir}")
