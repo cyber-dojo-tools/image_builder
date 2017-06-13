@@ -21,16 +21,24 @@ readonly NAME=language
 
 docker volume create --name=${NAME}
 
-docker-compose --file ${MY_DIR}/docker-compose.yml up -d
+readonly docker_compose="docker-compose --file ${MY_DIR}/docker-compose.yml"
+
+${docker_compose} up -d runner
+${docker_compose} up -d runner_stateless
+
 # crude wait for services
 sleep 1
-check_up 'cyber-dojo-image-builder-inner'
 check_up 'cyber-dojo-runner'
 check_up 'cyber-dojo-runner-stateless'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-docker exec cyber-dojo-image-builder-inner /app/spike-curl-run.sh
+${docker_compose} \
+    run \
+      image_builder_inner \
+          /app/spike-curl-run.sh
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # TODO: shunit2
 #

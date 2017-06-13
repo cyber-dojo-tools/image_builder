@@ -172,17 +172,17 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_files_exist
-#docker_login
+docker_login
 check_my_dependency
 build_the_image
 
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
-  #check_start_point_can_be_created
+  check_start_point_can_be_created
   check_start_point_src_is_red_amber_green
   check_outputs
 end
 
-#push_the_image_to_dockerhub
-#trigger_dependent_git_repos
+push_the_image_to_dockerhub
+trigger_dependent_git_repos
 
