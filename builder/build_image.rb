@@ -64,21 +64,16 @@ def check_start_point_can_be_created
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# TODO: check red/amber/green for runner and runner_stateless
-# For a while I was pondering whether to check amber/green
-# by doing s/6 * 9/6 * 7/ -> green (for example)
-# The problem with this approach is doesnt work for some
-# languages (eg that have infix notation * 6 7)
-# To solve that I considered adding
-#   traffic_lights/amber
-#   traffic_lights/green
-# subdirs which contain source files which will replace
-# start_point files completely.
-# I think the best solution is to make the default using
-# the s/6 * 9/6 * 7/ solution _unless_ the traffic_lights
-# sub-dirs exist, in which case, they will be used.
+# TODO:
+# If /6 * 9/ can be found in the start-point then
+#   check that /6 * 7/ is green
+#   check that /6 * 9sdsd/ is amber
+# If traffic_lights/ sub-dirs exist, test them too
+#   ... assume they contain complete filesets?
+# If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
+# then treat that as an error?
 
-def check_start_point_src_is_red_amber_green
+def check_start_point_src_is_red
   # Stateless runner
   banner __method__.to_s
   # start-point has already been verified
@@ -105,7 +100,7 @@ def check_start_point_src_is_red_amber_green
 end
 
 
-def check_start_point_src_is_red_amber_green_runner_statefull_runner
+def check_start_point_src_is_red_runner_statefull
   # TODO: avatar_old, kata_old  to clean-up
   banner __method__.to_s
   # start-point has already been verified
@@ -122,25 +117,14 @@ def check_start_point_src_is_red_amber_green_runner_statefull_runner
   runner.avatar_new(image_name, kata_id, avatar_name, visible_files)
   sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
   colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
-  puts colour
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_outputs_colour(rag)
-  dir = "#{outputs_dir}/#{rag}"
-  # TODO:
-  # rag_filename = '/usr/local/bin/red_amber_green.rb'
-  # cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
-  # src = assert_backtick cat_rag_filename
-  # fn = eval(src)
-  # rag = fn.call(stdout='ssd', stderr='sdsd', status=42)
-end
-
-def check_outputs
-  banner __method__.to_s
-  ['red','amber','green'].each { |rag| check_outputs_colour rag }
+  unless colour == :red
+    failed [ 'start_point files are not red',
+      "colour == #{colour}",
+      "stdout == #{stdout}",
+      "stderr == #{stderr}",
+      "status == #{status}"
+    ]
+  end
   banner_end
 end
 
@@ -179,8 +163,8 @@ build_the_image
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
   #check_start_point_can_be_created
-  check_start_point_src_is_red_amber_green
-  check_outputs
+  check_start_point_src_is_red
+  #check_saved_traffic_lights_filesets
 end
 
 #push_the_image_to_dockerhub

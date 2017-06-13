@@ -16,26 +16,6 @@ def check_required_files_exist
   if language_repo? && test_framework_repo?
     failed either_or + [ 'but not both.' ]
   end
-
-=begin
-  # ? do red/amber/green test dynamically using s/6 * 9/6 * 7/
-  if test_framework_repo?
-    required_dirs = [
-      "#{outputs_dir}/red",
-      "#{outputs_dir}/amber",
-      "#{outputs_dir}/green",
-      "#{traffic_lights_dir}/amber",
-      "#{traffic_lights_dir}/green",
-    ]
-    missing_dirs = required_dirs.select { |dir| !Dir.exists? dir }
-    missing_dirs.each do |dir|
-      failed [ "no #{dir}/ dir" ]
-    end
-    unless missing_dirs == []
-      failed [ ... ]
-    end
-  end
-=end
   banner_end
 end
 
