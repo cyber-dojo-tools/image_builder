@@ -11,6 +11,11 @@ require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
 require 'json'
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# TODO: don't fail if DOCKER_ env-vars are not defined
+#       since it could be a local build. Instead
+#       simply don't do the login/push
+
 def success; 0; end
 def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
 def kata_id; '6F4F4E4759'; end
@@ -153,18 +158,18 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_files_exist
-#docker_login
+docker_login
 check_my_dependency
 build_the_image
 
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
-  #check_start_point_can_be_created
+  check_start_point_can_be_created
   check_start_point_src_is_red_runner_stateless
   check_start_point_src_is_red_runner_statefull
   check_saved_traffic_lights_filesets
 end
 
-#push_the_image_to_dockerhub
+push_the_image_to_dockerhub
 trigger_dependent_git_repos
 
