@@ -1,44 +1,20 @@
 #!/bin/bash
 set -e
 
-# Runs image-builder on source living in WORK_DIR which
-# can be passed as $1 and default to the current work directory.
+# Runs image-builder on source living in SRC_DIR which
+# can be passed as $1 and defaults to the current work directory.
 
-# TODO: Simpler and cleaner to put docker-compose inside image_builder
-# (like commander) which has three services, builder,runner,runner_stateless
+readonly SRC_DIR=`pwd`
 
-readonly WORK_DIR=${1:-`pwd`}
-
-if [ ! -d ${WORK_DIR} ]; then
-  echo "FAILED: ${WORK_DIR} dir does not exist"
-  exit 1
-fi
-
-readonly URL=https://raw.githubusercontent.com/cyber-dojo-languages/image_builder/master
-
-readonly COMPOSE_YML=docker-compose.yml
-if [ ! -f ${WORK_DIR}/${COMPOSE_YML} ]; then
-  curl ${URL}/${COMPOSE_YML} > ${WORK_DIR}/${COMPOSE_YML}
-fi
-
-readonly UP_SCRIPT=up.sh
-if [ ! -f ${WORK_DIR}/${UP_SCRIPT} ]; then
-  curl ${URL}/${UP_SCRIPT} > ${WORK_DIR}/${UP_SCRIPT}
-  chmod +x ${WORK_DIR}/${UP_SCRIPT}
-fi
-
-# don't try to build image_builder
-docker pull cyberdojofoundation/image_builder
-${WORK_DIR}/up.sh
-
-# [docker exec] on Travis does not have --env option
-docker exec \
-  --interactive \
-  --tty \
-  cyber-dojo-image-builder \
-    bash -c \
-    "env \
-       DOCKER_USERNAME=${DOCKER_USERNAME} \
-       DOCKER_PASSWORD=${DOCKER_PASSWORD} \
-       WORK_DIR=${WORK_DIR} \
-         /app/build_image.rb"
+docker run \
+   --user=root \
+   --rm \
+   --interactive \
+   --tty \
+   --env DOCKER_USERNAME \
+   --env DOCKER_PASSWORD \
+   --env WORK_DIR=${SRC_DIR} \
+   --volume=${SRC_DIR}:${SRC_DIR}:ro \
+   --volume=/var/run/docker.sock:/var/run/docker.sock \
+     cyberdojofoundation/image_builder2 \
+       /app/build_image.sh

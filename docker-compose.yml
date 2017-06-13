@@ -1,11 +1,14 @@
 
 version: '2'
 
+volumes:
+  language:
+    external:
+      name: "language"
+
 services:
 
   image_builder:
-    build:
-      context: builder
     image: cyberdojofoundation/image_builder
     container_name: cyber-dojo-image-builder
     entrypoint: /bin/bash
@@ -18,7 +21,7 @@ services:
       - runner
       - runner_stateless
     volumes:
-      - ${WORK_DIR}:/repo:ro
+      - language:/repo:ro
       - /var/run/docker.sock:/var/run/docker.sock
 
   runner:

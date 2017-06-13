@@ -32,15 +32,13 @@ readonly cid=$(docker create \
       sh)
 
 docker cp ${WORK_DIR}/. ${cid}:/repo
-
-#docker stop ${cid}
-#docker rm --volumes ${cid}
+docker rm -f ${cid}
 
 #TODO: docker-compose            up runner
 #TODO: docker-compose            up runner-stateless
 #TODO: docker-compose -e KEY=VAL run builder
 
-docker-compose --file ${MY_DIR}/docker-compose2.yml up -d
+docker-compose --file ${MY_DIR}/docker-compose.yml up -d
 
 sleep 1
 check_up 'cyber-dojo-image-builder'
@@ -60,3 +58,5 @@ docker exec \
        WORK_DIR=${WORK_DIR} \
          /app/build_image.rb"
 
+docker-compose down
+docker volume rm ${NAME}
