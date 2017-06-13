@@ -11,8 +11,9 @@ def success; 0; end
 
 def docker_username; ENV['DOCKER_USERNAME']; end
 def docker_password; ENV['DOCKER_PASSWORD']; end
-def github_token   ; ENV['GITHUB_TOKEN'   ]; end
 def src_dir        ; ENV['SRC_DIR'        ]; end
+
+def github_token   ; ENV['GITHUB_TOKEN'] || 'not-set'; end
 
 def volume_name; 'language'; end
 
@@ -23,6 +24,7 @@ def my_dir; '/app'; end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def shell(command)
+  # does not show command's interactive output
   output = `#{command}`
   status = $?.exitstatus
   #log( [ "command=:#{command}:"] )
@@ -32,6 +34,7 @@ def shell(command)
 end
 
 def assert_shell(command)
+  # does not show command's interactive output
   output,status = shell(command)
   unless status == success
     failed [ command, "exit_status == #{status}", output ]
@@ -40,6 +43,7 @@ def assert_shell(command)
 end
 
 def assert_system(command)
+  # shows command's interactive output
   system(command)
   status = $?.exitstatus
   unless status == success
@@ -60,6 +64,15 @@ end
 
 def print(lines, stream)
   lines.each { |line| stream.puts line }
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def check_required_env_vars
+  [ 'DOCKER_USERNAME', 'DOCKER_PASSWORD', 'SRC_DIR' ].each do |name|
+    var = ENV[name]
+    failed [ "#{name} environment-variable not set "] if var.nil?
+  end
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -91,19 +104,6 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def up?(service_name)
-  command = [
-    'docker ps',
-      '--all',
-      '--filter status=running',
-      "--format '{{.Names}}'",
-        '|',
-           "grep ^#{service_name}$"
-  ].join(space)
-  up,_ = shell(command)
-  up == service_name
-end
-
 def wait_till_up(service_name)
   max_wait = 5 # seconds
   up = false
@@ -120,19 +120,20 @@ def wait_till_up(service_name)
   end
 end
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def exited?(service_name)
+def up?(service_name)
   command = [
     'docker ps',
       '--all',
+      '--filter status=running',
       "--format '{{.Names}}'",
         '|',
            "grep ^#{service_name}$"
   ].join(space)
-  exited,_ = shell(command)
-  exited != service_name
+  up,_ = shell(command)
+  up == service_name
 end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def wait_till_exited(service_name)
   max_wait = 5 # seconds
@@ -150,8 +151,21 @@ def wait_till_exited(service_name)
   end
 end
 
+def exited?(service_name)
+  command = [
+    'docker ps',
+      '--all',
+      "--format '{{.Names}}'",
+        '|',
+           "grep ^#{service_name}$"
+  ].join(space)
+  exited,_ = shell(command)
+  exited != service_name
+end
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+check_required_env_vars
 create_src_dir_volume
 
 docker_compose 'up -d runner'
@@ -166,7 +180,7 @@ assert_system [
     'run',
       "-e DOCKER_USERNAME=#{docker_username}",
       "-e DOCKER_PASSWORD=#{docker_password}",
-      # "-e GITHUB_TOKEN=#{github_token}",
+      "-e GITHUB_TOKEN=#{github_token}",
       "-e SRC_DIR=#{src_dir}",
         'image_builder_inner',
           '/app/build_image.rb'
@@ -176,5 +190,6 @@ docker_compose 'down'
 
 wait_till_exited 'cyber-dojo-runner'
 wait_till_exited 'cyber-dojo-runner-stateless'
+wait_till_exited 'cyber-dojo-image-builder'
 
 assert_shell("docker volume rm #{volume_name}")
