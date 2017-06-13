@@ -23,25 +23,46 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def call_rag_lambda(stdout, stderr, status)
+def assert_red(colour, sss)
+  # TODO: improve diagnostic: print src_dir
+  unless colour == :red
+    failed [ 'start_point files are not red',
+      "colour == #{colour}",
+      "stdout == #{sss['stdout']}",
+      "stderr == #{sss['stderr']}",
+      "status == #{sss['status']}"
+    ]
+  end
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def call_rag_lambda(sss)
   rag_filename = '/usr/local/bin/red_amber_green.rb'
   cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
   src = assert_backtick cat_rag_filename
   fn = eval(src)
-  fn.call(stdout, stderr, status)
+  fn.call(sss['stdout'], sss['stderr'], sss['status'])
 end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def check_images_red_amber_green_lambda_file
   # TODO: improve diagnostics
   banner __method__.to_s
-  colour = call_rag_lambda(stdout='ssd', stderr='sdsd', status=42)
+  sss = {
+    'stdout' => 'sdd',
+    'stderr' => 'sdsd',
+    'status' => 42
+  }
+  colour = call_rag_lambda(sss)
   unless colour == :amber
     failed [
       "image #{image_name}'s #{rag_filename} sanity check did not produce :amber",
       "colour == #{colour}",
-      "stdout == #{stdout}",
-      "stderr == #{stderr}",
-      "status == #{status}"
+      "stdout == #{sss['stdout']}",
+      "stderr == #{sss['stderr']}",
+      "status == #{sss['status']}"
     ]
   end
   banner_end
@@ -79,23 +100,13 @@ end
 
 def kata_id; '6F4F4E4759'; end
 def avatar_name; 'salmon'; end
-
-def assert_red(colour, sss)
-  unless colour == :red
-    failed [ 'start_point files are not red',
-      "colour == #{colour}",
-      "stdout == #{sss['stdout']}",
-      "stderr == #{sss['stderr']}",
-      "status == #{sss['status']}"
-    ]
-  end
-end
+def max_seconds; 10; end
 
 def check_start_point_src_is_red_runner_stateless
   banner __method__.to_s
   runner = RunnerServiceStateless.new
-  sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds=10)
-  colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
+  sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds)
+  colour = call_rag_lambda(sss)
   assert_red(colour, sss)
   banner_end
 end
@@ -107,8 +118,8 @@ def check_start_point_src_is_red_runner_statefull
   runner = RunnerServiceStatefull.new
   runner.kata_new(image_name, kata_id)
   runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
-  sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
-  colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
+  sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds)
+  colour = call_rag_lambda(sss)
   runner.avatar_old(image_name, kata_id, avatar_name)
   runner.kata_old(image_name, kata_id)
   assert_red(colour, sss)
