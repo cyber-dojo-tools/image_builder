@@ -34,16 +34,19 @@ readonly cid=$(docker create \
 docker cp ${WORK_DIR}/. ${cid}:/repo
 docker rm -f ${cid}
 
-#TODO: docker-compose            up runner
-#TODO: docker-compose            up runner-stateless
-#TODO: docker-compose -e KEY=VAL run builder
+readonly docker_compose="docker-compose --file ${MY_DIR}/docker-compose.yml"
 
-docker-compose --file ${MY_DIR}/docker-compose.yml up -d
+${docker_compose} up -d runner
+${docker_compose} up -d runner-stateless
+${docker_compose} up -d cyber-dojo-image-builder
+
+#TODO: docker-compose --file ${MY_DIR}/docker-compose.yml -e KEY=VAL run builder
+#${docker_compose} up -d
 
 sleep 1
-check_up 'cyber-dojo-image-builder'
 check_up 'cyber-dojo-runner'
 check_up 'cyber-dojo-runner-stateless'
+check_up 'cyber-dojo-image-builder'
 
 #TODO: GITHUB_TOKEN
 
