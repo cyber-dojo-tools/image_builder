@@ -40,15 +40,16 @@ ${docker_compose} up -d runner
 ${docker_compose} up -d runner_stateless
 ${docker_compose} up -d image_builder
 
-#TODO: docker-compose --file ${MY_DIR}/docker-compose.yml -e KEY=VAL run builder
-#${docker_compose} up -d
-
 sleep 1
 check_up 'cyber-dojo-runner'
 check_up 'cyber-dojo-runner-stateless'
+
+#TODO: ${docker_compose} -e KEY=VAL run image_builder
+#with KEY=VAL for DOCKER_USERNAME, DOCKER_PASSWORD, SRC_DIR
+
 check_up 'cyber-dojo-image-builder'
 
-#TODO: GITHUB_TOKEN
+#TODO: add GITHUB_TOKEN
 
 docker exec \
   --interactive \
