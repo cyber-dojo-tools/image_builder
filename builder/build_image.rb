@@ -65,47 +65,25 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_start_point_src_is_red
-  # Stateless runner
-  banner __method__.to_s
+def start_point_visible_files
   # start-point has already been verified
   manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
   visible_files = {}
   manifest['visible_filenames'].each do |filename|
     visible_files[filename] = IO.read(start_point_dir + '/' + filename)
   end
-  kata_id = '6F4F4E4759'
-  avatar_name = 'salmon'
-  runner = RunnerServiceStateless.new
-  sss = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds=10)
-  colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
-  unless colour == :red
-    failed [ 'start_point files are not red',
-      "colour == #{colour}",
-      "stdout == #{stdout}",
-      "stderr == #{stderr}",
-      "status == #{status}"
-    ]
-  end
-  banner_end
+  visible_files
 end
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_start_point_src_is_red_runner_statefull
-  # TODO: avatar_old, kata_old  to clean-up
+def kata_id; '6F4F4E4759'; end
+def avatar_name; 'salmon'; end
+
+def check_start_point_src_is_red_runner_stateless
   banner __method__.to_s
-  # start-point has already been verified
-  manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
-  visible_files = {}
-  manifest['visible_filenames'].each do |filename|
-    visible_files[filename] = IO.read(start_point_dir + '/' + filename)
-  end
-  kata_id = '6F4F4E4759'
-  avatar_name = 'salmon'
-  runner = RunnerServiceStatefull.new
-  runner.kata_new(image_name, kata_id)
-  runner.avatar_new(image_name, kata_id, avatar_name, visible_files)
-  sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
+  runner = RunnerServiceStateless.new
+  sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds=10)
   colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
   unless colour == :red
     failed [ 'start_point files are not red',
@@ -120,7 +98,30 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def check_start_point_src_is_red_runner_statefull
+  banner __method__.to_s
+  runner = RunnerServiceStatefull.new
+  runner.kata_new(image_name, kata_id)
+  runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
+  sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds=10)
+  colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
+  # TODO: runner.avatar_old
+  # TODO: runner.kata_old
+  unless colour == :red
+    failed [ 'start_point files are not red',
+      "colour == #{colour}",
+      "stdout == #{stdout}",
+      "stderr == #{stderr}",
+      "status == #{status}"
+    ]
+  end
+  banner_end
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def check_saved_traffic_lights_filesets
+  banner __method__.to_s
   # If /6 * 9/ can be found in the start-point then
   #   check that /6 * 7/ is green
   #   check that /6 * 9sdsd/ is amber
@@ -128,6 +129,7 @@ def check_saved_traffic_lights_filesets
   #   ... assume they contain complete filesets?
   # If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
   # then treat that as an error?
+  banner_end
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -165,7 +167,8 @@ build_the_image
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
   #check_start_point_can_be_created
-  check_start_point_src_is_red
+  check_start_point_src_is_red_runner_stateless
+  #check_start_point_src_is_red_runner_statefull
   check_saved_traffic_lights_filesets
 end
 
