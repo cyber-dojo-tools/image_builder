@@ -24,6 +24,6 @@ docker volume create --name=${NAME}
 docker-compose --file ${MY_DIR}/docker-compose.yml up -d
 # crude wait for services
 sleep 1
-check_up 'cyber-dojo-image-builder'
+check_up 'cyber-dojo-image-builder-inner'
 check_up 'cyber-dojo-runner'
 check_up 'cyber-dojo-runner-stateless'

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-docker exec cyber-dojo-image-builder /app/spike-curl-run.sh
+docker exec cyber-dojo-image-builder-inner /app/spike-curl-run.sh
 
 # TODO: shunit2
 #

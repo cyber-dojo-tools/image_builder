@@ -8,9 +8,9 @@ volumes:
 
 services:
 
-  image_builder:
-    image: cyberdojofoundation/image_builder
-    container_name: cyber-dojo-image-builder
+  image_builder_inner:
+    image: cyberdojofoundation/image_builder_inner
+    container_name: cyber-dojo-image-builder-inner
     entrypoint: /bin/bash
     stdin_open: true
     tty: true
