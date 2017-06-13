@@ -13,6 +13,8 @@ require 'json'
 
 def success; 0; end
 
+def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def build_the_image
@@ -23,22 +25,23 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def assert_red(colour, sss)
-  # TODO: improve diagnostic: print src_dir
-  unless colour == :red
-    failed [ 'start_point files are not red',
-      "colour == #{colour}",
+def assert_rag(expected_colour, sss, diagnostic)
+  actual_colour = call_rag_lambda(sss)
+  unless expected_colour == actual_colour
+    failed [ diagnostic,
+      "expected_colour == #{expected_colour}",
+      "  actual_colour == #{actual_colour}",
       "stdout == #{sss['stdout']}",
       "stderr == #{sss['stderr']}",
       "status == #{sss['status']}"
     ]
   end
+
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def call_rag_lambda(sss)
-  rag_filename = '/usr/local/bin/red_amber_green.rb'
   cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
   src = assert_backtick cat_rag_filename
   fn = eval(src)
@@ -48,23 +51,13 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def check_images_red_amber_green_lambda_file
-  # TODO: improve diagnostics
   banner __method__.to_s
   sss = {
     'stdout' => 'sdd',
     'stderr' => 'sdsd',
     'status' => 42
   }
-  colour = call_rag_lambda(sss)
-  unless colour == :amber
-    failed [
-      "image #{image_name}'s #{rag_filename} sanity check did not produce :amber",
-      "colour == #{colour}",
-      "stdout == #{sss['stdout']}",
-      "stderr == #{sss['stderr']}",
-      "status == #{sss['status']}"
-    ]
-  end
+  assert_rag(:amber, sss, "#{rag_filename} sanity check")
   banner_end
 end
 
@@ -106,8 +99,7 @@ def check_start_point_src_is_red_runner_stateless
   banner __method__.to_s
   runner = RunnerServiceStateless.new
   sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds)
-  colour = call_rag_lambda(sss)
-  assert_red(colour, sss)
+  assert_rag(:red, sss, "dir == #{start_point_dir}")
   banner_end
 end
 
@@ -122,7 +114,7 @@ def check_start_point_src_is_red_runner_statefull
   colour = call_rag_lambda(sss)
   runner.avatar_old(image_name, kata_id, avatar_name)
   runner.kata_old(image_name, kata_id)
-  assert_red(colour, sss)
+  assert_rag(:red, sss, "dir == #{start_point_dir}")
   banner_end
 end
 
