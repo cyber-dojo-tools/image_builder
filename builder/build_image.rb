@@ -12,8 +12,10 @@ require_relative 'runner_service_stateless'
 require 'json'
 
 def success; 0; end
-
 def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
+def kata_id; '6F4F4E4759'; end
+def avatar_name; 'salmon'; end
+def max_seconds; 10; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -36,12 +38,12 @@ def assert_rag(expected_colour, sss, diagnostic)
       "status == #{sss['status']}"
     ]
   end
-
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def call_rag_lambda(sss)
+  # TODO: improve diagnostics if cat/eval/call fails
   cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
   src = assert_backtick cat_rag_filename
   fn = eval(src)
@@ -90,10 +92,6 @@ def start_point_visible_files
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def kata_id; '6F4F4E4759'; end
-def avatar_name; 'salmon'; end
-def max_seconds; 10; end
 
 def check_start_point_src_is_red_runner_stateless
   banner __method__.to_s
