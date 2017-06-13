@@ -2,4 +2,4 @@ services: docker
 language: generic
 
 script:
-    - ./pipe_build_up_test_push.sh
+    - ./pipe_build_test_push.sh
