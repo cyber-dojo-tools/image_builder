@@ -8,7 +8,10 @@ set -e
 
 readonly SRC_DIR=${1:-`pwd`}
 
-# TODO: add check that SRC_DIR exists
+if [ ! -d "${SRC_DIR}" ]; then
+  echo "${SRC_DIR} does not exist"
+  exit 1
+fi
 
 docker run \
    --user=root \

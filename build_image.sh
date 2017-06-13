@@ -53,5 +53,5 @@ ${docker_compose} \
           /app/build_image.rb
 
 ${docker_compose} down
-sleep 1
+sleep 2
 docker volume rm ${NAME}
