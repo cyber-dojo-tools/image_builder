@@ -6,6 +6,8 @@ set -e
 
 check_up()
 {
+  #TODO: loop till $1 is up or max_seconds has elapsed
+  #      and remove sleep from below.
   set +e
   local up=$(docker ps --filter status=running --format '{{.Names}}' | grep ^${1}$)
   set -e
