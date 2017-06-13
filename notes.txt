@@ -23,12 +23,3 @@
 # (possibly with a command line option).
 # Orthogonal to that, what version number do I use?
 # The language's or the test framework's? Or both?
-
-
-#===========================================
-
-WORK_DIR -> SRC_DIR
-build-image.sh goes into /builder dir
-  and drop build-context from docker-compose.yml
-
-docker-compose.yml drop the 2

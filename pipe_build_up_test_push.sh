@@ -4,4 +4,5 @@ set -e
 ./build.sh
 ./up.sh
 ./test.sh
+./down.sh
 ./push.sh

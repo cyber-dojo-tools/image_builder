@@ -17,7 +17,7 @@ check_up()
 echo "inside image_builder2/build_image.sh"
 echo "DOCKER_USERNAME=:${DOCKER_USERNAME}:"
 echo "DOCKER_PASSWORD=:${DOCKER_PASSWORD}:"
-echo "WORK_DIR=:${WORK_DIR}:"
+echo "SRC_DIR=:${SRC_DIR}:"
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly NAME=language
@@ -31,14 +31,14 @@ readonly cid=$(docker create \
     cyberdojo/runner \
       sh)
 
-docker cp ${WORK_DIR}/. ${cid}:/repo
+docker cp ${SRC_DIR}/. ${cid}:/repo
 docker rm -f ${cid}
 
 readonly docker_compose="docker-compose --file ${MY_DIR}/docker-compose.yml"
 
 ${docker_compose} up -d runner
-${docker_compose} up -d runner-stateless
-${docker_compose} up -d cyber-dojo-image-builder
+${docker_compose} up -d runner_stateless
+${docker_compose} up -d image_builder
 
 #TODO: docker-compose --file ${MY_DIR}/docker-compose.yml -e KEY=VAL run builder
 #${docker_compose} up -d
@@ -58,8 +58,9 @@ docker exec \
     "env \
        DOCKER_USERNAME=${DOCKER_USERNAME} \
        DOCKER_PASSWORD=${DOCKER_PASSWORD} \
-       WORK_DIR=${WORK_DIR} \
+       SRC_DIR=${SRC_DIR} \
          /app/build_image.rb"
 
-docker-compose down
+${docker_compose} down
+sleep 1
 docker volume rm ${NAME}

@@ -86,7 +86,7 @@ def repo_url
   # Each repo has a travis script which checks that its
   # actual dependency (from its source) exactly
   # matches its entry in the dependencies list below.
-  cdl + '/' + ENV['WORK_DIR'].split('/')[-1]
+  cdl + '/' + ENV['SRC_DIR'].split('/')[-1]
 end
 
 def from
