@@ -4,9 +4,9 @@ set -e
 check_up()
 {
   set +e
-  local s=$(docker ps --filter status=running --format '{{.Names}}' | grep ^${1}$)
+  local up=$(docker ps --filter status=running --format '{{.Names}}' | grep ^${1}$)
   set -e
-  if [ "${s}" != "${1}" ]; then
+  if [ "${up}" != "${1}" ]; then
     echo
     echo "${1} exited"
     docker logs ${1}
