@@ -74,7 +74,6 @@ def check_start_point_src_is_red
   manifest['visible_filenames'].each do |filename|
     visible_files[filename] = IO.read(start_point_dir + '/' + filename)
   end
-  image_name = manifest['image_name']
   kata_id = '6F4F4E4759'
   avatar_name = 'salmon'
   runner = RunnerServiceStateless.new
@@ -101,7 +100,6 @@ def check_start_point_src_is_red_runner_statefull
   manifest['visible_filenames'].each do |filename|
     visible_files[filename] = IO.read(start_point_dir + '/' + filename)
   end
-  image_name = manifest['image_name']
   kata_id = '6F4F4E4759'
   avatar_name = 'salmon'
   runner = RunnerServiceStatefull.new
