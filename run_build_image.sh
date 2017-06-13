@@ -8,6 +8,8 @@ set -e
 
 readonly SRC_DIR=${1:-`pwd`}
 
+# TODO: add check that SRC_DIR exists
+
 docker run \
    --user=root \
    --rm \
@@ -15,6 +17,7 @@ docker run \
    --tty \
    --env DOCKER_USERNAME \
    --env DOCKER_PASSWORD \
+   --env GITHUB_TOKEN \
    --env SRC_DIR=${SRC_DIR} \
    --volume=${SRC_DIR}:${SRC_DIR}:ro \
    --volume=/var/run/docker.sock:/var/run/docker.sock \
