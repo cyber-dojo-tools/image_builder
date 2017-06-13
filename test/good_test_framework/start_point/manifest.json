@@ -1,16 +1,15 @@
-
 {
   "visible_filenames": [
-   "src/Hiker.elm",
-   "tests/Tests.elm",
-   "tests/Main.elm",
-   "tests/elm-package.json",
-   "cyber-dojo.sh"
+    "test_Hiker.hs",
+    "Hiker.hs",
+    "cyber-dojo.sh"
   ],
 
-  "filename_extension" : ".elm",
+  "filename_extension" : ".hs",
 
-  "display_name": "Elm, ElmTest",
+  "tab_size": 4,
 
-  "image_name": "cyberdojofoundation/elm_test"
+  "display_name": "Haskell, hunit",
+
+  "image_name": "cyberdojofoundation/haskell_hunit"
 }
