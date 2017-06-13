@@ -2,12 +2,6 @@
 
 # Spiking how to call run(...) in a runner_stateless container
 # (on port 4597) from inside an image_builder container using curl.
-#
-# Running image_builder should be a single operation.
-# At the moment it is a two-step operation as you first
-# have to start the runner_stateless service which image_builder
-# uses to check a test start_point. Perhaps embed docker-compose
-# inside image_builder?
 
 run() {
   local json=$1
