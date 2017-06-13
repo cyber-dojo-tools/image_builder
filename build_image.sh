@@ -4,10 +4,15 @@ set -e
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
+#TODO: in check_up() loop till $1 is up or max_seconds
+#      has elapsed and remove sleep from below.
+#
+#TODO: ensure language volume is removed if an earlier command fails.
+#      Currently the (set -e) bypasses the
+#     [docker-compose down] and [volume rm] commands.
+
 check_up()
 {
-  #TODO: loop till $1 is up or max_seconds has elapsed
-  #      and remove sleep from below.
   set +e
   local up=$(docker ps --filter status=running --format '{{.Names}}' | grep ^${1}$)
   set -e
