@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# This builds the main 'outer' image_builder docker-image
+# which includes docker-compose inside it.
+
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
 docker build \

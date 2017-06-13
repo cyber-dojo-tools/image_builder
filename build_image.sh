@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# This is the main entry-point for the image_builder
+# docker-image which includes docker-compose inside it.
+
 check_up()
 {
   set +e
