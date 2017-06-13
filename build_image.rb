@@ -1,5 +1,12 @@
 #!/usr/bin/env ruby
 
+# This is the main entry-point for the image_builder
+# docker-image which includes docker-compose inside it.
+
+#TODO: ensure language volume is removed if an earlier command fails.
+#TODO: get my_dir programmatically
+#TODO: add --verbose option which prints shell-log
+
 def success; 0; end
 
 def docker_username; ENV['DOCKER_USERNAME']; end
