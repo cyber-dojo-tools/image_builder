@@ -80,19 +80,23 @@ end
 def kata_id; '6F4F4E4759'; end
 def avatar_name; 'salmon'; end
 
+def assert_red(colour, sss)
+  unless colour == :red
+    failed [ 'start_point files are not red',
+      "colour == #{colour}",
+      "stdout == #{sss['stdout']}",
+      "stderr == #{sss['stderr']}",
+      "status == #{sss['status']}"
+    ]
+  end
+end
+
 def check_start_point_src_is_red_runner_stateless
   banner __method__.to_s
   runner = RunnerServiceStateless.new
   sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds=10)
   colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
-  unless colour == :red
-    failed [ 'start_point files are not red',
-      "colour == #{colour}",
-      "stdout == #{stdout}",
-      "stderr == #{stderr}",
-      "status == #{status}"
-    ]
-  end
+  assert_red(colour, sss)
   banner_end
 end
 
@@ -107,14 +111,7 @@ def check_start_point_src_is_red_runner_statefull
   colour = call_rag_lambda(sss['stdout'], sss['stderr'], sss['status'])
   runner.avatar_old(image_name, kata_id, avatar_name)
   runner.kata_old(image_name, kata_id)
-  unless colour == :red
-    failed [ 'start_point files are not red',
-      "colour == #{colour}",
-      "stdout == #{stdout}",
-      "stderr == #{stderr}",
-      "status == #{status}"
-    ]
-  end
+  assert_red(colour, sss)
   banner_end
 end
 
