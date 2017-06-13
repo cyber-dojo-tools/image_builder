@@ -4,8 +4,12 @@ set -e
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
+#TODO: convert this to a Ruby script
+#      Add --debug option. Better still --verbose.
+#
 #TODO: in check_up() loop till $1 is up or max_seconds
 #      has elapsed and remove sleep from below.
+#      Call is wait_till_up()
 #
 #TODO: ensure language volume is removed if an earlier command fails.
 #      Currently the (set -e) bypasses the
@@ -58,5 +62,6 @@ ${docker_compose} \
           /app/build_image.rb
 
 ${docker_compose} down
+# TODO: create check_down() function.
 sleep 2
 docker volume rm ${NAME}
