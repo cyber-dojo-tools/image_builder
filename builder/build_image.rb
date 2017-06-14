@@ -15,6 +15,15 @@ require 'json'
 # TODO: don't fail if DOCKER_ env-vars are not defined
 #       since it could be a local build. Instead
 #       simply don't do the login/push
+#
+# TODO: instead of trigger_dependent_git_repos I could
+#       instead git clone them to a dir and then call
+#       run_build_image.sh on the dir. I think I would need
+#       some kind of 'preprocessor' phase where I created
+#       a list of all the dependents.
+#
+# TODO: add how long red/amber/green runs take.
+#       issue warning if they take too long.
 
 def success; 0; end
 def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
