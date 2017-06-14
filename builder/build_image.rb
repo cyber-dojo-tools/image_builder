@@ -20,7 +20,11 @@ require 'json'
 #       instead git clone them to a dir and then call
 #       run_build_image.sh on the dir. I think I would need
 #       some kind of 'preprocessor' phase where I created
-#       a list of all the dependents.
+#       a list of all the dependents. This will considerably
+#       speed up Travis cycle-time since it won't then need
+#       to [docker pull] the image created on the previous step.
+#       However, it may start to hit the 50min max time for
+#       a single (public) Travis run.
 #
 # TODO: add how long red/amber/green runs take.
 #       issue warning if they take too long.
