@@ -13,8 +13,6 @@ def docker_username; ENV['DOCKER_USERNAME']; end
 def docker_password; ENV['DOCKER_PASSWORD']; end
 def src_dir        ; ENV['SRC_DIR'        ]; end
 
-def github_token   ; ENV['GITHUB_TOKEN'] || 'not-set'; end
-
 def volume_name; 'language'; end
 
 def space; ' '; end
@@ -180,7 +178,6 @@ assert_system [
     'run',
       "-e DOCKER_USERNAME=#{docker_username}",
       "-e DOCKER_PASSWORD=#{docker_password}",
-      "-e GITHUB_TOKEN=#{github_token}",
       "-e SRC_DIR=#{src_dir}",
         'image_builder_inner',
           '/app/build_image.rb'

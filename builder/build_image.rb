@@ -12,22 +12,35 @@ require_relative 'runner_service_stateless'
 require 'json'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# TODO: don't fail if DOCKER_ env-vars are not defined
-#       since it could be a local build. Instead
-#       simply don't do the login/push
-#
-# TODO: instead of trigger_dependent_git_repos I could
-#       instead git clone them to a dir and then call
-#       run_build_image.sh on the dir. I think I would need
-#       some kind of 'preprocessor' phase where I created
-#       a list of all the dependents. This will considerably
-#       speed up Travis cycle-time since it won't then need
-#       to [docker pull] the image created on the previous step.
+# TODO: Don't trigger_dependent_git_repos.
+#       Instead have option to control when this run is for a single
+#       repo or it for a chain starting with this repo.
+#       If for a chain, start by creating a list of all the dependents.
+#       Then build these in a chain, one by one.
+#       This will considerably speed up Travis cycle-time since
+#       Travis won't need to [docker pull] the image created on
+#       the [docker push] step for the previous repo.
 #       However, it may start to hit the 50min max time for
 #       a single (public) Travis run.
 #
-# TODO: add how long red/amber/green runs take.
-#       issue warning if they take too long.
+# TODO: If TRAVIS env-var is defined check if DOCKER_ env-vars
+#       are defined. If they are not issue error diagnostic and fail.
+#       If TRAVIS env-var is not defined, check if DOCKER_ env-vars
+#       are defined. If they are not issue warning diagnostic and continue
+#       and do not do [docker login/push] commands.
+#
+#       If on Travis do a [git clone] of dependent repo
+#       to continue the image-chain build.
+#       If not on Travis, instead of doing [git clone]
+#       assume the repo is in .. dir and simply use that.
+#
+#       Also, when not on Travis, instead of curling the
+#       cyber-dojo script, check if cyber-dojo script is on path
+#       and if so, use that. If no cyber-dojo script on path
+#       then issue an error.
+#
+# TODO: add information on how long red/amber/green runs take.
+#       issue warning if they take too long?
 
 def success; 0; end
 def rag_filename; '/usr/local/bin/red_amber_green.rb'; end

@@ -20,7 +20,6 @@ docker run \
   --tty \
   --env DOCKER_USERNAME \
   --env DOCKER_PASSWORD \
-  --env GITHUB_TOKEN \
   --env SRC_DIR=${SRC_DIR} \
   --volume=${SRC_DIR}:${SRC_DIR}:ro \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
