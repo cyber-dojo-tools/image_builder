@@ -12,8 +12,6 @@ class RunnerServiceStateless
 
   private
 
-  attr_reader :image_name, :kata_id
-
   include HttpService
   def hostname; 'runner_stateless'; end
   def port; '4597'; end
