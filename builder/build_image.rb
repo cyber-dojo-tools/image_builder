@@ -14,7 +14,7 @@ require 'json'
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO: Don't trigger_dependent_git_repos.
 #       Instead have option to control when this run is for a single
-#       repo or it for a chain starting with this repo.
+#       repo or if for a chain starting with this repo.
 #       If for a chain, start by creating a list of all the dependents.
 #       Then build these in a chain, one by one.
 #       This will considerably speed up Travis cycle-time since
@@ -33,11 +33,19 @@ require 'json'
 #       to continue the image-chain build.
 #       If not on Travis, instead of doing [git clone]
 #       assume the repo is in .. dir and simply use that.
+#       However, that assumes the not just the current dir
+#       but all its sibling dirs are available inside the
+#       container. Currently I'm volume-mounting and then doing
+#       a [cp -R] which is starting to sound impractical.
+#       I think I need a data-container which I reuse.
 #
 #       Also, when not on Travis, instead of curling the
 #       cyber-dojo script, check if cyber-dojo script is on path
 #       and if so, use that. If no cyber-dojo script on path
 #       then issue an error.
+#       However that again confuses cyber-dojo being available
+#       on the host which is not the same as the cyber-dojo
+#       script being available inside the container.
 #
 # TODO: add information on how long red/amber/green runs take.
 #       issue warning if they take too long?

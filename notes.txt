@@ -1,4 +1,19 @@
 
+# TODO: are we are on Travis or running locally?
+# If on Travis, then only the current dir needs to be
+# volume mounted so it is visible inside the container.
+# Dependent repos will be git clones.
+# If locally, then I need to volume-mount the base-dir
+# so that all dependent repos will be available inside
+# the container without doing a git clone.
+# TODO: think I need to volume-mount the cyber-dojo script
+# inside the container if running locally. How else can
+# the container check the dir is a good start-point.
+# TODO: think I need to volume-mount the json file
+# containing the dependency triples.
+
+
+
 # display version numbers
 # - - - - - - - - - - - -
 # the base-language versions be gathered from the dependency table
