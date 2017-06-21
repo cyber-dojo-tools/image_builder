@@ -18,6 +18,13 @@
 # containing the dependency triples. Unless this is
 # parameterizable the script won't be much use for
 # someone testing out their own language/test repos.
+# Or maybe make using this dependency list optional???
+# Default could be just to build for the dir named on
+# the command-line. How to extend beyond that?
+# If a json file is named then use that?
+# That would work well on Travis.
+# Could also use the base-dir of the dir given.
+# That would work well for a local build.
 
 
 

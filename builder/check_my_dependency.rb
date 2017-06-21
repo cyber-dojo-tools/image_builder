@@ -197,6 +197,26 @@ def dependencies
     [ "#{cdl}/swift-swordfish",
       "#{cdf}/swift_xctest",
       "#{cdf}/swift_swordfish"
+    ],
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Ubuntu-17-04
+
+    [ "#{cdl}/ubuntu-build-essential-17.04",
+      "ubuntu:17.04",
+      "#{cdf}/ubuntu-build-essential:17.04"
+    ],
+    [ "#{cdl}/gplusplus-7.1",
+      "#{cdf}/ubuntu-build-essential:17.04",
+      "#{cdf}/gplusplus:7.1"
+    ],
+    [ "#{cdl}/gplusplus-assert",
+      "#{cdf}/gplusplus:7.1",
+      "#{cdf}/gpp_assert"
+    ],
+    [ "#{cdl}/gplusplus-catch",
+      "#{cdf}/gplusplus:7.1",
+      "#{cdf}/gpp_catch"
     ]
 
   ]
