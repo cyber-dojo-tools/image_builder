@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Runs image-builder on source living in SRC_DIR which
 # can be passed as $1 but defaults to the current work directory.
@@ -25,3 +24,6 @@ docker run \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
     cyberdojofoundation/image_builder \
       /app/build_image.rb
+
+#exit_status=$?
+#echo "exit_status=${exit_status}"

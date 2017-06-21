@@ -3,7 +3,6 @@
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
-#TODO: ensure language volume is removed if an earlier command fails.
 #TODO: get my_dir programmatically
 #TODO: add --verbose option which prints shell-log
 
@@ -172,21 +171,22 @@ docker_compose 'up -d runner_stateless'
 wait_till_up 'cyber-dojo-runner'
 wait_till_up 'cyber-dojo-runner-stateless'
 
-assert_system [
-  'docker-compose',
-    "--file #{my_dir}/docker-compose.yml",
-    'run',
-      "-e DOCKER_USERNAME=#{docker_username}",
-      "-e DOCKER_PASSWORD=#{docker_password}",
-      "-e SRC_DIR=#{src_dir}",
-        'image_builder_inner',
-          '/app/build_image.rb'
-        ].join(space)
+begin
+  assert_system [
+    'docker-compose',
+      "--file #{my_dir}/docker-compose.yml",
+      'run',
+        "-e DOCKER_USERNAME=#{docker_username}",
+        "-e DOCKER_PASSWORD=#{docker_password}",
+        "-e SRC_DIR=#{src_dir}",
+          'image_builder_inner',
+            '/app/build_image.rb'
+    ].join(space)
 
-docker_compose 'down'
-
-wait_till_exited 'cyber-dojo-runner'
-wait_till_exited 'cyber-dojo-runner-stateless'
-wait_till_exited 'cyber-dojo-image-builder'
-
-assert_shell("docker volume rm #{volume_name}")
+ensure
+  docker_compose 'down'
+  wait_till_exited 'cyber-dojo-runner'
+  wait_till_exited 'cyber-dojo-runner-stateless'
+  wait_till_exited 'cyber-dojo-image-builder'
+  shell("docker volume rm #{volume_name}")
+end
