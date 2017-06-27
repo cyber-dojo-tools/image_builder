@@ -14,6 +14,14 @@ if [ ! -d "${SRC_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${TRAVIS}" ]; then
+  echo "Running locally"
+  readonly BASE_DIR=${SRC_DIR}
+else
+  echo 'Running on TRAVIS'
+  readonly BASE_DIR=$(dirname ${SRC_DIR})
+fi
+
 # I create a data-volume-container which holds src-dir.
 # By default this lives on one network and the containers
 # created inside image_builder (from its docker-compose.yml file)
@@ -24,7 +32,7 @@ fi
 docker network create ${NETWORK}
 
 docker create \
-  --volume=${SRC_DIR}:${SRC_DIR} \
+  --volume=${BASE_DIR}:${BASE_DIR} \
   --name=${NAME} \
   --network=${NETWORK} \
   cyberdojofoundation/image_builder \
