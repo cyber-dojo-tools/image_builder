@@ -12,8 +12,6 @@ def docker_username; ENV['DOCKER_USERNAME']; end
 def docker_password; ENV['DOCKER_PASSWORD']; end
 def src_dir        ; ENV['SRC_DIR'        ]; end
 
-def volume_name; 'language'; end
-
 def space; ' '; end
 
 def my_dir; '/app'; end
@@ -70,23 +68,6 @@ def check_required_env_vars
     var = ENV[name]
     failed [ "#{name} environment-variable not set "] if var.nil?
   end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def create_src_dir_volume
-  assert_shell "docker volume create --name=#{volume_name}"
-  command = [
-    'docker create',
-      '--interactive',
-      '--tty',
-      "--volume=#{volume_name}:/repo",
-        'cyberdojo/runner',
-          'sh'
-  ].join(space)
-  cid = assert_shell(command)
-  assert_shell "docker cp #{src_dir}/. #{cid}:/repo"
-  assert_shell "docker rm -f #{cid}"
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -163,7 +144,6 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_env_vars
-create_src_dir_volume
 
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
@@ -188,5 +168,4 @@ ensure
   wait_till_exited 'cyber-dojo-runner'
   wait_till_exited 'cyber-dojo-runner-stateless'
   wait_till_exited 'cyber-dojo-image-builder'
-  shell("docker volume rm #{volume_name}")
 end

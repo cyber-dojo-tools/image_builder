@@ -6,24 +6,48 @@
 # language's .travis.yml script.
 
 readonly SRC_DIR=${1:-`pwd`}
+readonly NETWORK=src_dir_network
+readonly NAME=src_dir_container
 
 if [ ! -d "${SRC_DIR}" ]; then
   echo "${SRC_DIR} does not exist"
   exit 1
 fi
 
+# I create a data-volume-container which holds src-dir.
+# By default this lives on one network and the containers
+# created inside image_builder (from its docker-compose.yml file)
+# live on a different network, and thus the later won't be
+# to connect to the former. To solve this I'm putting the src-dir
+# data-volume-container into its own dedicated network.
+
+docker network create ${NETWORK}
+
+docker create \
+  --volume=${SRC_DIR}:${SRC_DIR} \
+  --name=${NAME} \
+  --network=${NETWORK} \
+  cyberdojofoundation/image_builder \
+    /bin/true
+
 docker run \
   --user=root \
+  --network=${NETWORK} \
   --rm \
   --interactive \
   --tty \
   --env DOCKER_USERNAME \
   --env DOCKER_PASSWORD \
   --env SRC_DIR=${SRC_DIR} \
-  --volume=${SRC_DIR}:${SRC_DIR}:ro \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
     cyberdojofoundation/image_builder \
       /app/build_image.rb
 
-#exit_status=$?
-#echo "exit_status=${exit_status}"
+exit_status=$?
+
+docker rm --force --volumes ${NAME}
+
+docker network rm ${NETWORK}
+
+echo "exit_status=${exit_status}"
+exit ${exit_status}
