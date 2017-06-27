@@ -4,9 +4,9 @@ set -e
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
 # good-language
-./run_build_image.sh ${MY_DIR}/test/haskell-7.6.3
+./run_build_image.sh ${MY_DIR}/test/elixir-1.2.5
 # good-test-framework
-./run_build_image.sh ${MY_DIR}/test/haskell-hunit
+./run_build_image.sh ${MY_DIR}/test/elixir-exunit
 
 # TODO: shunit2
 #
