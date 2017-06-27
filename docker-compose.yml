@@ -20,7 +20,7 @@ services:
       - default
       - src_dir_network
     volumes_from:
-      - container:src_dir_container
+      - container:src_dir_container:ro
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
