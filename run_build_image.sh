@@ -29,14 +29,14 @@ fi
 # to connect to the former. To solve this I'm putting the src-dir
 # data-volume-container into its own dedicated network.
 
-docker network create ${NETWORK}
+docker network create ${NETWORK} > /dev/null
 
 docker create \
   --volume=${BASE_DIR}:${BASE_DIR} \
   --name=${NAME} \
   --network=${NETWORK} \
   cyberdojofoundation/image_builder \
-    /bin/true
+    /bin/true > /dev/null
 
 docker run \
   --user=root \
