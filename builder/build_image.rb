@@ -142,7 +142,7 @@ end
 def trigger_dependent_git_repos
   banner __method__.to_s
   my_dependents.each do |dependent|
-    puts "notify:#{dependent[2]}"
+    puts "TODO: notify:#{dependent[2]}"
     # TODO:
     # NB: I can stick with the javascript based notification
     # I'm using although I should upgrade to using a POST which
@@ -155,7 +155,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_files_exist
-docker_login
+#docker_login
 check_my_dependency
 build_the_image
 
@@ -167,6 +167,6 @@ if test_framework_repo?
   check_saved_traffic_lights_filesets
 end
 
-push_the_image_to_dockerhub
+#push_the_image_to_dockerhub
 trigger_dependent_git_repos
 
