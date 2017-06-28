@@ -32,6 +32,8 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def success; 0; end
+
 def docker_username_env_var; 'DOCKER_USERNAME'; end
 def docker_password_env_var; 'DOCKER_PASSWORD'; end
 
