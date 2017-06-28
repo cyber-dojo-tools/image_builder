@@ -70,7 +70,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def check_start_point_can_be_created
-  # TODO: Try the curl several times before failing.
+  # TODO: Try the curl several times before failing?
   banner __method__.to_s
   script = 'cyber-dojo'
   url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
@@ -97,7 +97,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_start_point_src_is_red_runner_stateless
+def check_start_point_src_is_red_using_runner_stateless
   banner __method__.to_s
   runner = RunnerServiceStateless.new
   sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds)
@@ -107,7 +107,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_start_point_src_is_red_runner_statefull
+def check_start_point_src_is_red_using_runner_statefull
   banner __method__.to_s
   runner = RunnerServiceStatefull.new
   runner.kata_new(image_name, kata_id)
@@ -126,8 +126,10 @@ def check_saved_traffic_lights_filesets
   # If /6 * 9/ can be found in the start-point then
   #   check that /6 * 7/ is green
   #   check that /6 * 9sdsd/ is amber
+
   # If traffic_lights/ sub-dirs exist, test them too
   #   ... assume they contain complete filesets?
+
   # If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
   # then treat that as an error?
   banner_end
@@ -149,16 +151,15 @@ def trigger_dependent_git_repos
   banner __method__.to_s
   my_dependents.each do |dependent|
     puts "TODO: notify:#{dependent[2]}"
-    # TODO:
-    # NB: I can stick with the javascript based notification
-    # I'm using although I should upgrade to using a POST which
-    # the travis API v3 now allows. See
-    # https://docs.travis-ci.com/user/triggering-builds/
+    # TODO: If running locally, use BASE_DIR
+    # TODO: If running on Travis, git clone the repo
   end
   banner_end
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# TODO: keep record of all images (in chain) successfully built.
+# TODO: push images to dockerhub at end (ensuring consistent set)
 
 check_required_files_exist
 docker_login if running_on_travis?
@@ -168,8 +169,8 @@ build_the_image
 if test_framework_repo?
   check_images_red_amber_green_lambda_file
   check_start_point_can_be_created
-  check_start_point_src_is_red_runner_stateless
-  check_start_point_src_is_red_runner_statefull
+  check_start_point_src_is_red_using_runner_stateless
+  check_start_point_src_is_red_using_runner_statefull
   check_saved_traffic_lights_filesets
 end
 
