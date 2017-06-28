@@ -16,10 +16,10 @@ fi
 
 if [ -z "${TRAVIS}" ]; then
   echo "Running locally"
-  readonly BASE_DIR=${SRC_DIR}
+  readonly BASE_DIR=$(dirname ${SRC_DIR})
 else
   echo 'Running on TRAVIS'
-  readonly BASE_DIR=$(dirname ${SRC_DIR})
+  readonly BASE_DIR=${SRC_DIR}
 fi
 
 # I create a data-volume-container which holds src-dir.

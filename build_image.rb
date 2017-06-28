@@ -9,7 +9,6 @@ def success; 0; end
 def space; ' '; end
 def my_dir; File.dirname(__FILE__); end
 
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def shell(command)
