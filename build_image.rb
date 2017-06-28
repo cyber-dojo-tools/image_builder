@@ -59,24 +59,6 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def running_on_travis?
-  ENV['TRAVIS'] == 'true'
-end
-
-def check_required_env_vars
-  if running_on_travis?
-    env_vars = [ 'SRC_DIR', 'DOCKER_USERNAME', 'DOCKER_PASSWORD' ]
-  else
-    env_vars = [ 'SRC_DIR' ]
-  end
-  env_vars.each do |name|
-    var = ENV[name]
-    failed [ "#{name} environment-variable not set "] if var.nil?
-  end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 def docker_compose(command)
   assert_shell([
     'docker-compose',
@@ -147,8 +129,6 @@ def exited?(service_name)
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-check_required_env_vars
 
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
