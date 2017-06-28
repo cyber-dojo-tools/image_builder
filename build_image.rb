@@ -3,12 +3,12 @@
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
-#TODO: get my_dir programmatically
 #TODO: add --verbose option which prints shell-log
 
 def success; 0; end
 def space; ' '; end
-def my_dir; '/app'; end
+def my_dir; File.dirname(__FILE__); end
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
