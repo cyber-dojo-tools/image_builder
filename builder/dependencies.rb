@@ -35,18 +35,33 @@
 
 # TODO: get this information dynamically
 # TODO: if running locally, use glob of SRC_DIR/..
-# TODO: if running on Travis, use github api to list orgs repos
-# curl -i https://api.github.com/orgs/cyber-dojo-languages/repos
+# TODO: if running on Travis, use github api to curl list orgs repos
+#
+# $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
+# $ curl -i ${URL}
+#
 # Response has a json body
 # [
 #   { "id": 91954027, "name": "elm-test", ... },
 #   { "id": 91954655, "name": "haskell-hunit", ... },
 #   ...
 # ]
+#
 # Then will need to try and get 3 files per repo
-#    docker/Dockerfile
-#    docker/image_name.json
-#    start_point/manifest.json
+#    o) docker/Dockerfile
+#    o) docker/image_name.json
+#    o) start_point/manifest.json
+#
+# This will probably quickly hit the github rate-limit of 60 per hour
+# for non-authenticated access. To increase the rate-limit to 5000
+# I need to authenticate
+#
+# $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
+# $ curl -i -u "user:password" ${URL}
+#
+# where the Travis repo for cyber-dojo-languages/image_builder
+# will need to store GITHUB_PASSWORD as environment-variable
+# which will need to be passed into the docker-compose run.
 
 def dependencies
   cdl = 'https://github.com/cyber-dojo-languages'
