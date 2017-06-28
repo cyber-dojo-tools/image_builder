@@ -56,6 +56,13 @@ class Builder
 
   # - - - - - - - - - - - - - - - - -
 
+  def image_name
+    # As it appears in the relevant json file.
+    filename = language_repo_marker_file if language_repo?
+    filename = test_framework_repo_marker_file if test_framework_repo?
+    json_image_name(filename)
+  end
+
   def build_the_image
     banner_begin
     assert_system "cd #{docker_dir} && docker build --tag #{image_name} ."
@@ -107,7 +114,7 @@ class Builder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_is_red_using_runner_statefull
-    banner __method__.to_s
+    banner_begin
     runner = RunnerServiceStatefull.new
     runner.kata_new(image_name, kata_id)
     runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
@@ -134,16 +141,6 @@ class Builder
     banner_end
   end
 
-  # - - - - - - - - - - - - - - - - -
-
-  def push_the_image_to_dockerhub
-    banner_begin
-    print([ "pushing #{image_name}" ], STDOUT)
-    assert_system "docker push #{image_name}"
-    assert_system 'docker logout'
-    banner_end
-  end
-
   private
 
   def repo_url
@@ -166,13 +163,6 @@ class Builder
     lines = dockerfile.split("\n")
     from_line = lines.find { |line| line.start_with? 'FROM' }
     from_line.split[1].strip
-  end
-
-  def image_name
-    # As it appears in the relevant json file.
-    filename = language_repo_marker_file if language_repo?
-    filename = test_framework_repo_marker_file if test_framework_repo?
-    json_image_name(filename)
   end
 
   # - - - - - - - - - - - - - - - - -

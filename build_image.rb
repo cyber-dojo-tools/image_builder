@@ -32,11 +32,13 @@ def assert_shell(command)
 end
 
 def assert_system(command)
-  # shows command's interactive output
+  # does show command's interactive output but
+  # does not show the command in failed diagnostic
+  # because it contains DOCKER_PASSWORD
   system(command)
   status = $?.exitstatus
   unless status == success
-    failed [ command, "exit_status == #{status}" ]
+    failed [ "exit_status == #{status}" ]
   end
 end
 

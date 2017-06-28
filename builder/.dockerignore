@@ -6,11 +6,12 @@
 
 #-----!Except these files
 
+!build_image.rb
+
 !builder.rb
 !dependencies.rb
+!dockerhub.rb
 !http_service.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb
 
-!build_image.rb
-!docker_login.rb

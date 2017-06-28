@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative 'builder'
-require_relative 'docker_login'
+require_relative 'dockerhub'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13,7 +13,7 @@ end
 # TODO: keep record of all images (in chain) successfully built.
 # TODO: push all images to dockerhub at end (ensuring consistent set)
 
-docker_login if running_on_travis?
+Dockerhub.login if running_on_travis?
 
 builder = Builder.new(ENV['SRC_DIR'])
 builder.check_my_dependency
@@ -25,5 +25,6 @@ if builder.test_framework_repo?
   builder.check_start_point_src_is_red_using_runner_stateless
   builder.check_start_point_src_is_red_using_runner_statefull
   builder.check_saved_traffic_lights_filesets
-  builder.push_the_image_to_dockerhub if running_on_travis?
 end
+
+Dockerhub.push(builder.image_name) if running_on_travis?
