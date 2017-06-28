@@ -44,6 +44,7 @@ docker run \
   --rm \
   --interactive \
   --tty \
+  --env TRAVIS \
   --env DOCKER_USERNAME \
   --env DOCKER_PASSWORD \
   --env SRC_DIR=${SRC_DIR} \

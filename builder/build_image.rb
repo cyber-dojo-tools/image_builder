@@ -21,6 +21,12 @@ def max_seconds; 10; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def running_on_travis?
+  ENV['TRAVIS'] == 'true'
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def build_the_image
   banner __method__.to_s
   assert_system "cd #{docker_dir} && docker build --tag #{image_name} ."
@@ -155,7 +161,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 check_required_files_exist
-#docker_login
+docker_login if running_on_travis?
 check_my_dependency
 build_the_image
 
@@ -167,6 +173,6 @@ if test_framework_repo?
   check_saved_traffic_lights_filesets
 end
 
-#push_the_image_to_dockerhub
+push_the_image_to_dockerhub if running_on_travis?
 trigger_dependent_git_repos
 

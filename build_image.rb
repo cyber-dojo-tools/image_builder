@@ -7,13 +7,7 @@
 #TODO: add --verbose option which prints shell-log
 
 def success; 0; end
-
-def docker_username; ENV['DOCKER_USERNAME']; end
-def docker_password; ENV['DOCKER_PASSWORD']; end
-def src_dir        ; ENV['SRC_DIR'        ]; end
-
 def space; ' '; end
-
 def my_dir; '/app'; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -63,8 +57,17 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def running_on_travis?
+  ENV['TRAVIS'] == 'true'
+end
+
 def check_required_env_vars
-  [ 'DOCKER_USERNAME', 'DOCKER_PASSWORD', 'SRC_DIR' ].each do |name|
+  if running_on_travis?
+    env_vars = [ 'SRC_DIR', 'DOCKER_USERNAME', 'DOCKER_PASSWORD' ]
+  else
+    env_vars = [ 'SRC_DIR' ]
+  end
+  env_vars.each do |name|
     var = ENV[name]
     failed [ "#{name} environment-variable not set "] if var.nil?
   end
@@ -156,9 +159,10 @@ begin
     'docker-compose',
       "--file #{my_dir}/docker-compose.yml",
       'run',
-        "-e DOCKER_USERNAME=#{docker_username}",
-        "-e DOCKER_PASSWORD=#{docker_password}",
-        "-e SRC_DIR=#{src_dir}",
+        "-e DOCKER_USERNAME=#{ENV['DOCKER_USERNAME']}",
+        "-e DOCKER_PASSWORD=#{ENV['DOCKER_PASSWORD']}",
+        "-e TRAVIS=#{ENV['TRAVIS']}",
+        "-e SRC_DIR=#{ENV['SRC_DIR']}",
           'image_builder_inner',
             '/app/build_image.rb'
     ].join(space)
