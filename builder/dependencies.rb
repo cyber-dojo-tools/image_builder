@@ -33,6 +33,21 @@
 # start-points do not have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+# TODO: get this information dynamically
+# TODO: if running locally, use glob of SRC_DIR/..
+# TODO: if running on Travis, use github api to list orgs repos
+# curl -i https://api.github.com/orgs/cyber-dojo-languages/repos
+# Response has a json body
+# [
+#   { "id": 91954027, "name": "elm-test", ... },
+#   { "id": 91954655, "name": "haskell-hunit", ... },
+#   ...
+# ]
+# Then will need to try and get 3 files per repo
+#    docker/Dockerfile
+#    docker/image_name.json
+#    start_point/manifest.json
+
 def dependencies
   cdl = 'https://github.com/cyber-dojo-languages'
   cdf = 'cyberdojofoundation'
