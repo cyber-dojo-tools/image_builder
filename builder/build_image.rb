@@ -1,23 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative 'assert'
-require_relative 'check_my_dependency'
-require_relative 'check_required_files_exist'
-require_relative 'dir_names'
+require_relative 'builder'
 require_relative 'docker_login'
-require_relative 'http_service'
-require_relative 'logger'
-require_relative 'runner_service_statefull'
-require_relative 'runner_service_stateless'
-require 'json'
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def success; 0; end
-def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
-def kata_id; '6F4F4E4759'; end
-def avatar_name; 'salmon'; end
-def max_seconds; 10; end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -26,154 +10,20 @@ def running_on_travis?
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def build_the_image
-  banner __method__.to_s
-  assert_system "cd #{docker_dir} && docker build --tag #{image_name} ."
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def assert_rag(expected_colour, sss, diagnostic)
-  actual_colour = call_rag_lambda(sss)
-  unless expected_colour == actual_colour
-    failed [ diagnostic,
-      "expected_colour == #{expected_colour}",
-      "  actual_colour == #{actual_colour}",
-      "stdout == #{sss['stdout']}",
-      "stderr == #{sss['stderr']}",
-      "status == #{sss['status']}"
-    ]
-  end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def call_rag_lambda(sss)
-  # TODO: improve diagnostics if cat/eval/call fails
-  cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
-  src = assert_backtick cat_rag_filename
-  fn = eval(src)
-  fn.call(sss['stdout'], sss['stderr'], sss['status'])
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_images_red_amber_green_lambda_file
-  banner __method__.to_s
-  sss = { 'stdout' => 'sdd', 'stderr' => 'sdsd', 'status' => 42 }
-  assert_rag(:amber, sss, "#{rag_filename} sanity check")
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_start_point_can_be_created
-  # TODO: Try the curl several times before failing?
-  banner __method__.to_s
-  script = 'cyber-dojo'
-  url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-  assert_system "curl -O #{url}"
-  assert_system "chmod +x #{script}"
-  name = 'checking'
-  assert_system "./#{script} start-point create #{name} --git=#{repo_url}"
-  # TODO: ensure always removed
-  assert_system "./#{script} start-point rm #{name}"
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def start_point_visible_files
-  # start-point has already been verified
-  manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
-  visible_files = {}
-  manifest['visible_filenames'].each do |filename|
-    visible_files[filename] = IO.read(start_point_dir + '/' + filename)
-  end
-  visible_files
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_start_point_src_is_red_using_runner_stateless
-  banner __method__.to_s
-  runner = RunnerServiceStateless.new
-  sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds)
-  assert_rag(:red, sss, "dir == #{start_point_dir}")
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_start_point_src_is_red_using_runner_statefull
-  banner __method__.to_s
-  runner = RunnerServiceStatefull.new
-  runner.kata_new(image_name, kata_id)
-  runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
-  sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds)
-  runner.avatar_old(image_name, kata_id, avatar_name)
-  runner.kata_old(image_name, kata_id)
-  assert_rag(:red, sss, "dir == #{start_point_dir}")
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def check_saved_traffic_lights_filesets
-  banner __method__.to_s
-  # If /6 * 9/ can be found in the start-point then
-  #   check that /6 * 7/ is green
-  #   check that /6 * 9sdsd/ is amber
-
-  # If traffic_lights/ sub-dirs exist, test them too
-  #   ... assume they contain complete filesets?
-
-  # If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
-  # then treat that as an error?
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def push_the_image_to_dockerhub
-  banner __method__.to_s
-  print([ "pushing #{image_name}" ], STDOUT)
-  assert_system "docker push #{image_name}"
-  assert_system 'docker logout'
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def trigger_dependent_git_repos
-  banner __method__.to_s
-  my_dependents.each do |dependent|
-    puts "TODO: notify:#{dependent[2]}"
-    # TODO: If running locally, use BASE_DIR
-    # TODO: If running on Travis, git clone the repo
-  end
-  banner_end
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO: keep record of all images (in chain) successfully built.
-# TODO: push images to dockerhub at end (ensuring consistent set)
+# TODO: push all images to dockerhub at end (ensuring consistent set)
 
-check_required_files_exist
 docker_login if running_on_travis?
-check_my_dependency
-build_the_image
 
-if test_framework_repo?
-  check_images_red_amber_green_lambda_file
-  check_start_point_can_be_created
-  check_start_point_src_is_red_using_runner_stateless
-  check_start_point_src_is_red_using_runner_statefull
-  check_saved_traffic_lights_filesets
+builder = Builder.new(ENV['SRC_DIR'])
+builder.check_my_dependency
+builder.check_required_files_exist
+builder.build_the_image
+if builder.test_framework_repo?
+  builder.check_images_red_amber_green_lambda_file
+  builder.check_start_point_can_be_created
+  builder.check_start_point_src_is_red_using_runner_stateless
+  builder.check_start_point_src_is_red_using_runner_statefull
+  builder.check_saved_traffic_lights_filesets
+  builder.push_the_image_to_dockerhub if running_on_travis?
 end
-
-push_the_image_to_dockerhub if running_on_travis?
-trigger_dependent_git_repos
-

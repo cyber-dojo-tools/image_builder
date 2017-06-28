@@ -6,16 +6,11 @@
 
 #-----!Except these files
 
-!assert.rb
-!build_image.rb
-!check_my_dependency.rb
-!check_required_files_exist.rb
-!dir_names.rb
-!docker_login.rb
+!builder.rb
+!dependencies.rb
 !http_service.rb
-!logger.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb
 
-# smoke test
-!spike-curl-run.sh
+!build_image.rb
+!docker_login.rb
