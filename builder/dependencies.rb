@@ -56,11 +56,12 @@
 # for non-authenticated access. To increase the rate-limit to 5000
 # I need to authenticate
 #
+# # curl -i -u "user:token" ${URL}
 # $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
-# $ curl -i -u "user:password" ${URL}
+# $ curl -i -u "travisuser:${GITHUB_TOKEN}" ${URL}
 #
 # where the Travis repo for cyber-dojo-languages/image_builder
-# will need to store GITHUB_PASSWORD as environment-variable
+# will need to store GITHUB_TOKEN as a secure environment-variable
 # which will need to be passed into the docker-compose run.
 
 def dependencies
