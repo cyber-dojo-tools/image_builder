@@ -37,9 +37,9 @@ require 'json'
 # TODO: if running on Travis, use github api to curl list orgs repos
 #
 # $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
-# $ curl -i ${URL}
+# $ curl ${URL}
 #
-# Response has a json body
+# Response is a json body
 # [
 #   { "id": 91954027, "name": "elm-test", ... },
 #   { "id": 91954655, "name": "haskell-hunit", ... },
@@ -51,13 +51,12 @@ require 'json'
 #    o) docker/image_name.json
 #    o) start_point/manifest.json
 #
-# This will probably quickly hit the github rate-limit of 60 per hour
+# The curl will probably quickly hit the github rate-limit of 60 per hour
 # for non-authenticated access. To increase the rate-limit to 5000
 # I need to authenticate
 #
-# # curl -i -u "user:token" ${URL}
 # $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
-# $ curl -i -u "travisuser:${GITHUB_TOKEN}" ${URL}
+# $ curl --user "travisuser:${GITHUB_TOKEN}" ${URL}
 #
 # where the Travis repo for cyber-dojo-languages/image_builder
 # will need to store GITHUB_TOKEN as a secure environment-variable
@@ -127,5 +126,21 @@ end
 
 def print(lines, stream)
   lines.each { |line| stream.puts line }
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def get_repo_names
+  url = 'https://api.github.com/orgs/cyber-dojo-languages/repos'
+  github_token = ENV['GITHUB_TOKEN']
+  command = [
+    'curl',
+    "--user 'travisuser:#{github_token}'",
+    "--header 'Accept: application/vnd.github.v3.full+json'",
+    url
+  ].join(' ')
+  response = `#{command}`
+  json = JSON.parse(response)
+  json.collect { |repo| repo['name'] }
 end
 

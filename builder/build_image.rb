@@ -10,6 +10,13 @@ def running_on_travis?
   ENV['TRAVIS'] == 'true'
 end
 
+if running_on_travis?
+  repo_names = get_repo_names
+  puts "<repo_names>"
+  puts repo_names
+  puts "</repo_names>"
+end
+
 #puts dependencies.inspect
 
 src_dir = ENV['SRC_DIR']
