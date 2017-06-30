@@ -11,30 +11,9 @@ class Builder
 
   attr_reader :src_dir, :image_name
 
-  def check_required_files_exist
-    banner_begin
-    if !docker_image_src?
-      failed [ "#{docker_marker_file} must exist" ]
-    end
-    either_or = [
-      "#{language_repo_marker_file} must exist",
-      'or',
-      "#{test_framework_repo_marker_file} must exist"
-    ]
-    if !language_repo? && !test_framework_repo?
-      failed either_or + [ 'neither do.' ]
-    end
-    if language_repo? && test_framework_repo?
-      failed either_or + [ 'but not both.' ]
-    end
-    banner_end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def build_the_image
     banner_begin
-    assert_system "cd #{docker_dir} && docker build --tag #{image_name} ."
+    assert_system "cd #{src_dir}/docker && docker build --tag #{image_name} ."
     banner_end
   end
 
@@ -133,30 +112,6 @@ class Builder
 
   # - - - - - - - - - - - - - - - - -
 
-  def docker_image_src?
-    File.exists? docker_marker_file
-  end
-
-  def docker_marker_file
-    "#{docker_dir}/Dockerfile"
-  end
-
-  def docker_dir
-    src_dir + '/docker'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def language_repo?
-    File.exists? language_repo_marker_file
-  end
-
-  def language_repo_marker_file
-    "#{docker_dir}/image_name.json"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def start_point_visible_files
     # start-point has already been verified
     manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
@@ -223,10 +178,6 @@ class Builder
   end
 
   # - - - - - - - - - - - - - - - - -
-
-  def quoted(s)
-    '"' + s + '"'
-  end
 
   def success
     0

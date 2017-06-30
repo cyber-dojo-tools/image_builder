@@ -1,3 +1,4 @@
+require 'json'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Each triple is
@@ -75,24 +76,62 @@ def local_dependencies
       lines = IO.read(dockerfile).split("\n")
       from_line = lines.find { |line| line.start_with? 'FROM' }
       from = from_line.split[1].strip
-      image_name_json = base_dir + '/' + entry + '/docker/image_name.json'
-      manifest_json = base_dir + '/' + entry + '/start_point/manifest.json'
-      if File.exists?(image_name_json)
-        json = JSON.parse(IO.read(image_name_json))
-      end
-      if File.exists?(manifest_json)
-        json = JSON.parse(IO.read(manifest_json))
-      end
-      image_name = json['image_name']
+      image_name = get_image_name(base_dir + '/' + entry)
       triples[base_dir + '/' + entry] = {
         'from' => from,
-        'image_name' => image_name
+        'image_name' => get_image_name(base_dir + '/' + entry)
       }
     end
   end
   triples
 end
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def get_image_name(dir)
+  language_marker_file = dir + '/docker/image_name.json'
+  test_framework_marker_file = dir + '/start_point/manifest.json'
+
+  either_or = [
+    "#{language_marker_file} must exist",
+    'or',
+    "#{test_framework_marker_file} must exist"
+  ]
+
+  is_language_dir = File.exists? language_marker_file
+  is_test_framework_dir = File.exists? test_framework_marker_file
+
+  if !is_language_dir && !is_test_framework_dir
+    failed either_or + [ 'neither do.' ]
+  end
+  if is_language_dir && is_test_framework_dir
+    failed either_or + [ 'but not both.' ]
+  end
+  if is_language_dir
+    file = language_marker_file
+  end
+  if is_test_framework_dir
+    file = test_framework_marker_file
+  end
+  JSON.parse(IO.read(file))['image_name']
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def failed(lines)
+  log(['FAILED'] + lines)
+  exit 1
+end
+
+def log(lines)
+  print(lines, STDERR)
+end
+
+def print(lines, stream)
+  lines.each { |line| stream.puts line }
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def dependencies
   return local_dependencies if !running_on_travis?
