@@ -10,11 +10,14 @@ def running_on_travis?
   ENV['TRAVIS'] == 'true'
 end
 
-puts dependencies
+d = dependencies
+#puts d.inspect
+src_dir = ENV['SRC_DIR']
+triple = d.find { |entry| entry[0] == src_dir }
 
 Dockerhub.login if running_on_travis?
 
-builder = Builder.new(ENV['SRC_DIR'])
+builder = Builder.new(triple[0], triple[2])
 builder.check_required_files_exist
 builder.build_the_image
 if builder.test_framework_repo?

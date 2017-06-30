@@ -22,11 +22,11 @@ else
   readonly BASE_DIR=${SRC_DIR}
 fi
 
-# I create a data-volume-container which holds src-dir.
+# I create a data-volume-container which holds src-dir/..
 # By default this lives on one network and the containers
 # created inside image_builder (from its docker-compose.yml file)
-# live on a different network, and thus the later won't be
-# to connect to the former. To solve this I'm putting the src-dir
+# live on a different network, and thus the later won't be able
+# to connect to the former. To solve this I'm putting the src-dir/..
 # data-volume-container into its own dedicated network.
 
 docker network create ${NETWORK} > /dev/null

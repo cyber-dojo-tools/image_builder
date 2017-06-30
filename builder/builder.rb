@@ -4,9 +4,12 @@ require 'json'
 
 class Builder
 
-  def initialize(src_dir)
+  def initialize(src_dir, image_name)
     @src_dir = src_dir
+    @image_name = image_name
   end
+
+  attr_reader :src_dir, :image_name
 
   def check_required_files_exist
     banner_begin
@@ -28,13 +31,6 @@ class Builder
   end
 
   # - - - - - - - - - - - - - - - - -
-
-  def image_name
-    # As it appears in the relevant json file.
-    filename = language_repo_marker_file if language_repo?
-    filename = test_framework_repo_marker_file if test_framework_repo?
-    json_image_name(filename)
-  end
 
   def build_the_image
     banner_begin
@@ -66,10 +62,9 @@ class Builder
     url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
     assert_system "curl -O #{url}"
     assert_system "chmod +x #{script}"
-    name = 'checking'
+    name = 'start-point-create-check'
+    system "./#{script} start-point rm #{name} >& /dev/null"
     assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
-    # TODO: ensure always removed
-    assert_system "./#{script} start-point rm #{name}"
     banner_end
   end
 
@@ -114,17 +109,6 @@ class Builder
   end
 
   private
-
-  attr_reader :src_dir
-
-  def json_image_name(filename)
-    # TODO: better diagnostics on failure
-    manifest = IO.read(filename)
-    json = JSON.parse(manifest)
-    json['image_name']
-  end
-
-  # - - - - - - - - - - - - - - - - -
 
   def assert_rag(expected_colour, sss, diagnostic)
     actual_colour = call_rag_lambda(sss)
