@@ -18,7 +18,6 @@ args = dependencies[src_dir]
 Dockerhub.login if running_on_travis?
 
 builder = Builder.new(src_dir, args)
-#builder.check_required_files_exist
 builder.build_the_image
 if builder.test_framework_repo?
   builder.check_images_red_amber_green_lambda_file
