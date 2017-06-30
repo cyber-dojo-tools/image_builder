@@ -1,5 +1,6 @@
 services: docker
 language: generic
+sudo: required
 
 script:
     - ./pipe_build_test_push.sh
