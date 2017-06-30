@@ -142,8 +142,9 @@ begin
       'run',
         "-e DOCKER_USERNAME=#{ENV['DOCKER_USERNAME']}",
         "-e DOCKER_PASSWORD=#{ENV['DOCKER_PASSWORD']}",
-        "-e TRAVIS=#{ENV['TRAVIS']}",
+        "-e GITHUB_TOKEN=#{ENV['GITHUB_TOKEN']}",
         "-e SRC_DIR=#{ENV['SRC_DIR']}",
+        "-e TRAVIS=#{ENV['TRAVIS']}",
           'image_builder_inner',
             '/app/build_image.rb'
     ].join(space)

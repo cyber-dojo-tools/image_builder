@@ -44,10 +44,11 @@ docker run \
   --rm \
   --interactive \
   --tty \
-  --env TRAVIS \
   --env DOCKER_USERNAME \
   --env DOCKER_PASSWORD \
+  --env GITHUB_TOKEN \
   --env SRC_DIR=${SRC_DIR} \
+  --env TRAVIS \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
     cyberdojofoundation/image_builder \
       /app/build_image.rb
