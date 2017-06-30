@@ -96,7 +96,7 @@ end
 
 
 def dependencies
-  return get_dependencies if !running_on_travis?
+  return local_dependencies if !running_on_travis?
   cdl = 'https://github.com/cyber-dojo-languages'
   cdf = 'cyberdojofoundation'
   [

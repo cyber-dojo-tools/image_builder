@@ -67,8 +67,7 @@ class Builder
     assert_system "curl -O #{url}"
     assert_system "chmod +x #{script}"
     name = 'checking'
-    # TODO: use --dir instead of --git
-    assert_system "./#{script} start-point create #{name} --git=#{repo_url}"
+    assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
     # TODO: ensure always removed
     assert_system "./#{script} start-point rm #{name}"
     banner_end
@@ -100,7 +99,7 @@ class Builder
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_saved_traffic_lights_filesets
+  def check_amber_green_filesets
     banner_begin
     # If /6 * 9/ can be found in the start-point then
     #   check that /6 * 7/ is green
@@ -116,21 +115,7 @@ class Builder
 
   private
 
-  def repo_url
-    cdl = 'https://github.com/cyber-dojo-languages'
-    # I'd like the repo-name to be named, eg,
-    #   ".../alpine-language-base:3.4
-    #  but github does not allow a colon in the repo name
-    #  so I'm using
-    #   ".../alpine-language-base-3.4
-    #
-    # Each repo has a travis script which checks that its
-    # actual dependency (from its source) exactly
-    # matches its entry in the dependencies list.
-    cdl + '/' + @src_dir.split('/')[-1]
-  end
-
-  # - - - - - - - - - - - - - - - - -
+  attr_reader :src_dir
 
   def json_image_name(filename)
     # TODO: better diagnostics on failure
@@ -173,7 +158,7 @@ class Builder
   end
 
   def docker_dir
-    root_dir + '/docker'
+    src_dir + '/docker'
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -203,13 +188,7 @@ class Builder
   end
 
   def start_point_dir
-    root_dir + '/start_point'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def root_dir
-    @src_dir
+    src_dir + '/start_point'
   end
 
   # - - - - - - - - - - - - - - - - -
