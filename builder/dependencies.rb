@@ -64,7 +64,39 @@
 # will need to store GITHUB_TOKEN as a secure environment-variable
 # which will need to be passed into the docker-compose run.
 
+
+def local_dependencies
+  # I should be able to use Dir.glob() here but doesn't seem to work?!
+  triples = []
+  base_dir = File.expand_path("#{ENV['SRC_DIR']}/..", '/')
+  Dir.entries(base_dir).each do |entry|
+    dockerfile = base_dir + '/' + entry + '/docker/Dockerfile'
+    if File.exists?(dockerfile)
+      lines = IO.read(dockerfile).split("\n")
+      from_line = lines.find { |line| line.start_with? 'FROM' }
+      from = from_line.split[1].strip
+      image_name_json = base_dir + '/' + entry + '/docker/image_name.json'
+      manifest_json = base_dir + '/' + entry + '/start_point/manifest.json'
+      if File.exists?(image_name_json)
+        json = JSON.parse(IO.read(image_name_json))
+      end
+      if File.exists?(manifest_json)
+        json = JSON.parse(IO.read(manifest_json))
+      end
+      image_name = json['image_name']
+      triples << [
+        base_dir + '/' + entry,
+        from,
+        image_name
+      ]
+    end
+  end
+  triples
+end
+
+
 def dependencies
+  return get_dependencies if !running_on_travis?
   cdl = 'https://github.com/cyber-dojo-languages'
   cdf = 'cyberdojofoundation'
   [

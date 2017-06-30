@@ -1,4 +1,3 @@
-require_relative 'dependencies'
 require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
 require 'json'
@@ -8,32 +7,6 @@ class Builder
   def initialize(src_dir)
     @src_dir = src_dir
   end
-
-  def check_my_dependency
-    banner_begin
-    found = dependencies.include?([ repo_url, from, image_name ])
-    unless found
-      failed [
-        'cannot find dependency entry for',
-        "[ #{quoted(repo_url)},",
-        "  #{quoted(from)},",
-        "  #{quoted(image_name)}",
-        ']'
-      ]
-    end
-    my_dependents = dependencies.select do |triple|
-      triple[1] == image_name
-    end
-    unless my_dependents == []
-      #if github_token == ''
-      #  warning ["#{github_token_env_var} env-var not set" ]
-      #  failed ["#{github_token_env_var} env-var not set" ]
-      #end
-    end
-    banner_end
-  end
-
-  # - - - - - - - - - - - - - - - - -
 
   def check_required_files_exist
     banner_begin
@@ -155,14 +128,6 @@ class Builder
     # actual dependency (from its source) exactly
     # matches its entry in the dependencies list.
     cdl + '/' + @src_dir.split('/')[-1]
-  end
-
-  def from
-    # As it appears in the image's Dockerfile
-    dockerfile = IO.read(docker_marker_file)
-    lines = dockerfile.split("\n")
-    from_line = lines.find { |line| line.start_with? 'FROM' }
-    from_line.split[1].strip
   end
 
   # - - - - - - - - - - - - - - - - -
