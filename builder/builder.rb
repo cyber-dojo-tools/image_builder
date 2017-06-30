@@ -11,10 +11,23 @@ class Builder
 
   attr_reader :src_dir, :image_name
 
+  def build_and_test_image
+    banner('=', src_dir)
+    build_the_image
+    if test_framework_repo?
+      check_images_red_amber_green_lambda_file
+      check_start_point_can_be_created
+      check_start_point_src_is_red_using_runner_stateless
+      check_start_point_src_is_red_using_runner_statefull
+      check_amber_green_filesets
+    end
+  end
+
+  private
+
   def build_the_image
-    banner_begin
+    banner
     assert_system "cd #{src_dir}/docker && docker build --tag #{image_name} ."
-    banner_end
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -26,17 +39,16 @@ class Builder
   # - - - - - - - - - - - - - - - - -
 
   def check_images_red_amber_green_lambda_file
-    banner_begin
+    banner
     sss = { 'stdout' => 'sdd', 'stderr' => 'sdsd', 'status' => 42 }
     assert_rag(:amber, sss, "#{rag_filename} sanity check")
-    banner_end
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_can_be_created
     # TODO: Try the curl several times before failing?
-    banner_begin
+    banner
     script = 'cyber-dojo'
     url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
     assert_system "curl -O #{url}"
@@ -44,23 +56,21 @@ class Builder
     name = 'start-point-create-check'
     system "./#{script} start-point rm #{name} 2>&1 > /dev/null"
     assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
-    banner_end
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_is_red_using_runner_stateless
-    banner_begin
+    banner
     runner = RunnerServiceStateless.new
     sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds)
     assert_rag(:red, sss, "dir == #{start_point_dir}")
-    banner_end
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_is_red_using_runner_statefull
-    banner_begin
+    banner
     runner = RunnerServiceStatefull.new
     runner.kata_new(image_name, kata_id)
     runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
@@ -68,13 +78,12 @@ class Builder
     runner.avatar_old(image_name, kata_id, avatar_name)
     runner.kata_old(image_name, kata_id)
     assert_rag(:red, sss, "dir == #{start_point_dir}")
-    banner_end
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def check_amber_green_filesets
-    banner_begin
+    banner
     # If /6 * 9/ can be found in the start-point then
     #   check that /6 * 7/ is green
     #   check that /6 * 9sdsd/ is amber
@@ -84,10 +93,9 @@ class Builder
 
     # If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
     # then treat that as an error?
-    banner_end
   end
 
-  private
+  # - - - - - - - - - - - - - - - - -
 
   def assert_rag(expected_colour, sss, diagnostic)
     actual_colour = call_rag_lambda(sss)
@@ -101,6 +109,8 @@ class Builder
       ]
     end
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def call_rag_lambda(sss)
     # TODO: improve diagnostics if cat/eval/call fails
@@ -132,17 +142,9 @@ class Builder
 
   # - - - - - - - - - - - - - - - - -
 
-  def banner_begin
-    title = caller_locations(1,1)[0].label
-    print([ '', banner_line, title, ], STDOUT)
-  end
-
-  def banner_end
-    print([ 'OK', banner_line ], STDOUT)
-  end
-
-  def banner_line
-    '-' * 42
+  def banner(ch = '-', title = caller_locations(1,1)[0].label)
+    line = ch * 42
+    print([ '', line, title, ], STDOUT)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -163,6 +165,8 @@ class Builder
     end
     output
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def failed(lines)
     log(['FAILED'] + lines)

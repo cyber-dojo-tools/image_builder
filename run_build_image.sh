@@ -3,7 +3,7 @@
 # Runs image-builder on source living in SRC_DIR which
 # can be passed as $1 but defaults to the current work directory.
 # This script is curl'd and run as the only command in each
-# language's .travis.yml script.
+# language repo's .travis.yml script.
 
 readonly SRC_DIR=${1:-`pwd`}
 readonly NETWORK=src_dir_network
