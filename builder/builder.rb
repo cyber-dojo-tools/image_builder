@@ -4,9 +4,9 @@ require 'json'
 
 class Builder
 
-  def initialize(src_dir, image_name)
+  def initialize(src_dir, args)
     @src_dir = src_dir
-    @image_name = image_name
+    @image_name = args['image_name']
   end
 
   attr_reader :src_dir, :image_name

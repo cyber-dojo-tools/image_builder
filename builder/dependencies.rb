@@ -67,7 +67,7 @@
 
 def local_dependencies
   # I should be able to use Dir.glob() here but doesn't seem to work?!
-  triples = []
+  triples = {}
   base_dir = File.expand_path("#{ENV['SRC_DIR']}/..", '/')
   Dir.entries(base_dir).each do |entry|
     dockerfile = base_dir + '/' + entry + '/docker/Dockerfile'
@@ -84,11 +84,10 @@ def local_dependencies
         json = JSON.parse(IO.read(manifest_json))
       end
       image_name = json['image_name']
-      triples << [
-        base_dir + '/' + entry,
-        from,
-        image_name
-      ]
+      triples[base_dir + '/' + entry] = {
+        'from' => from,
+        'image_name' => image_name
+      }
     end
   end
   triples
