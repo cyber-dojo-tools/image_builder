@@ -11,10 +11,10 @@ def running_on_travis?
 end
 
 if running_on_travis?
-  repo_names = get_repo_names
-  puts "<repo_names>"
-  puts repo_names
-  puts "</repo_names>"
+  repo_triples = get_repo_triples
+  puts "<repo_triples>"
+  puts repo_triples.inspect
+  puts "</repo_triples>"
 end
 
 #puts dependencies.inspect

@@ -2,7 +2,7 @@ require 'json'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Each triple is
-#   [ 1. name of dir which holds a cyber-dojo language image,
+#   [ 1. name of dir/repo which holds a cyber-dojo language image,
 #     2. name of docker image it is built FROM,
 #     3. name of docker image it builds
 #   ]
@@ -10,7 +10,7 @@ require 'json'
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # language triples
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Some triples are for images which are, or help to create,
+# Some triples are for images which are (or help to create)
 # base languages which do not include a test framework.
 # Their image names typically do have version numbers, eg:
 #   cyberdojofoundation/elm:0.18.0
@@ -34,37 +34,8 @@ require 'json'
 # start-points do not have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# TODO: if running on Travis, use github api to curl list orgs repos
-#
-# $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
-# $ curl ${URL}
-#
-# Response is a json body
-# [
-#   { "id": 91954027, "name": "elm-test", ... },
-#   { "id": 91954655, "name": "haskell-hunit", ... },
-#   ...
-# ]
-#
-# Then will need to try and get 3 files per repo
-#    o) docker/Dockerfile
-#    o) docker/image_name.json
-#    o) start_point/manifest.json
-#
-# The curl will probably quickly hit the github rate-limit of 60 per hour
-# for non-authenticated access. To increase the rate-limit to 5000
-# I need to authenticate
-#
-# $ readonly URL=https://api.github.com/orgs/cyber-dojo-languages/repos
-# $ curl --user "travisuser:${GITHUB_TOKEN}" ${URL}
-#
-# where the Travis repo for cyber-dojo-languages/image_builder
-# will need to store GITHUB_TOKEN as a secure environment-variable
-# which will need to be passed into the docker-compose run.
-
-
 def dependencies
-  # I should be able to use Dir.glob() here but doesn't seem to work?!
+  # I should be able to use Dir.glob() but I can't get it to work.
   triples = {}
   base_dir = File.expand_path("#{ENV['SRC_DIR']}/..", '/')
   Dir.entries(base_dir).each do |entry|
@@ -129,16 +100,46 @@ def print(lines, stream)
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def get_repo_triples
+  #TODO: get o) docker/image_name.json
+  #TODO: get o) start_point/manifest.json
+  #TODO: get image_name from one
+  triples = {}
+  base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
+  get_repo_names.each do |repo_name|
+    # eg repo_name = 'gplusplus-catch'
+    url = base_url + '/' + repo_name + '/' + 'master/docker/Dockerfile'
+    command = [ 'curl', '--silent', '--fail', url ].join(' ')
+    dockerfile = `#{command}`
+    if $?.success?
+      lines = dockerfile.split("\n")
+      from_line = lines.find { |line| line.start_with? 'FROM' }
+      from = from_line.split[1].strip
+      triples[repo_name] = {
+        'from' => from
+      }
+    end
+  end
+  triples
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def get_repo_names
-  url = 'https://api.github.com/orgs/cyber-dojo-languages/repos'
+  # important to use GITHUB_TOKEN in an authenticated request
+  # so the github rate-limit is 5000 requests per hour. Non
+  # authenticated rate-limit is only 60 requests per hour.
+  org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
+  # TODO: verify GITHUB_TOKEN env-var is set
   github_token = ENV['GITHUB_TOKEN']
   command = [
     'curl',
     '--silent',
     "--user 'travisuser:#{github_token}'",
     "--header 'Accept: application/vnd.github.v3.full+json'",
-    url
+    org_url + '/repos'
   ].join(' ')
   response = `#{command}`
   json = JSON.parse(response)
