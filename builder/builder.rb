@@ -51,7 +51,7 @@ class Builder
     banner
     script = 'cyber-dojo'
     url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-    assert_system "curl -O #{url}"
+    assert_system "curl --silent -O #{url}"
     assert_system "chmod +x #{script}"
     name = 'start-point-create-check'
     system "./#{script} start-point rm #{name} 2>&1 > /dev/null"

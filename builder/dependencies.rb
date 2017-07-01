@@ -135,6 +135,7 @@ def get_repo_names
   github_token = ENV['GITHUB_TOKEN']
   command = [
     'curl',
+    '--silent',
     "--user 'travisuser:#{github_token}'",
     "--header 'Accept: application/vnd.github.v3.full+json'",
     url
