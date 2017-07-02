@@ -45,7 +45,7 @@ def dependencies
     if File.exists?(dockerfile)
       triple = {}
       set_from(triple, IO.read(dockerfile))
-      set_image_name(triple, dir)
+      set_image_name_dir(triple, dir)
       triples[dir] = triple
     end
   end
@@ -63,14 +63,14 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def set_image_name(triple, dir)
+def set_image_name_dir(triple, dir)
   language_filename = dir + '/docker/image_name.json'
   test_framework_filename = dir + '/start_point/manifest.json'
 
   language_file = read_nil(language_filename)
   test_framework_file = read_nil(test_framework_filename)
 
-  set_image_name2(triple, {
+  set_image_name(triple, {
     language_filename:language_filename,
     test_framework_filename:test_framework_filename,
     language_file:language_file,
@@ -86,30 +86,29 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def set_image_name2(triple, args)
+def set_image_name(triple, args)
   either_or = [
     "#{args[:language_filename]} must exist",
     'or',
     "#{args[:test_framework_filename]} must exist"
   ]
 
-  is_language = !args[:language_file].nil?
-  is_test_framework = !args[:test_framework_file].nil?
+  language = !args[:language_file].nil?
+  test_framework = !args[:test_framework_file].nil?
 
-  if !is_language && !is_test_framework
+  if !language && !test_framework
     failed either_or + [ 'neither do.' ]
   end
-  if is_language && is_test_framework
+  if language && test_framework
     failed either_or + [ 'but not both.' ]
   end
-  if is_language
+  if language
     file = args[:language_file]
-    triple['test_framework'] = false
   end
-  if is_test_framework
+  if test_framework
     file = args[:test_framework_file]
-    triple['test_framework'] = true
   end
+  triple['test_framework'] = test_framework
   triple['image_name'] = JSON.parse(file)['image_name']
 end
 
