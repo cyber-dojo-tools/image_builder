@@ -37,14 +37,16 @@ require 'json'
 def dependencies
   # I should be able to use Dir.glob() but I can't get it to work.
   triples = {}
-  base_dir = File.expand_path("#{ENV['SRC_DIR']}/..", '/')
+  src_dir = ENV['SRC_DIR']
+  base_dir = File.expand_path("#{src_dir}/..", '/')
   Dir.entries(base_dir).each do |entry|
-    triple = {}
-    dockerfile = base_dir + '/' + entry + '/docker/Dockerfile'
+    dir = base_dir + '/' + entry
+    dockerfile = dir + '/docker/Dockerfile'
     if File.exists?(dockerfile)
+      triple = {}
       set_from(triple, dockerfile)
-      set_image_name(triple, base_dir + '/' + entry)
-      triples[base_dir + '/' + entry] = triple
+      set_image_name(triple, dir)
+      triples[dir] = triple
     end
   end
   triples
@@ -82,9 +84,11 @@ def set_image_name(triple, dir)
   end
   if is_language_dir
     file = language_marker_file
+    triple['test_framework_repo'] = false
   end
   if is_test_framework_dir
     file = test_framework_marker_file
+    triple['test_framework_repo'] = true
   end
   triple['image_name'] = JSON.parse(IO.read(file))['image_name']
 end

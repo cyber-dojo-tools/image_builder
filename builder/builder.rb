@@ -7,6 +7,7 @@ class Builder
   def initialize(src_dir, args)
     @src_dir = src_dir
     @image_name = args['image_name']
+    @test_framework_repo = args['test_framework_repo']
   end
 
   attr_reader :src_dir, :image_name
@@ -33,7 +34,7 @@ class Builder
   # - - - - - - - - - - - - - - - - -
 
   def test_framework_repo?
-    File.exists? test_framework_repo_marker_file
+    @test_framework_repo
   end
 
   # - - - - - - - - - - - - - - - - -
