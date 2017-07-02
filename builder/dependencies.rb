@@ -44,7 +44,7 @@ def dependencies
     dockerfile = dir + '/docker/Dockerfile'
     if File.exists?(dockerfile)
       triple = {}
-      set_from(triple, dockerfile)
+      set_from(triple, IO.read(dockerfile))
       set_image_name(triple, dir)
       triples[dir] = triple
     end
@@ -55,7 +55,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def set_from(triple, dockerfile)
-  lines = IO.read(dockerfile).split("\n")
+  lines = dockerfile.split("\n")
   from_line = lines.find { |line| line.start_with? 'FROM' }
   from = from_line.split[1].strip
   triple['from'] = from
@@ -123,12 +123,9 @@ def get_repo_triples
     command = [ 'curl', '--silent', '--fail', url ].join(' ')
     dockerfile = `#{command}`
     if $?.success?
-      lines = dockerfile.split("\n")
-      from_line = lines.find { |line| line.start_with? 'FROM' }
-      from = from_line.split[1].strip
-      triples[repo_name] = {
-        'from' => from
-      }
+      triple = {}
+      set_from(triple, dockerfile)
+      triples[repo_name] = triple
     end
   end
   triples
