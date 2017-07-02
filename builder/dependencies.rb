@@ -39,16 +39,12 @@ def dependencies
   triples = {}
   base_dir = File.expand_path("#{ENV['SRC_DIR']}/..", '/')
   Dir.entries(base_dir).each do |entry|
+    triple = {}
     dockerfile = base_dir + '/' + entry + '/docker/Dockerfile'
     if File.exists?(dockerfile)
-      lines = IO.read(dockerfile).split("\n")
-      from_line = lines.find { |line| line.start_with? 'FROM' }
-      from = from_line.split[1].strip
-      image_name = get_image_name(base_dir + '/' + entry)
-      triples[base_dir + '/' + entry] = {
-        'from' => from,
-        'image_name' => get_image_name(base_dir + '/' + entry)
-      }
+      set_from(triple, dockerfile)
+      set_image_name(triple, base_dir + '/' + entry)
+      triples[base_dir + '/' + entry] = triple
     end
   end
   triples
@@ -56,7 +52,16 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def get_image_name(dir)
+def set_from(triple, dockerfile)
+  lines = IO.read(dockerfile).split("\n")
+  from_line = lines.find { |line| line.start_with? 'FROM' }
+  from = from_line.split[1].strip
+  triple['from'] = from
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def set_image_name(triple, dir)
   language_marker_file = dir + '/docker/image_name.json'
   test_framework_marker_file = dir + '/start_point/manifest.json'
 
@@ -81,7 +86,7 @@ def get_image_name(dir)
   if is_test_framework_dir
     file = test_framework_marker_file
   end
-  JSON.parse(IO.read(file))['image_name']
+  triple['image_name'] = JSON.parse(IO.read(file))['image_name']
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
