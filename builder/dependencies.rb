@@ -131,23 +131,45 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def get_repo_triples
-  #TODO: get o) docker/image_name.json
-  #TODO: get o) start_point/manifest.json
-  #TODO: get image_name from one
   triples = {}
   base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
   get_repo_names.each do |repo_name|
     # eg repo_name = 'gplusplus-catch'
     url = base_url + '/' + repo_name + '/' + 'master/docker/Dockerfile'
-    command = [ 'curl', '--silent', '--fail', url ].join(' ')
-    dockerfile = `#{command}`
-    if $?.success?
+    dockerfile = curl_nil(url)
+    unless dockerfile.nil?
       triple = {}
       set_from(triple, dockerfile)
+      set_image_name_repo(triple, base_url + '/' + repo_name + '/master')
       triples[repo_name] = triple
     end
   end
   triples
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def curl_nil(url)
+  command = [ 'curl', '--silent', '--fail', url ].join(' ')
+  file = `#{command}`
+  return $?.exitstatus == 0 ? file : nil
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def set_image_name_repo(triple, repo_url)
+  language_filename = repo_url + '/docker/image_name.json'
+  test_framework_filename = repo_url + '/start_point/manifest.json'
+
+  language_file = curl_nil(language_filename)
+  test_framework_file = curl_nil(test_framework_filename)
+
+  set_image_name(triple, {
+    language_filename:language_filename,
+    test_framework_filename:test_framework_filename,
+    language_file:language_file,
+    test_framework_file:test_framework_file
+  })
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

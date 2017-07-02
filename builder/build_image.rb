@@ -10,6 +10,7 @@ def running_on_travis?
   ENV['TRAVIS'] == 'true'
 end
 
+=begin
 if running_on_travis?
   repo_triples = get_repo_triples
   puts "<repo_triples>"
@@ -20,6 +21,7 @@ else
   puts dependencies.inspect
   puts "</dir_triples>"
 end
+=end
 
 src_dir = ENV['SRC_DIR']
 args = dependencies[src_dir]
