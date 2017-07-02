@@ -64,17 +64,17 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def set_image_name(triple, dir)
-  language_marker_file = dir + '/docker/image_name.json'
-  test_framework_marker_file = dir + '/start_point/manifest.json'
+  language_marker_filename = dir + '/docker/image_name.json'
+  test_framework_marker_filename = dir + '/start_point/manifest.json'
 
   either_or = [
-    "#{language_marker_file} must exist",
+    "#{language_marker_filename} must exist",
     'or',
-    "#{test_framework_marker_file} must exist"
+    "#{test_framework_marker_filename} must exist"
   ]
 
-  is_language_dir = File.exists? language_marker_file
-  is_test_framework_dir = File.exists? test_framework_marker_file
+  is_language_dir = File.exists? language_marker_filename
+  is_test_framework_dir = File.exists? test_framework_marker_filename
 
   if !is_language_dir && !is_test_framework_dir
     failed either_or + [ 'neither do.' ]
@@ -83,14 +83,14 @@ def set_image_name(triple, dir)
     failed either_or + [ 'but not both.' ]
   end
   if is_language_dir
-    file = language_marker_file
+    filename = language_marker_filename
     triple['test_framework_repo'] = false
   end
   if is_test_framework_dir
-    file = test_framework_marker_file
+    filename = test_framework_marker_filename
     triple['test_framework_repo'] = true
   end
-  triple['image_name'] = JSON.parse(IO.read(file))['image_name']
+  triple['image_name'] = JSON.parse(IO.read(filename))['image_name']
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
