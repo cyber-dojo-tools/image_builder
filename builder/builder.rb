@@ -7,7 +7,7 @@ class Builder
   def initialize(src_dir, args)
     @src_dir = src_dir
     @image_name = args['image_name']
-    @test_framework_repo = args['test_framework_repo']
+    @test_framework = args['test_framework']
   end
 
   attr_reader :src_dir, :image_name
@@ -15,7 +15,7 @@ class Builder
   def build_and_test_image
     banner('=', src_dir)
     build_the_image
-    if test_framework_repo?
+    if test_framework?
       check_images_red_amber_green_lambda_file
       check_start_point_can_be_created
       check_start_point_src_is_red_using_runner_stateless
@@ -33,8 +33,8 @@ class Builder
 
   # - - - - - - - - - - - - - - - - -
 
-  def test_framework_repo?
-    @test_framework_repo
+  def test_framework?
+    @test_framework
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -131,10 +131,6 @@ class Builder
       visible_files[filename] = IO.read(start_point_dir + '/' + filename)
     end
     visible_files
-  end
-
-  def test_framework_repo_marker_file
-    "#{start_point_dir}/manifest.json"
   end
 
   def start_point_dir

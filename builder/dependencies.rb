@@ -64,33 +64,53 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def set_image_name(triple, dir)
-  language_marker_filename = dir + '/docker/image_name.json'
-  test_framework_marker_filename = dir + '/start_point/manifest.json'
+  language_filename = dir + '/docker/image_name.json'
+  test_framework_filename = dir + '/start_point/manifest.json'
 
+  language_file = read_nil(language_filename)
+  test_framework_file = read_nil(test_framework_filename)
+
+  set_image_name2(triple, {
+    language_filename:language_filename,
+    test_framework_filename:test_framework_filename,
+    language_file:language_file,
+    test_framework_file:test_framework_file
+  })
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def read_nil(filename)
+  File.exists?(filename) ? IO.read(filename) : nil
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def set_image_name2(triple, args)
   either_or = [
-    "#{language_marker_filename} must exist",
+    "#{args[:language_filename]} must exist",
     'or',
-    "#{test_framework_marker_filename} must exist"
+    "#{args[:test_framework_filename]} must exist"
   ]
 
-  is_language_dir = File.exists? language_marker_filename
-  is_test_framework_dir = File.exists? test_framework_marker_filename
+  is_language = !args[:language_file].nil?
+  is_test_framework = !args[:test_framework_file].nil?
 
-  if !is_language_dir && !is_test_framework_dir
+  if !is_language && !is_test_framework
     failed either_or + [ 'neither do.' ]
   end
-  if is_language_dir && is_test_framework_dir
+  if is_language && is_test_framework
     failed either_or + [ 'but not both.' ]
   end
-  if is_language_dir
-    filename = language_marker_filename
-    triple['test_framework_repo'] = false
+  if is_language
+    file = args[:language_file]
+    triple['test_framework'] = false
   end
-  if is_test_framework_dir
-    filename = test_framework_marker_filename
-    triple['test_framework_repo'] = true
+  if is_test_framework
+    file = args[:test_framework_file]
+    triple['test_framework'] = true
   end
-  triple['image_name'] = JSON.parse(IO.read(filename))['image_name']
+  triple['image_name'] = JSON.parse(file)['image_name']
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
