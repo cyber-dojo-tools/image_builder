@@ -68,19 +68,19 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def wait_till(service_name, msg)
+def wait_till(method_name, service_name)
   max_wait = 5 # seconds
-  one_wait = 0.2
+  one_wait = 0.2 # seconds
   done = false
   tries = 0
   while !done && tries < (max_wait / one_wait)
-    done = yield(service_name)
+    done = Object.send(method_name, service_name)
     assert_shell("sleep #{one_wait}") unless done
     tries += 1
   end
-  unless yield(service_name)
-    failed [ "#{service_name} not #{msg}" ]
-    #docker logs ${1}
+  unless Object.send(method_name, service_name)
+    failed [ "#{service_name} never #{method_name}" ]
+    #docker logs #{service_name}
     exit 1
   end
 end
@@ -128,7 +128,7 @@ docker_compose 'up -d runner_stateless'
 
 service_names = %w( cyber-dojo-runner cyber-dojo-runner-stateless )
 service_names.each do |name|
-  wait_till(name, 'up') { up?(name) }
+  wait_till :up?, name
 end
 
 begin
@@ -147,6 +147,6 @@ begin
 ensure
   docker_compose 'down'
   (service_names + [ 'cyber-dojo-image-builder' ]).each do |name|
-    wait_till(name, 'exited') { exited?(name) }
+    wait_till :exited?, name
   end
 end
