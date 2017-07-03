@@ -68,23 +68,26 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def wait_till_up(service_name)
+def wait_till(service_name, msg)
   max_wait = 5 # seconds
-  up = false
+  done = false
   tries = 0
-  while !up && tries < (max_wait / 0.2)
-    up = up?(service_name)
-    assert_shell('sleep 0.2') unless up
+  while !done && tries < (max_wait / 0.2)
+    done = yield(service_name)
+    assert_shell('sleep 0.2') unless done
     tries += 1
   end
-  if !up? service_name
-    failed [ "#{service_name} not running" ]
+  unless yield(service_name)
+    failed [ "#{service_name} not #{msg}" ]
     #docker logs ${1}
     exit 1
   end
 end
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def up?(service_name)
+  puts "inside up?()"
   command = [
     'docker ps',
       '--all',
@@ -98,22 +101,6 @@ def up?(service_name)
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def wait_till_exited(service_name)
-  max_wait = 5 # seconds
-  exited = false
-  tries = 0
-  while !exited && tries < (max_wait / 0.2)
-    exited = exited?(service_name)
-    assert_shell('sleep 0.2') unless exited
-    tries += 1
-  end
-  if !exited? service_name
-    failed [ "#{service_name} not exited" ]
-    #docker logs ${1}
-    exit 1
-  end
-end
 
 def exited?(service_name)
   command = [
@@ -139,8 +126,8 @@ end
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
 
-wait_till_up 'cyber-dojo-runner'
-wait_till_up 'cyber-dojo-runner-stateless'
+wait_till('cyber-dojo-runner'          , 'up') { |name| up?(name) }
+wait_till('cyber-dojo-runner-stateless', 'up') { |name| up?(name) }
 
 begin
   assert_system [
@@ -157,7 +144,7 @@ begin
     ].join(space)
 ensure
   docker_compose 'down'
-  wait_till_exited 'cyber-dojo-runner'
-  wait_till_exited 'cyber-dojo-runner-stateless'
-  wait_till_exited 'cyber-dojo-image-builder'
+  wait_till('cyber-dojo-runner'          , 'exited') { |name| exited?(name) }
+  wait_till('cyber-dojo-runner-stateless', 'exited') { |name| exited?(name) }
+  wait_till('cyber-dojo-image-builder'   , 'exited') { |name| exited?(name) }
 end
