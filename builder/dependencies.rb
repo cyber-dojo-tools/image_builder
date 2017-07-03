@@ -120,10 +120,10 @@ def failed(lines)
 end
 
 def log(lines)
-  print(lines, STDERR)
+  print_to(lines, STDERR)
 end
 
-def print(lines, stream)
+def print_to(lines, stream)
   lines.each { |line| stream.puts line }
 end
 
@@ -152,6 +152,7 @@ end
 def curl_nil(url)
   command = [ 'curl', '--silent', '--fail', url ].join(' ')
   file = `#{command}`
+  print '.'
   return $?.exitstatus == 0 ? file : nil
 end
 
