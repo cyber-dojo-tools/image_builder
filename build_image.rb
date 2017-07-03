@@ -3,7 +3,7 @@
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
-#TODO: add --verbose option to main docker-compose call
+#TODO?: add --verbose option to main docker-compose call
 
 def success; 0; end
 def space; ' '; end
@@ -70,11 +70,12 @@ end
 
 def wait_till(service_name, msg)
   max_wait = 5 # seconds
+  one_wait = 0.2
   done = false
   tries = 0
-  while !done && tries < (max_wait / 0.2)
+  while !done && tries < (max_wait / one_wait)
     done = yield(service_name)
-    assert_shell('sleep 0.2') unless done
+    assert_shell("sleep #{one_wait}") unless done
     tries += 1
   end
   unless yield(service_name)
@@ -87,7 +88,6 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def up?(service_name)
-  puts "inside up?()"
   command = [
     'docker ps',
       '--all',
@@ -126,8 +126,10 @@ end
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
 
-wait_till('cyber-dojo-runner'          , 'up') { |name| up?(name) }
-wait_till('cyber-dojo-runner-stateless', 'up') { |name| up?(name) }
+service_names = %w( cyber-dojo-runner cyber-dojo-runner-stateless )
+service_names.each do |name|
+  wait_till(name, 'up') { up?(name) }
+end
 
 begin
   assert_system [
@@ -144,7 +146,7 @@ begin
     ].join(space)
 ensure
   docker_compose 'down'
-  wait_till('cyber-dojo-runner'          , 'exited') { |name| exited?(name) }
-  wait_till('cyber-dojo-runner-stateless', 'exited') { |name| exited?(name) }
-  wait_till('cyber-dojo-image-builder'   , 'exited') { |name| exited?(name) }
+  (service_names + [ 'cyber-dojo-image-builder' ]).each do |name|
+    wait_till(name, 'exited') { exited?(name) }
+  end
 end
