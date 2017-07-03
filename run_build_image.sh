@@ -1,23 +1,33 @@
 #!/bin/bash
 
-# Runs image-builder on source living in SRC_DIR which
-# can be passed as $1 but defaults to the current work directory.
+# Runs image-builder on source living in SRC_DIR which is passed as $1.
 # This script is curl'd and run as the only command in each
-# language repo's .travis.yml script.
+# cyber-dojo-language repo's .travis.yml script.
+
+show_use() {
+  echo 'Use: run_build_image.sh <SRC_DIR> [options...]'
+  echo 'Options:'
+  echo '  --push=true    Login to dockerhub and push good images'
+  echo ''
+  echo 'Example: ./run_build_image.sh ${PWD}'
+}
 
 readonly SRC_DIR=${1}
 readonly NETWORK=src_dir_network
 readonly NAME=src_dir_container
 
-if [ -z "${SRC_DIR}" ]; then
-  echo "Use: run_build_image.sh [SRC_DIR]"
+if [ -z "${SRC_DIR}" ] || [ "${1}" == '--help' ]; then
+  show_use
   exit 1
 fi
 
 if [ ! -d "${SRC_DIR}" ]; then
-  echo "${SRC_DIR} does not exist"
+  show_use
+  echo "SRC_DIR <${SRC_DIR}> does not exist"
   exit 1
 fi
+
+shift # ${1}
 
 if [ -z "${TRAVIS}" ]; then
   echo "Running locally"
@@ -56,7 +66,7 @@ docker run \
   --env TRAVIS \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
     cyberdojofoundation/image_builder \
-      /app/build_image.rb
+      /app/build_image.rb ${*}
 
 exit_status=$?
 

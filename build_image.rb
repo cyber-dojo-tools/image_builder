@@ -142,8 +142,8 @@ begin
         env_var('SRC_DIR'),
         env_var('TRAVIS'),
           'image_builder_inner',
-            '/app/build_image.rb'
-    ].join(space)
+            '/app/build_image.rb',
+    ].join(space) + ' ' + ARGV.join(space)
 ensure
   docker_compose 'down'
   (service_names + [ 'cyber-dojo-image-builder' ]).each do |name|

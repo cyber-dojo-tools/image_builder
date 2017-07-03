@@ -10,6 +10,10 @@ def running_on_travis?
   ENV['TRAVIS'] == 'true'
 end
 
+def push?
+  ARGV.include?('--push=true') || running_on_travis?
+end
+
 =begin
 if running_on_travis?
   repo_triples = get_repo_triples
@@ -26,7 +30,7 @@ end
 src_dir = ENV['SRC_DIR']
 args = dependencies[src_dir]
 
-Dockerhub.login if running_on_travis?
+Dockerhub.login if push?
 builder = Builder.new(src_dir, args)
 builder.build_and_test_image
-Dockerhub.push(builder.image_name) if running_on_travis?
+Dockerhub.push(builder.image_name) if push?
