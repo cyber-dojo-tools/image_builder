@@ -5,9 +5,14 @@
 # This script is curl'd and run as the only command in each
 # language repo's .travis.yml script.
 
-readonly SRC_DIR=${1:-`pwd`}
+readonly SRC_DIR=${1}
 readonly NETWORK=src_dir_network
 readonly NAME=src_dir_container
+
+if [ -z "${SRC_DIR}" ]; then
+  echo "Use: run_build_image.sh [SRC_DIR]"
+  exit 1
+fi
 
 if [ ! -d "${SRC_DIR}" ]; then
   echo "${SRC_DIR} does not exist"
