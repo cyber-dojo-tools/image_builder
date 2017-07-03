@@ -129,6 +129,13 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def env_var(name)
+  value = ENV[name]
+  "-e #{name}=#{value}"
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
 
@@ -140,15 +147,14 @@ begin
     'docker-compose',
       "--file #{my_dir}/docker-compose.yml",
       'run',
-        "-e DOCKER_USERNAME=#{ENV['DOCKER_USERNAME']}",
-        "-e DOCKER_PASSWORD=#{ENV['DOCKER_PASSWORD']}",
-        "-e GITHUB_TOKEN=#{ENV['GITHUB_TOKEN']}",
-        "-e SRC_DIR=#{ENV['SRC_DIR']}",
-        "-e TRAVIS=#{ENV['TRAVIS']}",
+        env_var('DOCKER_USERNAME'),
+        env_var('DOCKER_PASSWORD'),
+        env_var('GITHUB_TOKEN'),
+        env_var('SRC_DIR'),
+        env_var('TRAVIS'),
           'image_builder_inner',
             '/app/build_image.rb'
     ].join(space)
-
 ensure
   docker_compose 'down'
   wait_till_exited 'cyber-dojo-runner'
