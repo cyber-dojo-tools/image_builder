@@ -19,7 +19,7 @@ class ImageBuilder
       check_images_red_amber_green_lambda_file
       check_start_point_can_be_created
       check_start_point_src_red_green_amber_using_runner_stateless
-      check_start_point_src_is_red_using_runner_statefull
+      check_start_point_src_red_green_amber_using_runner_statefull
     end
   end
 
@@ -85,6 +85,34 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
+  def check_start_point_src_red_green_amber_using_runner_statefull
+    banner
+    runner = RunnerServiceStatefull.new
+    visible_files = start_point_visible_files
+    runner.kata_new(image_name, kata_id)
+    runner.avatar_new(image_name, kata_id, avatar_name, visible_files)
+    # red
+    sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds)
+    assert_rag(:red, sss, "dir == #{start_point_dir}")
+    puts 'red: OK'
+    # green
+    pattern = '6 * 9'
+    filename = filename_6_times_9(visible_files, pattern)
+    content = visible_files[filename]
+    changed_files = { filename => content.sub(pattern, '6 * 7') }
+    sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files, max_seconds)
+    assert_rag(:green, sss, "dir == #{start_point_dir}")
+    puts 'green: OK'
+    changed_files = { filename => content.sub(pattern, '6 * 9sdsd') }
+    sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files, max_seconds)
+    assert_rag(:amber, sss, "dir == #{start_point_dir}")
+    puts 'amber: OK'
+    runner.avatar_old(image_name, kata_id, avatar_name)
+    runner.kata_old(image_name, kata_id)
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
   def filename_6_times_9(visible_files, pattern)
     filenames = visible_files.select { |filename,content| content.include? pattern }
     if filenames == []
@@ -94,19 +122,6 @@ class ImageBuilder
       failed [ "multiple '#{pattern}' files " + filenames.inspect ]
     end
     filenames.keys[0]
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def check_start_point_src_is_red_using_runner_statefull
-    banner
-    runner = RunnerServiceStatefull.new
-    runner.kata_new(image_name, kata_id)
-    runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
-    sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files={}, max_seconds)
-    runner.avatar_old(image_name, kata_id, avatar_name)
-    runner.kata_old(image_name, kata_id)
-    assert_rag(:red, sss, "dir == #{start_point_dir}")
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -154,7 +169,7 @@ class ImageBuilder
 
   def banner(ch = '-', title = caller_locations(1,1)[0].label)
     line = ch * 42
-    print([ '', line, title, ], STDOUT)
+    print_to([ '', line, title, ], STDOUT)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -184,10 +199,10 @@ class ImageBuilder
   end
 
   def log(lines)
-    print(lines, STDERR)
+    print_to(lines, STDERR)
   end
 
-  def print(lines, stream)
+  def print_to(lines, stream)
     lines.each { |line| stream.puts line }
   end
 
