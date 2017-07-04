@@ -18,9 +18,8 @@ class ImageBuilder
     if test_framework?
       check_images_red_amber_green_lambda_file
       check_start_point_can_be_created
-      check_start_point_src_is_red_using_runner_stateless
+      check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_is_red_using_runner_statefull
-      check_amber_green_filesets
     end
   end
 
@@ -61,11 +60,40 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_start_point_src_is_red_using_runner_stateless
+  def check_start_point_src_red_green_amber_using_runner_stateless
     banner
     runner = RunnerServiceStateless.new
-    sss = runner.run(image_name, kata_id, avatar_name, start_point_visible_files, max_seconds)
+    visible_files = start_point_visible_files
+    # red
+    sss = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds)
     assert_rag(:red, sss, "dir == #{start_point_dir}")
+    puts 'red: OK'
+    # green
+    pattern = '6 * 9'
+    filename = filename_6_times_9(visible_files, pattern)
+    content = visible_files[filename]
+    visible_files[filename] = content.sub(pattern, '6 * 7')
+    sss = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds)
+    assert_rag(:green, sss, "dir == #{start_point_dir}")
+    puts 'green: OK'
+    # amber
+    visible_files[filename] = content.sub(pattern, '6 * 9sdsd')
+    sss = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds)
+    assert_rag(:amber, sss, "dir == #{start_point_dir}")
+    puts 'amber: OK'
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def filename_6_times_9(visible_files, pattern)
+    filenames = visible_files.select { |filename,content| content.include? pattern }
+    if filenames == []
+      failed [ "no '#{pattern}' file found" ]
+    end
+    if filenames.length > 1
+      failed [ "multiple '#{pattern}' files " + filenames.inspect ]
+    end
+    filenames.keys[0]
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -79,21 +107,6 @@ class ImageBuilder
     runner.avatar_old(image_name, kata_id, avatar_name)
     runner.kata_old(image_name, kata_id)
     assert_rag(:red, sss, "dir == #{start_point_dir}")
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def check_amber_green_filesets
-    banner
-    # If /6 * 9/ can be found in the start-point then
-    #   check that /6 * 7/ is green
-    #   check that /6 * 9sdsd/ is amber
-
-    # If traffic_lights/ sub-dirs exist, test them too
-    #   ... assume they contain complete filesets?
-
-    # If /6 * 9/ can't be found and no traffic_lights/ sub-dirs exist
-    # then treat that as an error?
   end
 
   # - - - - - - - - - - - - - - - - -
