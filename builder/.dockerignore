@@ -8,7 +8,7 @@
 
 !build_image.rb
 
-!builder.rb
+!image_builder.rb
 !dependencies.rb
 !dockerhub.rb
 !http_service.rb

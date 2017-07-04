@@ -2,7 +2,7 @@ require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
 require 'json'
 
-class Builder
+class ImageBuilder
 
   def initialize(src_dir, args)
     @src_dir = src_dir

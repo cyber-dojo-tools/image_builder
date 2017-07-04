@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative 'builder'
+require_relative 'image_builder'
 require_relative 'dependencies'
 require_relative 'dockerhub'
 
@@ -31,6 +31,6 @@ src_dir = ENV['SRC_DIR']
 args = dependencies[src_dir]
 
 Dockerhub.login if push?
-builder = Builder.new(src_dir, args)
+builder = ImageBuilder.new(src_dir, args)
 builder.build_and_test_image
 Dockerhub.push(builder.image_name) if push?
