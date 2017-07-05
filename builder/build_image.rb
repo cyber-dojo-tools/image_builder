@@ -17,6 +17,7 @@ end
 
 def key
   if running_on_travis?
+    puts "TRAVIS_REPO_SLUG=#{ENV['TRAVIS_REPO_SLUG']}"
     ENV['TRAVIS_REPO_SLUG'].split('/')[1]
   else
     ENV['SRC_DIR']
@@ -30,7 +31,7 @@ end
 puts '-' * 42
 puts 'gathering_dependencies'
 dependencies = get_dependencies
-#puts JSON.pretty_generate(dependencies)
+puts JSON.pretty_generate(dependencies)
 
 graph = dependency_graph(key, dependencies)
 #puts
