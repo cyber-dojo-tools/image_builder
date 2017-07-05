@@ -10,6 +10,7 @@ services:
   image_builder_inner:
     image: cyberdojofoundation/image_builder_inner
     container_name: cyber-dojo-image-builder-inner
+    tmpfs: /tmp
     mem_limit: 2G
     memswap_limit: 2G
     restart: "no"

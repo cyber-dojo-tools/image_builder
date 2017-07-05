@@ -5,37 +5,41 @@ require_relative 'dependencies'
 require_relative 'dockerhub'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# TODO: This is inefficient.
+# It would be better if I gathered all the dependencies
+# and then, if running on Travis, I git cloned _all_
+# the repos in the graphs into SRC_DIR
+# and then proceeded as if running locally.
 
 def running_on_travis?
   ENV['TRAVIS'] == 'true'
+end
+
+def key
+  if running_on_travis?
+    ENV['TRAVIS_REPO_SLUG'].split('/')[1]
+  else
+    ENV['SRC_DIR']
+  end
 end
 
 def push?
   ARGV.include?('--push=true') || running_on_travis?
 end
 
-=begin
-if running_on_travis?
-  repo_triples = get_repo_triples
-  puts "<repo_triples>"
-  puts repo_triples.inspect
-  puts "</repo_triples>"
-else
-  puts "<dir_triples>"
-  puts dir_dependencies.inspect
-  puts "</dir_triples>"
-end
-=end
+puts '-' * 42
+puts 'gathering_dependencies'
+dependencies = get_dependencies
+#puts JSON.pretty_generate(dependencies)
 
-src_dir = ENV['SRC_DIR']
-args = dir_dependencies[src_dir]
-
-if !running_on_travis?
-  graph = dependency_graph(src_dir, dir_dependencies)
-  puts JSON.pretty_generate(graph)
-end
+graph = dependency_graph(key, dependencies)
+#puts
+#puts JSON.pretty_generate(graph)
 
 Dockerhub.login if push?
-builder = ImageBuilder.new(src_dir, args)
+
+args = dependencies[key]
+builder = ImageBuilder.new(key, args)
 builder.build_and_test_image
+
 Dockerhub.push(builder.image_name) if push?

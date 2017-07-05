@@ -141,6 +141,7 @@ begin
         env_var('GITHUB_TOKEN'),
         env_var('SRC_DIR'),
         env_var('TRAVIS'),
+        env_var('TRAVIS_REPO_SLUG'),
           'image_builder_inner',
             '/app/build_image.rb',
     ].join(space) + ' ' + ARGV.join(space)

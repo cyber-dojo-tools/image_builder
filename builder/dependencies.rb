@@ -34,6 +34,10 @@ require 'json'
 # start-points do not have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def get_dependencies
+  ENV['TRAVIS'] == 'true' ? repo_dependencies : dir_dependencies
+end
+
 def dir_dependencies
   # I should be able to use Dir.glob() but I can't get it to work.
   triples = {}
@@ -132,7 +136,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def get_repo_triples
+def repo_dependencies
   triples = {}
   base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
   get_repo_names.each do |repo_name|
@@ -181,9 +185,11 @@ def get_repo_names
   # important to use GITHUB_TOKEN in an authenticated request
   # so the github rate-limit is 5000 requests per hour. Non
   # authenticated rate-limit is only 60 requests per hour.
-  org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
-  # TODO: verify GITHUB_TOKEN env-var is set
   github_token = ENV['GITHUB_TOKEN']
+  if github_token.nil?
+    failed [ 'GITHUB_TOKEN env-var not set' ]
+  end
+  org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
   command = [
     'curl',
     '--silent',

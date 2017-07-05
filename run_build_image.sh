@@ -64,6 +64,7 @@ docker run \
   --env GITHUB_TOKEN \
   --env SRC_DIR=${SRC_DIR} \
   --env TRAVIS \
+  --env TRAVIS_REPO_SLUG \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
     cyberdojofoundation/image_builder \
       /app/build_image.rb ${*}
