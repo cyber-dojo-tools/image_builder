@@ -4,8 +4,10 @@ set -e
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
 # good-language
+export TRAVIS_REPO_SLUG=cyber-dojo-languages/elixir-1.2.5
 ./run_build_image.sh ${MY_DIR}/test/elixir-1.2.5
 # good-test-framework
+export TRAVIS_REPO_SLUG=cyber-dojo-languages/elixir-exunit
 ./run_build_image.sh ${MY_DIR}/test/elixir-exunit
 
 # TODO: shunit2
