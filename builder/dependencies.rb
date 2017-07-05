@@ -34,7 +34,7 @@ require 'json'
 # start-points do not have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def dependencies
+def dir_dependencies
   # I should be able to use Dir.glob() but I can't get it to work.
   triples = {}
   src_dir = ENV['SRC_DIR']
@@ -55,6 +55,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def set_from(triple, dockerfile)
+  print '.'
   lines = dockerfile.split("\n")
   from_line = lines.find { |line| line.start_with? 'FROM' }
   from = from_line.split[1].strip
@@ -81,6 +82,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def read_nil(filename)
+  print '.'
   File.exists?(filename) ? IO.read(filename) : nil
 end
 
@@ -150,9 +152,9 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def curl_nil(url)
+  print '.'
   command = [ 'curl', '--silent', '--fail', url ].join(' ')
   file = `#{command}`
-  print '.'
   return $?.exitstatus == 0 ? file : nil
 end
 
@@ -194,3 +196,20 @@ def get_repo_names
   json.collect { |repo| repo['name'] }
 end
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def dependency_graph(src_dir, dependencies)
+  root = dependencies[src_dir].clone
+  fill_dependency_graph(root, dependencies.clone)
+  root
+end
+
+def fill_dependency_graph(root, dependencies)
+  root['children'] = {}
+  dependencies.each do |dir,entry|
+    if root['image_name'] == entry['from']
+      fill_dependency_graph(root['children'][dir] = entry.clone, dependencies)
+    end
+  end
+end

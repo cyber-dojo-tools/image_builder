@@ -22,13 +22,18 @@ if running_on_travis?
   puts "</repo_triples>"
 else
   puts "<dir_triples>"
-  puts dependencies.inspect
+  puts dir_dependencies.inspect
   puts "</dir_triples>"
 end
 =end
 
 src_dir = ENV['SRC_DIR']
-args = dependencies[src_dir]
+args = dir_dependencies[src_dir]
+
+if !running_on_travis?
+  graph = dependency_graph(src_dir, dir_dependencies)
+  puts JSON.pretty_generate(graph)
+end
 
 Dockerhub.login if push?
 builder = ImageBuilder.new(src_dir, args)
