@@ -206,7 +206,6 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def dependency_graph(key, dependencies)
-  puts "building graph:key=:#{key}:"
   root = dependencies[key].clone
   fill_dependency_graph(root, dependencies.clone)
   root
