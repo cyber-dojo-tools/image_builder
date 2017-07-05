@@ -54,7 +54,7 @@ class ImageBuilder
     assert_system "curl --silent -O #{url}"
     assert_system "chmod +x #{script}"
     name = 'start-point-create-check'
-    system "./#{script} start-point rm #{name} 2>&1 > /dev/null"
+    system "./#{script} start-point rm #{name} &> /dev/null"
     assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
   end
 
