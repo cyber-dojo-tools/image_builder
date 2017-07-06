@@ -68,24 +68,39 @@ class ImageBuilder
 
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
-    visible_files = start_point_visible_files
-    # red
-    took,sss = timed_run_stateless(visible_files)
+    took,sss = timed_run_stateless(red_files)
     assert_rag(:red, sss, "dir == #{start_point_dir}")
     puts "red: OK (~#{took} seconds)"
-    # green
-    pattern = '6 * 9'
-    filename = filename_6_times_9(visible_files, pattern)
-    content = visible_files[filename]
-    visible_files[filename] = content.sub(pattern, '6 * 7')
-    took,sss = timed_run_stateless(visible_files)
+    took,sss = timed_run_stateless(green_files)
     assert_rag(:green, sss, "dir == #{start_point_dir}")
     puts "green: OK (~#{took} seconds)"
-    # amber
-    visible_files[filename] = content.sub(pattern, '6 * 9sdsd')
-    took,sss = timed_run_stateless(visible_files)
+    took,sss = timed_run_stateless(amber_files)
     assert_rag(:amber, sss, "dir == #{start_point_dir}")
     puts "amber: OK (~#{took} seconds)"
+  end
+
+  def red_files
+    start_point_visible_files
+  end
+
+  def green_files
+    from = '6 * 9'
+    to = '6 * 7'
+    visible_files = red_files
+    filename = filename_6_times_9(visible_files, from)
+    content = visible_files[filename]
+    visible_files[filename] = content.sub(from, to)
+    visible_files
+  end
+
+  def amber_files
+    from = '6 * 9'
+    to = '6 * 9sdsd'
+    visible_files = red_files
+    filename = filename_6_times_9(visible_files, from)
+    content = visible_files[filename]
+    visible_files[filename] = content.sub(from, to)
+    visible_files
   end
 
   def timed_run_stateless(visible_files)
