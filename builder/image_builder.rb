@@ -77,7 +77,8 @@ class ImageBuilder
   def assert_time_run_stateless(colour)
     runner = RunnerServiceStateless.new
     method = (colour.to_s + '_files').to_sym
-    files = self.send(method)
+    start_files = start_point_visible_files
+    files = self.send(method, start_files)
     args = [image_name]
     args << kata_id
     args << 'salmon'
@@ -88,28 +89,26 @@ class ImageBuilder
     puts "#{colour}: OK (~#{took} seconds)"
   end
 
-  def red_files
-    start_point_visible_files
+  def red_files(start_files)
+    start_files
   end
 
-  def green_files
+  def green_files(start_files)
     from = '6 * 9'
     to = '6 * 7'
-    visible_files = red_files
-    filename = filename_6_times_9(visible_files, from)
-    content = visible_files[filename]
-    visible_files[filename] = content.sub(from, to)
-    visible_files
+    filename = filename_6_times_9(start_files, from)
+    content = start_files[filename]
+    start_files[filename] = content.sub(from, to)
+    start_files
   end
 
-  def amber_files
+  def amber_files(start_files)
     from = '6 * 9'
     to = '6 * 9sdsd'
-    visible_files = red_files
-    filename = filename_6_times_9(visible_files, from)
-    content = visible_files[filename]
-    visible_files[filename] = content.sub(from, to)
-    visible_files
+    filename = filename_6_times_9(start_files, from)
+    content = start_files[filename]
+    start_files[filename] = content.sub(from, to)
+    start_files
   end
 
   # - - - - - - - - - - - - - - - - -
