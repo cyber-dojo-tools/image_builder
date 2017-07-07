@@ -266,7 +266,7 @@ class ImageBuilder
 
   def banner(ch = '-', title = caller_locations(1,1)[0].label)
     line = ch * 42
-    print_to([ '', line, title, ], STDOUT)
+    print_to([ '', line, title], STDOUT)
   end
 
   # - - - - - - - - - - - - - - - - -
