@@ -75,16 +75,9 @@ class ImageBuilder
 
   def assert_time_run_stateless(colour)
     runner = RunnerServiceStateless.new
+    method = (colour.to_s + '_files').to_sym
+    files = self.send(method)
     started = Time.now
-    if colour == :red
-      files = red_files
-    end
-    if colour == :amber
-      files = amber_files
-    end
-    if colour == :green
-      files = green_files
-    end
     sss = runner.run(image_name, kata_id, 'salmon', files, max_seconds)
     stopped = Time.now
     took = (stopped - started).round(2)
