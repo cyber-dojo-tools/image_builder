@@ -115,32 +115,29 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_statefull
-    # TODO: need 3 ensures' so avatar_old happens each time.
     banner
     runner = RunnerServiceStatefull.new
-    start_files = start_point_visible_files
     runner.kata_new(image_name, kata_id)
     begin
-      # red
-      runner.avatar_new(image_name, kata_id, 'rhino', start_files)
-      took, sss = timed_run_statefull(runner, 'rhino', red_changed_files(start_files))
-      assert_rag(:red, sss, "dir == #{start_point_dir}")
-      puts "red: OK (~#{took} seconds)"
-      runner.avatar_old(image_name, kata_id, 'rhino')
-      # green
-      runner.avatar_new(image_name, kata_id, 'gopher', start_files)
-      took, sss = timed_run_statefull(runner, 'gopher', green_changed_files(start_files))
-      assert_rag(:green, sss, "dir == #{start_point_dir}")
-      puts "green: OK (~#{took} seconds)"
-      runner.avatar_old(image_name, kata_id, 'gopher')
-      # amber
-      runner.avatar_new(image_name, kata_id, 'antelope', start_files)
-      took, sss = timed_run_statefull(runner, 'antelope', amber_changed_files(start_files))
-      assert_rag(:amber, sss, "dir == #{start_point_dir}")
-      puts "amber: OK (~#{took} seconds)"
-      runner.avatar_old(image_name, kata_id, 'antelope')
+      assert_timed_run_statefull(:red  , runner, 'rhino')
+      assert_timed_run_statefull(:amber, runner, 'antelope')
+      assert_timed_run_statefull(:green, runner, 'gopher')
     ensure
       runner.kata_old(image_name, kata_id)
+    end
+  end
+
+  def assert_timed_run_statefull(colour, runner, avatar_name)
+    start_files = start_point_visible_files
+    begin
+      runner.avatar_new(image_name, kata_id, avatar_name, start_files)
+      method = (colour.to_s + '_changed_files').to_sym
+      changed_files = self.send(method, start_files)
+      took, sss = timed_run_statefull(runner, avatar_name, changed_files)
+      assert_rag(colour, sss, "dir == #{start_point_dir}")
+      puts "#{colour}: OK (~#{took} seconds)"
+    ensure
+      runner.avatar_old(image_name, kata_id, avatar_name)
     end
   end
 
