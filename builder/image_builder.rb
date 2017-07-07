@@ -65,6 +65,7 @@ class ImageBuilder
   end
 
   # - - - - - - - - - - - - - - - - -
+  # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
@@ -77,10 +78,12 @@ class ImageBuilder
     runner = RunnerServiceStateless.new
     method = (colour.to_s + '_files').to_sym
     files = self.send(method)
-    started = Time.now
-    sss = runner.run(image_name, kata_id, 'salmon', files, max_seconds)
-    stopped = Time.now
-    took = (stopped - started).round(2)
+    args = [image_name]
+    args << kata_id
+    args << 'salmon'
+    args << files
+    args << (max_seconds=10)
+    took,sss = timed_run { runner.run(*args) }
     assert_rag(colour, sss, "dir == #{start_point_dir}")
     puts "#{colour}: OK (~#{took} seconds)"
   end
@@ -110,6 +113,7 @@ class ImageBuilder
   end
 
   # - - - - - - - - - - - - - - - - -
+  # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_statefull
     banner
@@ -130,10 +134,13 @@ class ImageBuilder
       runner.avatar_new(image_name, kata_id, avatar_name, start_files)
       method = (colour.to_s + '_changed_files').to_sym
       changed_files = self.send(method, start_files)
-      started = Time.now
-      sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files, max_seconds)
-      stopped = Time.now
-      took = (stopped - started).round(2)
+      args = [image_name]
+      args << kata_id
+      args << avatar_name
+      args << (deleted_filenames=[])
+      args << changed_files
+      args << (max_seconds=10)
+      took,sss = timed_run { runner.run(*args) }
       assert_rag(colour, sss, "dir == #{start_point_dir}")
       puts "#{colour}: OK (~#{took} seconds)"
     ensure
@@ -159,6 +166,16 @@ class ImageBuilder
     filename = filename_6_times_9(start_files, from)
     content = start_files[filename]
     { filename => content.sub(from, to) }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def timed_run
+    started = Time.now
+    sss = yield
+    stopped = Time.now
+    took = (stopped - started).round(2)
+    return took,sss
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -222,7 +239,7 @@ class ImageBuilder
   end
 
   def src_dir
-    if ENV['TRAVIS'] != 'true'
+    if !on_travis?
       @key # running locally
     else
       unless @cloned
@@ -290,10 +307,6 @@ class ImageBuilder
 
   def kata_id
     '6F4F4E4759'
-  end
-
-  def max_seconds
-    10
   end
 
 end
