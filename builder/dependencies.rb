@@ -159,7 +159,7 @@ def curl_nil(url)
   print '.'
   command = [ 'curl', '--silent', '--fail', url ].join(' ')
   file = `#{command}`
-  return $?.exitstatus == 0 ? file : nil
+  $?.exitstatus == 0 ? file : nil
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
