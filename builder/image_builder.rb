@@ -93,19 +93,15 @@ class ImageBuilder
     start_files
   end
 
-  def green_files(start_files)
-    from = '6 * 9'
-    to = '6 * 7'
-    filename = filename_6_times_9(start_files, from)
+  def amber_files(start_files)
+    filename,from,to = filename_from_to(:amber, start_files)
     content = start_files[filename]
     start_files[filename] = content.sub(from, to)
     start_files
   end
 
-  def amber_files(start_files)
-    from = '6 * 9'
-    to = '6 * 9sdsd'
-    filename = filename_6_times_9(start_files, from)
+  def green_files(start_files)
+    filename,from,to = filename_from_to(:green, start_files)
     content = start_files[filename]
     start_files[filename] = content.sub(from, to)
     start_files
@@ -152,19 +148,38 @@ class ImageBuilder
   end
 
   def green_changed_files(start_files)
-    from = '6 * 9'
-    to = '6 * 7'
-    filename = filename_6_times_9(start_files, from)
+    filename,from,to = filename_from_to(:green, start_files)
     content = start_files[filename]
     { filename => content.sub(from, to) }
   end
 
   def amber_changed_files(start_files)
-    from = '6 * 9'
-    to = '6 * 9sdsd'
-    filename = filename_6_times_9(start_files, from)
+    filename,from,to = filename_from_to(:amber, start_files)
     content = start_files[filename]
     { filename => content.sub(from, to) }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def filename_from_to(colour, start_files)
+    pattern_file = start_point_dir + '/red_amber_green_pattern.json'
+    if File.exists? pattern_file
+      puts "inside red_amber_green_pattern.json"
+      json = JSON.parse(IO.read(pattern_file))
+      args = json[colour.to_s]
+      return args['filename'],args['from'],args['to']
+    end
+    if colour == :amber
+      from = '6 * 9'
+      to = '6 * 9sdsd'
+      filename = filename_6_times_9(start_files, from)
+    end
+    if colour == :green
+      from = '6 * 9'
+      to = '6 * 7'
+      filename = filename_6_times_9(start_files, from)
+    end
+    return filename,from,to
   end
 
   # - - - - - - - - - - - - - - - - -
