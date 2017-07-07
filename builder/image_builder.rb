@@ -105,10 +105,10 @@ class ImageBuilder
 
   def timed_run_stateless(visible_files)
     runner = RunnerServiceStateless.new
-    t1 = Time.now
+    started = Time.now
     sss = runner.run(image_name, kata_id, 'salmon', visible_files, max_seconds)
-    t2 = Time.now
-    took = ((t2 - t1) / 3).round(2)
+    stopped = Time.now
+    took = (stopped - started).round(2)
     return took,sss
   end
 
@@ -133,7 +133,10 @@ class ImageBuilder
       runner.avatar_new(image_name, kata_id, avatar_name, start_files)
       method = (colour.to_s + '_changed_files').to_sym
       changed_files = self.send(method, start_files)
-      took, sss = timed_run_statefull(runner, avatar_name, changed_files)
+      started = Time.now
+      sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files, max_seconds)
+      stopped = Time.now
+      took = (stopped - started).round(2)
       assert_rag(colour, sss, "dir == #{start_point_dir}")
       puts "#{colour}: OK (~#{took} seconds)"
     ensure
@@ -159,14 +162,6 @@ class ImageBuilder
     filename = filename_6_times_9(start_files, from)
     content = start_files[filename]
     { filename => content.sub(from, to) }
-  end
-
-  def timed_run_statefull(runner, avatar_name, changed_files)
-    t1 = Time.now
-    sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files, max_seconds)
-    t2 = Time.now
-    took = ((t2 - t1) / 3).round(2)
-    return took,sss
   end
 
   # - - - - - - - - - - - - - - - - -
