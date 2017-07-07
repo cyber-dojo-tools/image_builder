@@ -106,7 +106,7 @@ class ImageBuilder
   def timed_run_stateless(visible_files)
     runner = RunnerServiceStateless.new
     t1 = Time.now
-    sss = runner.run(image_name, kata_id, avatar_name, visible_files, max_seconds)
+    sss = runner.run(image_name, kata_id, 'salmon', visible_files, max_seconds)
     t2 = Time.now
     took = ((t2 - t1) / 3).round(2)
     return took,sss
@@ -115,35 +115,56 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_statefull
+    # TODO: need 3 ensures' so avatar_old happens each time.
     banner
     runner = RunnerServiceStatefull.new
-    visible_files = start_point_visible_files
+    start_files = start_point_visible_files
     runner.kata_new(image_name, kata_id)
-    runner.avatar_new(image_name, kata_id, avatar_name, visible_files)
     begin
       # red
-      took, sss = timed_run_statefull(runner, changed_files={})
+      runner.avatar_new(image_name, kata_id, 'rhino', start_files)
+      took, sss = timed_run_statefull(runner, 'rhino', red_changed_files(start_files))
       assert_rag(:red, sss, "dir == #{start_point_dir}")
       puts "red: OK (~#{took} seconds)"
+      runner.avatar_old(image_name, kata_id, 'rhino')
       # green
-      pattern = '6 * 9'
-      filename = filename_6_times_9(visible_files, pattern)
-      content = visible_files[filename]
-      changed_files = { filename => content.sub(pattern, '6 * 7') }
-      took, sss = timed_run_statefull(runner, changed_files)
+      runner.avatar_new(image_name, kata_id, 'gopher', start_files)
+      took, sss = timed_run_statefull(runner, 'gopher', green_changed_files(start_files))
       assert_rag(:green, sss, "dir == #{start_point_dir}")
       puts "green: OK (~#{took} seconds)"
-      changed_files = { filename => content.sub(pattern, '6 * 9sdsd') }
-      took, sss = timed_run_statefull(runner, changed_files)
+      runner.avatar_old(image_name, kata_id, 'gopher')
+      # amber
+      runner.avatar_new(image_name, kata_id, 'antelope', start_files)
+      took, sss = timed_run_statefull(runner, 'antelope', amber_changed_files(start_files))
       assert_rag(:amber, sss, "dir == #{start_point_dir}")
       puts "amber: OK (~#{took} seconds)"
+      runner.avatar_old(image_name, kata_id, 'antelope')
     ensure
-      runner.avatar_old(image_name, kata_id, avatar_name)
       runner.kata_old(image_name, kata_id)
     end
   end
 
-  def timed_run_statefull(runner, changed_files)
+  def red_changed_files(_)
+    {}
+  end
+
+  def green_changed_files(start_files)
+    from = '6 * 9'
+    to = '6 * 7'
+    filename = filename_6_times_9(start_files, from)
+    content = start_files[filename]
+    { filename => content.sub(from, to) }
+  end
+
+  def amber_changed_files(start_files)
+    from = '6 * 9'
+    to = '6 * 9sdsd'
+    filename = filename_6_times_9(start_files, from)
+    content = start_files[filename]
+    { filename => content.sub(from, to) }
+  end
+
+  def timed_run_statefull(runner, avatar_name, changed_files)
     t1 = Time.now
     sss = runner.run(image_name, kata_id, avatar_name, deleted_filenames=[], changed_files, max_seconds)
     t2 = Time.now
@@ -280,10 +301,6 @@ class ImageBuilder
 
   def kata_id
     '6F4F4E4759'
-  end
-
-  def avatar_name
-    'salmon'
   end
 
   def max_seconds
