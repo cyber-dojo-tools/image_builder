@@ -149,14 +149,12 @@ class ImageBuilder
 
   def green_changed_files(start_files)
     filename,from,to = filename_from_to(:green, start_files)
-    content = start_files[filename]
-    { filename => content.sub(from, to) }
+    { filename => start_files[filename].sub(from, to) }
   end
 
   def amber_changed_files(start_files)
     filename,from,to = filename_from_to(:amber, start_files)
-    content = start_files[filename]
-    { filename => content.sub(from, to) }
+    { filename => start_files[filename].sub(from, to) }
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -164,19 +162,17 @@ class ImageBuilder
   def filename_from_to(colour, start_files)
     pattern_file = start_point_dir + '/red_amber_green_pattern.json'
     if File.exists? pattern_file
-      puts "inside red_amber_green_pattern.json"
+      # TODO: add handling of failed json parse
       json = JSON.parse(IO.read(pattern_file))
       args = json[colour.to_s]
       return args['filename'],args['from'],args['to']
     end
     if colour == :amber
-      from = '6 * 9'
-      to = '6 * 9sdsd'
+      from,to = '6 * 9','6 * 9sdsd'
       filename = filename_6_times_9(start_files, from)
     end
     if colour == :green
-      from = '6 * 9'
-      to = '6 * 7'
+      from,to = '6 * 9','6 * 7'
       filename = filename_6_times_9(start_files, from)
     end
     return filename,from,to
