@@ -68,15 +68,28 @@ class ImageBuilder
 
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
-    took,sss = timed_run_stateless(red_files)
-    assert_rag(:red, sss, "dir == #{start_point_dir}")
-    puts "red: OK (~#{took} seconds)"
-    took,sss = timed_run_stateless(green_files)
-    assert_rag(:green, sss, "dir == #{start_point_dir}")
-    puts "green: OK (~#{took} seconds)"
-    took,sss = timed_run_stateless(amber_files)
-    assert_rag(:amber, sss, "dir == #{start_point_dir}")
-    puts "amber: OK (~#{took} seconds)"
+    assert_time_run_stateless(:red)
+    assert_time_run_stateless(:amber)
+    assert_time_run_stateless(:green)
+  end
+
+  def assert_time_run_stateless(colour)
+    runner = RunnerServiceStateless.new
+    started = Time.now
+    if colour == :red
+      files = red_files
+    end
+    if colour == :amber
+      files = amber_files
+    end
+    if colour == :green
+      files = green_files
+    end
+    sss = runner.run(image_name, kata_id, 'salmon', files, max_seconds)
+    stopped = Time.now
+    took = (stopped - started).round(2)
+    assert_rag(colour, sss, "dir == #{start_point_dir}")
+    puts "#{colour}: OK (~#{took} seconds)"
   end
 
   def red_files
@@ -101,15 +114,6 @@ class ImageBuilder
     content = visible_files[filename]
     visible_files[filename] = content.sub(from, to)
     visible_files
-  end
-
-  def timed_run_stateless(visible_files)
-    runner = RunnerServiceStateless.new
-    started = Time.now
-    sss = runner.run(image_name, kata_id, 'salmon', visible_files, max_seconds)
-    stopped = Time.now
-    took = (stopped - started).round(2)
-    return took,sss
   end
 
   # - - - - - - - - - - - - - - - - -
