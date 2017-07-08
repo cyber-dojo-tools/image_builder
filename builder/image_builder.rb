@@ -5,7 +5,6 @@ require 'json'
 class ImageBuilder
 
   def initialize(key, args)
-    puts "args=:#{args}:"
     @key = key
     @image_name = args['image_name']
     @test_framework = args['test_framework']
@@ -35,7 +34,6 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def test_framework?
-    puts "@test_framework=:#{@test_framework}:"
     @test_framework
   end
 
