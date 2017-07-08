@@ -5,6 +5,7 @@ require 'json'
 class ImageBuilder
 
   def initialize(key, args)
+    puts "args=:#{args}:"
     @key = key
     @image_name = args['image_name']
     @test_framework = args['test_framework']
@@ -15,10 +16,10 @@ class ImageBuilder
 
   def build_and_test_image
     banner('=', src_dir)
+    check_start_point_can_be_created if test_framework?
     build_the_image
     if test_framework?
       check_images_red_amber_green_lambda_file
-      check_start_point_can_be_created
       check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_red_green_amber_using_runner_statefull
     end
@@ -34,6 +35,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def test_framework?
+    puts "@test_framework=:#{@test_framework}:"
     @test_framework
   end
 
