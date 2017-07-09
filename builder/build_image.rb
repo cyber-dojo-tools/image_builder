@@ -45,6 +45,10 @@ dependencies = get_dependencies
 puts
 puts JSON.pretty_generate(dependencies)
 
+puts
+puts "#{dependencies.size} repos gathered"
+puts
+
 graph = dependency_graph(key, dependencies)
 puts
 puts JSON.pretty_generate(graph)
