@@ -42,8 +42,8 @@ end
 puts '-' * 42
 puts 'gathering_dependencies'
 dependencies = get_dependencies
-puts
-puts JSON.pretty_generate(dependencies)
+#puts
+#puts JSON.pretty_generate(dependencies)
 
 puts
 puts "#{dependencies.size} repos gathered"
