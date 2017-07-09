@@ -186,7 +186,7 @@ def get_repo_names
   # so the github rate-limit is 5000 requests per hour. Non
   # authenticated rate-limit is only 60 requests per hour.
   github_token = ENV['GITHUB_TOKEN']
-  if github_token.nil?
+  if github_token.nil? || github_token == ''
     failed [ 'GITHUB_TOKEN env-var not set' ]
   end
   org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
