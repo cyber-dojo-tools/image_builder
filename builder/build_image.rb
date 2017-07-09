@@ -5,22 +5,14 @@ require_relative 'dependencies'
 require_relative 'dockerhub'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# TODO: This is inefficient.
-# It would be better if I gathered all the dependencies
-# and then, if running on Travis, I git cloned _all_
-# the repos in the graph into SRC_DIR and then
-# proceeded as if running locally.
+# TODO:
+# Running Travis
+# Send POST to trigger immediate dependents.
 #
-# When running locally
+# Running locally
 # 1) SRC_DIR/.. already has dirs populated
 # 2) harvest dependencies from that
 # 3) create graph from SRC_DIR and dependencies
-# 4) chain-build
-#
-# When running on Travis
-# 1) harvest dependencies from repos
-# 2) create graph from SRC_DIR and dependencies
-# 3) populate SRC_DIR/.. from graph (this is in a data-container)
 # 4) chain-build
 
 def running_on_travis?
