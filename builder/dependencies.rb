@@ -182,6 +182,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def get_repo_names
+  # https://developer.github.com/v3/repos/#list-organization-repositories
   # important to use GITHUB_TOKEN in an authenticated request
   # so the github rate-limit is 5000 requests per hour. Non
   # authenticated rate-limit is only 60 requests per hour.
@@ -195,7 +196,7 @@ def get_repo_names
     '--silent',
     "--user 'travisuser:#{github_token}'",
     "--header 'Accept: application/vnd.github.v3.full+json'",
-    org_url + '/repos'
+    org_url + '/repos?per_page=1000'
   ].join(' ')
   response = `#{command}`
   json = JSON.parse(response)
