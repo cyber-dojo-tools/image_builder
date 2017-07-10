@@ -3,8 +3,6 @@
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
-#TODO?: add --verbose option to main docker-compose call
-
 def success; 0; end
 def space; ' '; end
 def my_dir; File.dirname(__FILE__); end

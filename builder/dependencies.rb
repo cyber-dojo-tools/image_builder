@@ -71,6 +71,7 @@ def dir_dependencies
   src_dir = ENV['SRC_DIR']
   base_dir = File.expand_path("#{src_dir}/..", '/')
   Dir.entries(base_dir).each do |entry|
+    print '.'
     dir = base_dir + '/' + entry
     args = dir_get_args(dir)
     triples[dir] = args unless args.nil?
@@ -85,14 +86,71 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def dir_get_args(dir)
-  docker_filename = dir + '/docker/Dockerfile'
-  dockerfile = read_nil(docker_filename)
+  get_args(dir) { |filename| read_nil(filename) }
+end
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+# repo
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def repo_dependencies
+  triples = {}
+  base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
+  get_repo_names.each do |repo_name|
+    # eg repo_name = 'gplusplus-catch'
+    print '.'
+    url = base_url + '/' + repo_name + '/' + 'master'
+    args = get_args(url) { |filename| curl_nil(filename) }
+    triples[repo_name] = args unless args.nil?
+  end
+  triples
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def get_repo_names
+  # https://developer.github.com/v3/repos/#list-organization-repositories
+  # important to use GITHUB_TOKEN in an authenticated request
+  # so the github rate-limit is 5000 requests per hour. Non
+  # authenticated rate-limit is only 60 requests per hour.
+  github_token = ENV['GITHUB_TOKEN']
+  if github_token.nil? || github_token == ''
+    failed [ 'GITHUB_TOKEN env-var not set' ]
+  end
+  org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
+  command = [
+    'curl',
+    '--silent',
+    "--user 'travisuser:#{github_token}'",
+    "--header 'Accept: application/vnd.github.v3.full+json'",
+    org_url + '/repos?per_page=1000'
+  ].join(' ')
+  response = `#{command}`
+  json = JSON.parse(response)
+  json.collect { |repo| repo['name'] }
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def curl_nil(url)
+  command = [ 'curl', '--silent', '--fail', url ].join(' ')
+  file = `#{command}`
+  $?.exitstatus == 0 ? file : nil
+end
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+# common
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def get_args(base)
+  docker_filename = base + '/docker/Dockerfile'
+  dockerfile = yield(docker_filename)
   return nil if dockerfile.nil?
   args = []
-  args << (image_name_filename = dir + '/docker/image_name.json')
-  args << (manifest_filename   = dir + '/start_point/manifest.json')
-  args << (image_name_file = read_nil(image_name_filename))
-  args << (manifest_file   = read_nil(manifest_filename))
+  args << (image_name_filename = base + '/docker/image_name.json')
+  args << (manifest_filename   = base + '/start_point/manifest.json')
+  args << (image_name_file = yield(image_name_filename))
+  args << (manifest_file   = yield(manifest_filename))
   {
     from:get_FROM(dockerfile),
     image_name:get_image_name(args),
@@ -146,104 +204,6 @@ def get_test_framework(file)
   !file.nil?
 end
 
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-# repo
-
-def repo_dependencies
-  triples = {}
-  base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
-  get_repo_names.each do |repo_name|
-    # eg repo_name = 'gplusplus-catch'
-    url = base_url + '/' + repo_name + '/' + 'master/docker/Dockerfile'
-    dockerfile = curl_nil(url)
-    unless dockerfile.nil?
-      print '.'
-      triple = {}
-      triple[:from] = get_FROM(dockerfile)
-      set_image_name_repo(triple, base_url + '/' + repo_name + '/master')
-      triples[repo_name] = triple
-    end
-  end
-  triples
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_repo_names
-  # https://developer.github.com/v3/repos/#list-organization-repositories
-  # important to use GITHUB_TOKEN in an authenticated request
-  # so the github rate-limit is 5000 requests per hour. Non
-  # authenticated rate-limit is only 60 requests per hour.
-  github_token = ENV['GITHUB_TOKEN']
-  if github_token.nil? || github_token == ''
-    failed [ 'GITHUB_TOKEN env-var not set' ]
-  end
-  org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
-  command = [
-    'curl',
-    '--silent',
-    "--user 'travisuser:#{github_token}'",
-    "--header 'Accept: application/vnd.github.v3.full+json'",
-    org_url + '/repos?per_page=1000'
-  ].join(' ')
-  response = `#{command}`
-  json = JSON.parse(response)
-  json.collect { |repo| repo['name'] }
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def set_image_name_repo(triple, repo_url)
-  language_filename = repo_url + '/docker/image_name.json'
-  test_framework_filename = repo_url + '/start_point/manifest.json'
-
-  language_file = curl_nil(language_filename)
-  test_framework_file = curl_nil(test_framework_filename)
-
-  set_image_name_test_framework(triple, {
-    language_filename:language_filename,
-    test_framework_filename:test_framework_filename,
-    language_file:language_file,
-    test_framework_file:test_framework_file
-  })
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def set_image_name_test_framework(triple, args)
-  either_or = [
-    "#{args[:language_filename]} must exist",
-    'or',
-    "#{args[:test_framework_filename]} must exist"
-  ]
-
-  language = !args[:language_file].nil?
-  test_framework = !args[:test_framework_file].nil?
-
-  if !language && !test_framework
-    failed either_or + [ 'neither do.' ]
-  end
-  if language && test_framework
-    failed either_or + [ 'but not both.' ]
-  end
-  if language
-    file = args[:language_file]
-  end
-  if test_framework
-    file = args[:test_framework_file]
-  end
-  triple[:image_name] = JSON.parse(file)['image_name']
-  triple[:test_framework] = test_framework
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def curl_nil(url)
-  command = [ 'curl', '--silent', '--fail', url ].join(' ')
-  file = `#{command}`
-  $?.exitstatus == 0 ? file : nil
-end
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def failed(lines)
@@ -258,4 +218,3 @@ end
 def print_to(lines, stream)
   lines.each { |line| stream.puts line }
 end
-
