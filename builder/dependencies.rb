@@ -6,9 +6,9 @@ require 'json'
 #
 # Each hash value is
 # {
-#   from:  ==> name of docker image it is built FROM,
+#   from: ==> name of docker image it is built FROM,
 #   image_name: ==> name of docker image it builds,
-#   test_framework: ==> whether there is a start_point
+#   test_framework: ==> whether a start_point/ dir exists
 # }
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -41,6 +41,8 @@ def get_dependencies
   ENV['TRAVIS'] == 'true' ? repo_dependencies : dir_dependencies
 end
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def dependency_graph(dependencies)
   if running_on_travis?
     key = ENV['TRAVIS_REPO_SLUG'].split('/')[1]
@@ -51,6 +53,8 @@ def dependency_graph(dependencies)
   fill_dependency_graph(root, dependencies.clone)
   root
 end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def fill_dependency_graph(root, dependencies)
   root[:children] = {}
