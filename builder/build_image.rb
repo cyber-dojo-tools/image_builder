@@ -27,11 +27,11 @@ Dockerhub.login if push?
 
 src_dir = ENV['SRC_DIR']
 builder = ImageBuilder.new(src_dir, dir_get_args(src_dir))
-builder.build_and_test_image
+#builder.build_and_test_image
 
 Dockerhub.push(builder.image_name) if push?
 
-=begin
+#=begin
 puts '-' * 42
 puts 'gathering_dependencies'
 dependencies = get_dependencies
@@ -43,6 +43,6 @@ puts
 graph = dependency_graph(dependencies)
 puts
 puts JSON.pretty_generate(graph)
-=end
+#=end
 
 

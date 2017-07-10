@@ -61,7 +61,7 @@ def fill_dependency_graph(root, dependencies)
   end
 end
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 # dir
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -72,75 +72,82 @@ def dir_dependencies
   base_dir = File.expand_path("#{src_dir}/..", '/')
   Dir.entries(base_dir).each do |entry|
     dir = base_dir + '/' + entry
-    dockerfile = dir + '/docker/Dockerfile'
-    if File.exists?(dockerfile)
-      triples[dir] = dir_get_args(dir)
-    end
+    args = dir_get_args(dir)
+    triples[dir] = args unless args.nil?
   end
   triples
+end
+
+def read_nil(filename)
+  File.exists?(filename) ? IO.read(filename) : nil
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def dir_get_args(dir)
-  dockerfile = dir + '/docker/Dockerfile'
+  docker_filename = dir + '/docker/Dockerfile'
+  dockerfile = read_nil(docker_filename)
+  return nil if dockerfile.nil?
+  args = []
+  args << (image_name_filename = dir + '/docker/image_name.json')
+  args << (manifest_filename   = dir + '/start_point/manifest.json')
+  args << (image_name_file = read_nil(image_name_filename))
+  args << (manifest_file   = read_nil(manifest_filename))
   {
-    from: dir_get_from(IO.read(dockerfile)),
-    image_name: dir_get_image_name(dir),
-    test_framework: dir_has_start_point?(dir)
+    from:get_FROM(dockerfile),
+    image_name:get_image_name(args),
+    test_framework:get_test_framework(manifest_file)
   }
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def dir_get_from(dockerfile)
+def get_FROM(dockerfile)
   lines = dockerfile.split("\n")
   from_line = lines.find { |line| line.start_with? 'FROM' }
   from_line.split[1].strip
 end
 
-def dir_get_image_name(dir)
-  language_filename = dir + '/docker/image_name.json'
-  language_file = read_nil(language_filename)
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  test_framework_filename = dir + '/start_point/manifest.json'
-  test_framework_file = read_nil(test_framework_filename)
+def get_image_name(args)
+  image_name_filename = args[0]
+  manifest_filename   = args[1]
+  image_name_file     = args[2]
+  manifest_file       = args[3]
 
-  language = !language_file.nil?
-  test_framework = !test_framework_file.nil?
+  either_or = [
+    "#{image_name_filename} must exist",
+    'or',
+    "#{manifest_filename} must exist"
+  ]
 
-  if !language && !test_framework
+  image_name = !image_name_file.nil?
+  manifest = !manifest_file.nil?
+
+  if !image_name && !manifest
     failed either_or + [ 'neither do.' ]
   end
-  if language && test_framework
+  if image_name && manifest
     failed either_or + [ 'but not both.' ]
   end
-  if language
-    file = language_file
+  if image_name
+    file = image_name_file
   end
-  if test_framework
-    file = test_framework_file
+  if manifest
+    file = manifest_file
   end
   JSON.parse(file)['image_name']
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def read_nil(filename)
-  print '.'
-  File.exists?(filename) ? IO.read(filename) : nil
+def get_test_framework(file)
+  !file.nil?
 end
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def dir_has_start_point?(dir)
-  test_framework_filename = dir + '/start_point/manifest.json'
-  File.exists? test_framework_filename
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 # repo
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def repo_dependencies
   triples = {}
@@ -150,91 +157,14 @@ def repo_dependencies
     url = base_url + '/' + repo_name + '/' + 'master/docker/Dockerfile'
     dockerfile = curl_nil(url)
     unless dockerfile.nil?
+      print '.'
       triple = {}
-      set_from(triple, dockerfile)
+      triple[:from] = get_FROM(dockerfile)
       set_image_name_repo(triple, base_url + '/' + repo_name + '/master')
       triples[repo_name] = triple
     end
   end
   triples
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def set_from(triple, dockerfile)
-  print '.'
-  triple['from'] = get_from(dockerfile)
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def set_image_name_dir(triple, dir)
-  language_filename = dir + '/docker/image_name.json'
-  test_framework_filename = dir + '/start_point/manifest.json'
-
-  language_file = read_nil(language_filename)
-  test_framework_file = read_nil(test_framework_filename)
-
-  set_image_name(triple, {
-    language_filename:language_filename,
-    test_framework_filename:test_framework_filename,
-    language_file:language_file,
-    test_framework_file:test_framework_file
-  })
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def set_image_name(triple, args)
-  either_or = [
-    "#{args[:language_filename]} must exist",
-    'or',
-    "#{args[:test_framework_filename]} must exist"
-  ]
-
-  language = !args[:language_file].nil?
-  test_framework = !args[:test_framework_file].nil?
-
-  if !language && !test_framework
-    failed either_or + [ 'neither do.' ]
-  end
-  if language && test_framework
-    failed either_or + [ 'but not both.' ]
-  end
-  if language
-    file = args[:language_file]
-  end
-  if test_framework
-    file = args[:test_framework_file]
-  end
-  triple['test_framework'] = test_framework
-  triple['image_name'] = JSON.parse(file)['image_name']
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def curl_nil(url)
-  print '.'
-  command = [ 'curl', '--silent', '--fail', url ].join(' ')
-  file = `#{command}`
-  $?.exitstatus == 0 ? file : nil
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def set_image_name_repo(triple, repo_url)
-  language_filename = repo_url + '/docker/image_name.json'
-  test_framework_filename = repo_url + '/start_point/manifest.json'
-
-  language_file = curl_nil(language_filename)
-  test_framework_file = curl_nil(test_framework_filename)
-
-  set_image_name(triple, {
-    language_filename:language_filename,
-    test_framework_filename:test_framework_filename,
-    language_file:language_file,
-    test_framework_file:test_framework_file
-  })
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -259,6 +189,59 @@ def get_repo_names
   response = `#{command}`
   json = JSON.parse(response)
   json.collect { |repo| repo['name'] }
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def set_image_name_repo(triple, repo_url)
+  language_filename = repo_url + '/docker/image_name.json'
+  test_framework_filename = repo_url + '/start_point/manifest.json'
+
+  language_file = curl_nil(language_filename)
+  test_framework_file = curl_nil(test_framework_filename)
+
+  set_image_name_test_framework(triple, {
+    language_filename:language_filename,
+    test_framework_filename:test_framework_filename,
+    language_file:language_file,
+    test_framework_file:test_framework_file
+  })
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def set_image_name_test_framework(triple, args)
+  either_or = [
+    "#{args[:language_filename]} must exist",
+    'or',
+    "#{args[:test_framework_filename]} must exist"
+  ]
+
+  language = !args[:language_file].nil?
+  test_framework = !args[:test_framework_file].nil?
+
+  if !language && !test_framework
+    failed either_or + [ 'neither do.' ]
+  end
+  if language && test_framework
+    failed either_or + [ 'but not both.' ]
+  end
+  if language
+    file = args[:language_file]
+  end
+  if test_framework
+    file = args[:test_framework_file]
+  end
+  triple[:image_name] = JSON.parse(file)['image_name']
+  triple[:test_framework] = test_framework
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def curl_nil(url)
+  command = [ 'curl', '--silent', '--fail', url ].join(' ')
+  file = `#{command}`
+  $?.exitstatus == 0 ? file : nil
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
