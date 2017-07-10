@@ -1,25 +1,28 @@
 require 'json'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Each triple is
-#   [ 1. name of dir/repo which holds a cyber-dojo language image,
-#     2. name of docker image it is built FROM,
-#     3. name of docker image it builds
-#   ]
+# Each hash key is the name of dir/repo which holds
+# a cyber-dojo language image.
+#
+# Each hash value is
+# {
+#   from:  ==> name of docker image it is built FROM,
+#   image_name: ==> name of docker image it builds,
+#   test_framework: ==> whether there is a start_point
+# }
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# language triples
+# test_framework==false
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Some triples are for images which are (or help to create)
-# base languages which do not include a test framework.
+# A base image which to build FROM
 # Their image names typically do have version numbers, eg:
 #   cyberdojofoundation/elm:0.18.0
 #   cyberdojofoundation/haskell:7.6.3
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# test triples
+# test_framework==true
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Some triples are for images which do include a test framework.
+# Some dirs/repos are for images which do include a test framework.
 # Their image names do not have version numbers, eg:
 #   cyberdojofoundation/elm_test
 #   cyberdojofoundation/haskell_hunit
@@ -38,6 +41,30 @@ def get_dependencies
   ENV['TRAVIS'] == 'true' ? repo_dependencies : dir_dependencies
 end
 
+def dependency_graph(dependencies)
+  if running_on_travis?
+    key = ENV['TRAVIS_REPO_SLUG'].split('/')[1]
+  else
+    key = ENV['SRC_DIR']
+  end
+  root = dependencies[key].clone
+  fill_dependency_graph(root, dependencies.clone)
+  root
+end
+
+def fill_dependency_graph(root, dependencies)
+  root[:children] = {}
+  dependencies.each do |dir,entry|
+    if root[:image_name] == entry[:from]
+      fill_dependency_graph(root[:children][dir] = entry.clone, dependencies)
+    end
+  end
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# dir
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 def dir_dependencies
   # I should be able to use Dir.glob() but I can't get it to work.
   triples = {}
@@ -47,10 +74,86 @@ def dir_dependencies
     dir = base_dir + '/' + entry
     dockerfile = dir + '/docker/Dockerfile'
     if File.exists?(dockerfile)
+      triples[dir] = dir_get_args(dir)
+    end
+  end
+  triples
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def dir_get_args(dir)
+  dockerfile = dir + '/docker/Dockerfile'
+  {
+    from: dir_get_from(IO.read(dockerfile)),
+    image_name: dir_get_image_name(dir),
+    test_framework: dir_has_start_point?(dir)
+  }
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def dir_get_from(dockerfile)
+  lines = dockerfile.split("\n")
+  from_line = lines.find { |line| line.start_with? 'FROM' }
+  from_line.split[1].strip
+end
+
+def dir_get_image_name(dir)
+  language_filename = dir + '/docker/image_name.json'
+  language_file = read_nil(language_filename)
+
+  test_framework_filename = dir + '/start_point/manifest.json'
+  test_framework_file = read_nil(test_framework_filename)
+
+  language = !language_file.nil?
+  test_framework = !test_framework_file.nil?
+
+  if !language && !test_framework
+    failed either_or + [ 'neither do.' ]
+  end
+  if language && test_framework
+    failed either_or + [ 'but not both.' ]
+  end
+  if language
+    file = language_file
+  end
+  if test_framework
+    file = test_framework_file
+  end
+  JSON.parse(file)['image_name']
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def read_nil(filename)
+  print '.'
+  File.exists?(filename) ? IO.read(filename) : nil
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def dir_has_start_point?(dir)
+  test_framework_filename = dir + '/start_point/manifest.json'
+  File.exists? test_framework_filename
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# repo
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def repo_dependencies
+  triples = {}
+  base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
+  get_repo_names.each do |repo_name|
+    # eg repo_name = 'gplusplus-catch'
+    url = base_url + '/' + repo_name + '/' + 'master/docker/Dockerfile'
+    dockerfile = curl_nil(url)
+    unless dockerfile.nil?
       triple = {}
-      set_from(triple, IO.read(dockerfile))
-      set_image_name_dir(triple, dir)
-      triples[dir] = triple
+      set_from(triple, dockerfile)
+      set_image_name_repo(triple, base_url + '/' + repo_name + '/master')
+      triples[repo_name] = triple
     end
   end
   triples
@@ -60,10 +163,7 @@ end
 
 def set_from(triple, dockerfile)
   print '.'
-  lines = dockerfile.split("\n")
-  from_line = lines.find { |line| line.start_with? 'FROM' }
-  from = from_line.split[1].strip
-  triple['from'] = from
+  triple['from'] = get_from(dockerfile)
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -81,13 +181,6 @@ def set_image_name_dir(triple, dir)
     language_file:language_file,
     test_framework_file:test_framework_file
   })
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def read_nil(filename)
-  print '.'
-  File.exists?(filename) ? IO.read(filename) : nil
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -116,41 +209,6 @@ def set_image_name(triple, args)
   end
   triple['test_framework'] = test_framework
   triple['image_name'] = JSON.parse(file)['image_name']
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def failed(lines)
-  log(['FAILED'] + lines)
-  exit 1
-end
-
-def log(lines)
-  print_to(lines, STDERR)
-end
-
-def print_to(lines, stream)
-  lines.each { |line| stream.puts line }
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def repo_dependencies
-  triples = {}
-  base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
-  get_repo_names.each do |repo_name|
-    # eg repo_name = 'gplusplus-catch'
-    url = base_url + '/' + repo_name + '/' + 'master/docker/Dockerfile'
-    dockerfile = curl_nil(url)
-    unless dockerfile.nil?
-      triple = {}
-      set_from(triple, dockerfile)
-      set_image_name_repo(triple, base_url + '/' + repo_name + '/master')
-      triples[repo_name] = triple
-    end
-  end
-  triples
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -204,19 +262,17 @@ def get_repo_names
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def dependency_graph(key, dependencies)
-  root = dependencies[key].clone
-  fill_dependency_graph(root, dependencies.clone)
-  root
+def failed(lines)
+  log(['FAILED'] + lines)
+  exit 1
 end
 
-def fill_dependency_graph(root, dependencies)
-  root['children'] = {}
-  dependencies.each do |dir,entry|
-    if root['image_name'] == entry['from']
-      fill_dependency_graph(root['children'][dir] = entry.clone, dependencies)
-    end
-  end
+def log(lines)
+  print_to(lines, STDERR)
 end
+
+def print_to(lines, stream)
+  lines.each { |line| stream.puts line }
+end
+

@@ -4,14 +4,16 @@ require 'json'
 
 class ImageBuilder
 
-  def initialize(key, args)
-    @key = key
-    @image_name = args['image_name']
-    @test_framework = args['test_framework']
-    @cloned = false
+  def initialize(src_dir, args)
+    @src_dir = src_dir
+    @args = args
   end
 
-  attr_reader :image_name
+  attr_reader :src_dir
+
+  def image_name
+    @args[:image_name]
+  end
 
   def build_and_test_image
     banner('=', src_dir)
@@ -34,7 +36,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def test_framework?
-    @test_framework
+    @args[:test_framework]
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -56,12 +58,7 @@ class ImageBuilder
     assert_system "chmod +x #{script}"
     name = 'start-point-create-check'
     system "./#{script} start-point rm #{name} &> /dev/null"
-    if on_travis?
-      url = 'https://github.com/cyber-dojo-languages/' + @key
-      assert_system "./#{script} start-point create #{name} --git=#{url}"
-    else
-      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
-    end
+    assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -240,26 +237,6 @@ class ImageBuilder
 
   def start_point_dir
     src_dir + '/start_point'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def on_travis?
-    ENV['TRAVIS'] == 'true'
-  end
-
-  def src_dir
-    if !on_travis?
-      @key # running locally
-    else
-      unless @cloned
-        url = 'https://github.com/cyber-dojo-languages/' + @key
-        assert_system "cd /tmp && mkdir -p cyber-dojo"
-        assert_system "cd /tmp/cyber-dojo && git clone #{url}"
-        @cloned = true
-      end
-      '/tmp/cyber-dojo/' + @key
-    end
   end
 
   # - - - - - - - - - - - - - - - - -

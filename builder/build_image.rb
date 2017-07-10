@@ -19,36 +19,30 @@ def running_on_travis?
   ENV['TRAVIS'] == 'true'
 end
 
-def key
-  if running_on_travis?
-    ENV['TRAVIS_REPO_SLUG'].split('/')[1]
-  else
-    ENV['SRC_DIR']
-  end
-end
-
 def push?
   ARGV.include?('--push=true') || running_on_travis?
 end
 
-puts '-' * 42
-puts 'gathering_dependencies'
-dependencies = get_dependencies
-#puts
-#puts JSON.pretty_generate(dependencies)
-
-puts
-puts "#{dependencies.size} repos gathered"
-puts
-
-graph = dependency_graph(key, dependencies)
-puts
-puts JSON.pretty_generate(graph)
-
 Dockerhub.login if push?
 
-args = dependencies[key]
-builder = ImageBuilder.new(key, args)
+src_dir = ENV['SRC_DIR']
+builder = ImageBuilder.new(src_dir, dir_get_args(src_dir))
 builder.build_and_test_image
 
 Dockerhub.push(builder.image_name) if push?
+
+=begin
+puts '-' * 42
+puts 'gathering_dependencies'
+dependencies = get_dependencies
+puts
+puts JSON.pretty_generate(dependencies)
+puts
+puts "#{dependencies.size} repos gathered"
+puts
+graph = dependency_graph(dependencies)
+puts
+puts JSON.pretty_generate(graph)
+=end
+
+
