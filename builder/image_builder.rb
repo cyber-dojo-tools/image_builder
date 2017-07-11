@@ -16,7 +16,6 @@ class ImageBuilder
     end
     build_the_image
     if test_framework?
-      check_images_red_amber_green_lambda_file
       check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_red_green_amber_using_runner_statefull
     end
@@ -24,25 +23,6 @@ class ImageBuilder
   end
 
   private
-
-  def image_name
-    @args[:image_name]
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def build_the_image
-    banner
-    assert_system "cd #{src_dir}/docker && docker build --tag #{image_name} ."
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def test_framework?
-    @args[:test_framework]
-  end
-
-  # - - - - - - - - - - - - - - - - -
 
   def check_start_point_can_be_created
     # TODO: Try the curl several times before failing?
@@ -58,10 +38,9 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_images_red_amber_green_lambda_file
+  def build_the_image
     banner
-    sss = { 'stdout' => 'sdd', 'stderr' => 'sdsd', 'status' => 42 }
-    assert_rag(:amber, sss, "#{rag_filename} sanity check")
+    assert_system "cd #{src_dir}/docker && docker build --tag #{image_name} ."
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -234,12 +213,6 @@ class ImageBuilder
     files
   end
 
-  def start_point_dir
-    src_dir + '/start_point'
-  end
-
-  attr_reader :src_dir
-
   # - - - - - - - - - - - - - - - - -
 
   def banner(ch = '-', title = caller_locations(1,1)[0].label)
@@ -279,18 +252,18 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def success
-    0
-  end
+  def image_name; @args[:image_name]; end
 
-  def rag_filename
-    '/usr/local/bin/red_amber_green.rb'
-  end
+  def test_framework?; @args[:test_framework]; end
 
-  # - - - - - - - - - - - - - - - - -
+  def start_point_dir; src_dir + '/start_point'; end
 
-  def kata_id
-    '6F4F4E4759'
-  end
+  def src_dir; @src_dir; end
+
+  def success; 0; end
+
+  def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
+
+  def kata_id; '6F4F4E4759'; end
 
 end
