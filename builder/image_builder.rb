@@ -84,16 +84,17 @@ class ImageBuilder
     args << 'salmon'
     args << all_files(colour)
     args << (max_seconds=10)
-    took,sss = timed_run { runner.run(*args) }
+    took,sss = timed { runner.run(*args) }
     assert_rag(colour, sss, "dir == #{start_point_dir}")
     puts "#{colour}: OK (~#{took} seconds)"
   end
 
   def all_files(colour)
     files = start_files
-    return files if colour == :red
-    filename,content = edited_file(colour)
-    files[filename] = content
+    if colour != :red
+      filename,content = edited_file(colour)
+      files[filename] = content
+    end
     files
   end
 
@@ -121,7 +122,7 @@ class ImageBuilder
       args << (deleted_filenames=[])
       args << changed_files(colour)
       args << (max_seconds=10)
-      took,sss = timed_run { runner.run(*args) }
+      took,sss = timed { runner.run(*args) }
       assert_rag(colour, sss, "dir == #{start_point_dir}")
       puts "#{colour}: OK (~#{took} seconds)"
     ensure
@@ -130,9 +131,12 @@ class ImageBuilder
   end
 
   def changed_files(colour)
-    return {} if colour == :red
-    filename,content = edited_file(colour)
-    { filename => content }
+    if colour == :red
+      {}
+    else
+      filename,content = edited_file(colour)
+      { filename => content }
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -182,12 +186,12 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def timed_run
+  def timed
     started = Time.now
-    sss = yield
+    result = yield
     stopped = Time.now
     took = (stopped - started).round(2)
-    return took,sss
+    return took,result
   end
 
   # - - - - - - - - - - - - - - - - -
