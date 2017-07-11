@@ -74,12 +74,12 @@ class ImageBuilder
       puts "skipped: options['runner_statefull_only']"
       return
     end
-    assert_time_run_stateless(:red)
-    assert_time_run_stateless(:amber)
-    assert_time_run_stateless(:green)
+    assert_timed_run_stateless(:red)
+    assert_timed_run_stateless(:amber)
+    assert_timed_run_stateless(:green)
   end
 
-  def assert_time_run_stateless(colour)
+  def assert_timed_run_stateless(colour)
     runner = RunnerServiceStateless.new
     args = [image_name]
     args << kata_id
