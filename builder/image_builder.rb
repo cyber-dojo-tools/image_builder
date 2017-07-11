@@ -9,12 +9,6 @@ class ImageBuilder
     @args = args
   end
 
-  attr_reader :src_dir
-
-  def image_name
-    @args[:image_name]
-  end
-
   def build_and_test_image
     banner('=', src_dir)
     #check_start_point_can_be_created if test_framework?
@@ -24,12 +18,13 @@ class ImageBuilder
       check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_red_green_amber_using_runner_statefull
     end
+    image_name
   end
 
   private
 
-  def statefull_runner_only?
-    options
+  def image_name
+    @args[:image_name]
   end
 
   def build_the_image
@@ -236,6 +231,8 @@ class ImageBuilder
   def start_point_dir
     src_dir + '/start_point'
   end
+
+  attr_reader :src_dir
 
   # - - - - - - - - - - - - - - - - -
 

@@ -16,8 +16,8 @@ Dockerhub.login if push?
 src_dir = ENV['SRC_DIR']
 args = dir_get_args(src_dir)
 builder = ImageBuilder.new(src_dir, args)
-builder.build_and_test_image
-Dockerhub.push(builder.image_name) if push?
+image_name = builder.build_and_test_image
+Dockerhub.push(image_name) if push?
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO:
