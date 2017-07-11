@@ -21,9 +21,7 @@ class ImageBuilder
     build_the_image
     if test_framework?
       check_images_red_amber_green_lambda_file
-      #unless runner_statefull_only?
-        check_start_point_src_red_green_amber_using_runner_stateless
-      #end
+      check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_red_green_amber_using_runner_statefull
     end
   end
@@ -72,6 +70,10 @@ class ImageBuilder
 
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
+    if options['runner_statefull_only']
+      puts "skipped: options['runner_statefull_only']"
+      return
+    end
     assert_time_run_stateless(:red)
     assert_time_run_stateless(:amber)
     assert_time_run_stateless(:green)
