@@ -249,7 +249,7 @@ class ImageBuilder
     system command
     status = $?.exitstatus
     unless status == success
-      failed [ command, "exit_status == #{status}" ]
+      failed command, "exit_status == #{status}"
     end
   end
 
@@ -257,15 +257,15 @@ class ImageBuilder
     output = `#{command}`
     status = $?.exitstatus
     unless status == success
-      failed [ command, "exit_status == #{status}", output ]
+      failed command, "exit_status == #{status}", output
     end
     output
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def failed(lines)
-    log(['FAILED'] + lines)
+  def failed(*lines)
+    log ['FAILED'] + lines
     exit 1
   end
 
