@@ -46,17 +46,39 @@ class Dockerhub
 
     def success; 0; end
 
-    def dockerhub_username_env_var; 'DOCKER_USERNAME'; end
-    def dockerhub_password_env_var; 'DOCKER_PASSWORD'; end
+    def dockerhub_username_env_var
+      # should be DOCKERHUB_USERNAME but too late
+      # to change it on all the cyber-dojo-languages repos
+      'DOCKER_USERNAME'
+    end
 
-    def dockerhub_username; ENV[dockerhub_username_env_var]; end
-    def dockerhub_password; ENV[dockerhub_password_env_var]; end
+    def dockerhub_password_env_var
+      # should be DOCKERHUB_PASSWORD but too late
+      # to change it on all the cyber-dojo-languages repos
+      'DOCKER_PASSWORD'
+    end
+
+    def dockerhub_username
+      ENV[dockerhub_username_env_var]
+    end
+
+    def dockerhub_password
+      ENV[dockerhub_password_env_var]
+    end
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    def banner(title); print([ '', banner_line, title, ], STDOUT); end
-    def banner_end; print([ 'OK', banner_line ], STDOUT); end
-    def banner_line; '-' * 42; end
+    def banner(title)
+      print([ '', banner_line, title, ], STDOUT)
+    end
+
+    def banner_end
+      print([ 'OK', banner_line ], STDOUT)
+    end
+
+    def banner_line
+      '-' * 42
+    end
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
