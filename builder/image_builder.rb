@@ -244,7 +244,7 @@ class ImageBuilder
 
   def banner(ch = '-', title = caller_locations(1,1)[0].label)
     line = ch * 42
-    print_to([ '', line, title], STDOUT)
+    print_to STDOUT, '', line, title
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -269,15 +269,11 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def failed(*lines)
-    log ['FAILED'] + lines
+    print_to STDERR, 'FAILED', lines
     exit 1
   end
 
-  def log(lines)
-    print_to(lines, STDERR)
-  end
-
-  def print_to(lines, stream)
+  def print_to(stream, *lines)
     lines.each { |line| stream.puts line }
   end
 
