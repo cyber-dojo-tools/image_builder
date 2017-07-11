@@ -10,3 +10,5 @@ docker build \
   --build-arg DOCKER_COMPOSE_VERSION=1.11.1 \
   --tag cyberdojofoundation/image_builder \
     ${MY_DIR}
+
+${MY_DIR}/builder/build-docker-image.sh
