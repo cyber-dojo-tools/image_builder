@@ -81,32 +81,20 @@ class ImageBuilder
 
   def assert_time_run_stateless(colour)
     runner = RunnerServiceStateless.new
-    method = colour.to_s + '_files'
-    start_files = start_point_visible_files
-    files = self.send(method.to_sym, start_files)
     args = [image_name]
     args << kata_id
     args << 'salmon'
-    args << files
+    args << files(colour)
     args << (max_seconds=10)
     took,sss = timed_run { runner.run(*args) }
     assert_rag(colour, sss, "dir == #{start_point_dir}")
     puts "#{colour}: OK (~#{took} seconds)"
   end
 
-  def red_files(start_files)
-    start_files
-  end
-
-  def amber_files(start_files)
-    filename,from,to = filename_from_to(:amber, start_files)
-    content = start_files[filename]
-    start_files[filename] = content.sub(from, to)
-    start_files
-  end
-
-  def green_files(start_files)
-    filename,from,to = filename_from_to(:green, start_files)
+  def files(colour)
+    start_files = start_point_visible_files
+    return start_files if colour == :red
+    filename,from,to = filename_from_to(colour)
     content = start_files[filename]
     start_files[filename] = content.sub(from, to)
     start_files
@@ -129,16 +117,13 @@ class ImageBuilder
   end
 
   def assert_timed_run_statefull(colour, runner, avatar_name)
-    start_files = start_point_visible_files
     begin
-      runner.avatar_new(image_name, kata_id, avatar_name, start_files)
-      method = (colour.to_s + '_changed_files').to_sym
-      changed_files = self.send(method, start_files)
+      runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
       args = [image_name]
       args << kata_id
       args << avatar_name
       args << (deleted_filenames=[])
-      args << changed_files
+      args << changed_files(colour)
       args << (max_seconds=10)
       took,sss = timed_run { runner.run(*args) }
       assert_rag(colour, sss, "dir == #{start_point_dir}")
@@ -148,37 +133,46 @@ class ImageBuilder
     end
   end
 
-  def red_changed_files(_)
-    {}
-  end
-
-  def green_changed_files(start_files)
-    filename,from,to = filename_from_to(:green, start_files)
-    { filename => start_files[filename].sub(from, to) }
-  end
-
-  def amber_changed_files(start_files)
-    filename,from,to = filename_from_to(:amber, start_files)
-    { filename => start_files[filename].sub(from, to) }
+  def changed_files(colour)
+    return {} if colour == :red
+    filename,from,to = filename_from_to(colour)
+    { filename => start_point_visible_files[filename].sub(from, to) }
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def filename_from_to(colour, start_files)
+  def filename_from_to(colour)
     args = options[colour.to_s]
     unless args.nil?
       return args['filename'],args['from'],args['to']
     end
     if colour == :amber
-      from,to = '6 * 9','6 * 9sdsd'
-      filename = filename_6_times_9(start_files, from)
+      from = '6 * 9'
+      to = '6 * 9sdsd'
+      filename = filename_6_times_9(from)
     end
     if colour == :green
-      from,to = '6 * 9','6 * 7'
-      filename = filename_6_times_9(start_files, from)
+      from = '6 * 9'
+      to = '6 * 7'
+      filename = filename_6_times_9(from)
     end
     return filename,from,to
   end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def filename_6_times_9(from)
+    filenames = start_point_visible_files.select { |filename,content| content.include? from }
+    if filenames == []
+      failed [ "no '#{from}' file found" ]
+    end
+    if filenames.length > 1
+      failed [ "multiple '#{from}' files " + filenames.inspect ]
+    end
+    filenames.keys[0]
+  end
+
+  # - - - - - - - - - - - - - - - - -
 
   def options
     # TODO: add handling of failed json parse
@@ -198,19 +192,6 @@ class ImageBuilder
     stopped = Time.now
     took = (stopped - started).round(2)
     return took,sss
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def filename_6_times_9(visible_files, pattern)
-    filenames = visible_files.select { |filename,content| content.include? pattern }
-    if filenames == []
-      failed [ "no '#{pattern}' file found" ]
-    end
-    if filenames.length > 1
-      failed [ "multiple '#{pattern}' files " + filenames.inspect ]
-    end
-    filenames.keys[0]
   end
 
   # - - - - - - - - - - - - - - - - -
