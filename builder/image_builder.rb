@@ -11,7 +11,9 @@ class ImageBuilder
 
   def build_and_test_image
     banner('=', src_dir)
-    #check_start_point_can_be_created if test_framework?
+    if test_framework?
+      check_start_point_can_be_created
+    end
     build_the_image
     if test_framework?
       check_images_red_amber_green_lambda_file
@@ -27,6 +29,8 @@ class ImageBuilder
     @args[:image_name]
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def build_the_image
     banner
     assert_system "cd #{src_dir}/docker && docker build --tag #{image_name} ."
@@ -36,14 +40,6 @@ class ImageBuilder
 
   def test_framework?
     @args[:test_framework]
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def check_images_red_amber_green_lambda_file
-    banner
-    sss = { 'stdout' => 'sdd', 'stderr' => 'sdsd', 'status' => 42 }
-    assert_rag(:amber, sss, "#{rag_filename} sanity check")
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -61,6 +57,13 @@ class ImageBuilder
   end
 
   # - - - - - - - - - - - - - - - - -
+
+  def check_images_red_amber_green_lambda_file
+    banner
+    sss = { 'stdout' => 'sdd', 'stderr' => 'sdsd', 'status' => 42 }
+    assert_rag(:amber, sss, "#{rag_filename} sanity check")
+  end
+
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_stateless
@@ -94,7 +97,6 @@ class ImageBuilder
     files
   end
 
-  # - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_statefull
