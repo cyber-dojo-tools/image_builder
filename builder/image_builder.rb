@@ -81,9 +81,9 @@ class ImageBuilder
 
   def assert_time_run_stateless(colour)
     runner = RunnerServiceStateless.new
-    method = (colour.to_s + '_files').to_sym
+    method = colour.to_s + '_files'
     start_files = start_point_visible_files
-    files = self.send(method, start_files)
+    files = self.send(method.to_sym, start_files)
     args = [image_name]
     args << kata_id
     args << 'salmon'
