@@ -17,16 +17,22 @@ class ImageBuilder
 
   def build_and_test_image
     banner('=', src_dir)
-    check_start_point_can_be_created if test_framework?
+    #check_start_point_can_be_created if test_framework?
     build_the_image
     if test_framework?
       check_images_red_amber_green_lambda_file
-      check_start_point_src_red_green_amber_using_runner_stateless
+      #unless runner_statefull_only?
+        check_start_point_src_red_green_amber_using_runner_stateless
+      #end
       check_start_point_src_red_green_amber_using_runner_statefull
     end
   end
 
   private
+
+  def statefull_runner_only?
+    options
+  end
 
   def build_the_image
     banner
@@ -157,11 +163,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def filename_from_to(colour, start_files)
-    if options?
-      args = options[colour.to_s]
-      unless args.nil?
-        return args['filename'],args['from'],args['to']
-      end
+    args = options[colour.to_s]
+    unless args.nil?
+      return args['filename'],args['from'],args['to']
     end
     if colour == :amber
       from,to = '6 * 9','6 * 9sdsd'
@@ -174,17 +178,14 @@ class ImageBuilder
     return filename,from,to
   end
 
-  def options_file
-    start_point_dir + '/options.json'
-  end
-
-  def options?
-    File.exists? options_file
-  end
-
   def options
     # TODO: add handling of failed json parse
-    @options ||= JSON.parse(IO.read(options_file))
+    options_file = start_point_dir + '/options.json'
+    if File.exists? options_file
+      JSON.parse(IO.read(options_file))
+    else
+      {}
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
