@@ -84,20 +84,19 @@ class ImageBuilder
     args = [image_name]
     args << kata_id
     args << 'salmon'
-    args << files(colour)
+    args << all_files(colour)
     args << (max_seconds=10)
     took,sss = timed_run { runner.run(*args) }
     assert_rag(colour, sss, "dir == #{start_point_dir}")
     puts "#{colour}: OK (~#{took} seconds)"
   end
 
-  def files(colour)
-    start_files = start_point_visible_files
-    return start_files if colour == :red
-    filename,from,to = filename_from_to(colour)
-    content = start_files[filename]
-    start_files[filename] = content.sub(from, to)
-    start_files
+  def all_files(colour)
+    files = start_files
+    return files if colour == :red
+    filename,content = edited_file(colour)
+    files[filename] = content
+    files
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -118,7 +117,7 @@ class ImageBuilder
 
   def assert_timed_run_statefull(colour, runner, avatar_name)
     begin
-      runner.avatar_new(image_name, kata_id, avatar_name, start_point_visible_files)
+      runner.avatar_new(image_name, kata_id, avatar_name, start_files)
       args = [image_name]
       args << kata_id
       args << avatar_name
@@ -135,34 +134,34 @@ class ImageBuilder
 
   def changed_files(colour)
     return {} if colour == :red
-    filename,from,to = filename_from_to(colour)
-    { filename => start_point_visible_files[filename].sub(from, to) }
+    filename,content = edited_file(colour)
+    { filename => content }
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def filename_from_to(colour)
+  def edited_file(colour)
     args = options[colour.to_s]
-    unless args.nil?
-      return args['filename'],args['from'],args['to']
-    end
-    if colour == :amber
+    if !args.nil?
+      filename = args['filename']
+      from = args['from']
+      to = args['to']
+    elsif colour == :amber
       from = '6 * 9'
       to = '6 * 9sdsd'
       filename = filename_6_times_9(from)
-    end
-    if colour == :green
+    elsif colour == :green
       from = '6 * 9'
       to = '6 * 7'
       filename = filename_6_times_9(from)
     end
-    return filename,from,to
+    return filename, start_files[filename].sub(from,to)
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def filename_6_times_9(from)
-    filenames = start_point_visible_files.select { |filename,content| content.include? from }
+    filenames = start_files.select { |_,content| content.include? from }
     if filenames == []
       failed [ "no '#{from}' file found" ]
     end
@@ -221,14 +220,17 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def start_point_visible_files
+  def start_files
     # start-point has already been verified
-    manifest = JSON.parse(IO.read(start_point_dir + '/manifest.json'))
-    visible_files = {}
+    manifest_filename = start_point_dir + '/manifest.json'
+    manifest = IO.read(manifest_filename)
+    manifest = JSON.parse(manifest)
+    files = {}
     manifest['visible_filenames'].each do |filename|
-      visible_files[filename] = IO.read(start_point_dir + '/' + filename)
+      path = start_point_dir + '/' + filename
+      files[filename] = IO.read(path)
     end
-    visible_files
+    files
   end
 
   def start_point_dir
