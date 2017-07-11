@@ -10,7 +10,7 @@ class ImageBuilder
   end
 
   def build_and_test_image
-    banner('=', src_dir)
+    banner
     if test_framework?
       check_start_point_can_be_created
     end
@@ -215,8 +215,9 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def banner(ch = '-', title = caller_locations(1,1)[0].label)
-    line = ch * 42
+  def banner
+    line = '-' * 42
+    title = caller_locations(1,1)[0].label
     print_to STDOUT, '', line, title
   end
 
