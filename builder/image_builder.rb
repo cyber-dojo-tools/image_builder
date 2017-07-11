@@ -157,12 +157,11 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def filename_from_to(colour, start_files)
-    pattern_file = start_point_dir + '/red_amber_green_pattern.json'
-    if File.exists? pattern_file
-      # TODO: add handling of failed json parse
-      json = JSON.parse(IO.read(pattern_file))
-      args = json[colour.to_s]
-      return args['filename'],args['from'],args['to']
+    if options?
+      args = options[colour.to_s]
+      unless args.nil?
+        return args['filename'],args['from'],args['to']
+      end
     end
     if colour == :amber
       from,to = '6 * 9','6 * 9sdsd'
@@ -173,6 +172,19 @@ class ImageBuilder
       filename = filename_6_times_9(start_files, from)
     end
     return filename,from,to
+  end
+
+  def options_file
+    start_point_dir + '/options.json'
+  end
+
+  def options?
+    File.exists? options_file
+  end
+
+  def options
+    # TODO: add handling of failed json parse
+    @options ||= JSON.parse(IO.read(options_file))
   end
 
   # - - - - - - - - - - - - - - - - -
