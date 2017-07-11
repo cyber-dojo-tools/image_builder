@@ -3,14 +3,14 @@ class Dockerhub
 
   def self.login
     banner 'dockerhub_login'
-    if docker_username == ''
-      failed [ "#{docker_username_env_var} env-var not set" ]
+    if dockerhub_username == ''
+      failed [ "#{dockerhub_username_env_var} env-var not set" ]
     end
-    if docker_password == ''
-      failed [ "#{docker_password_env_var} env-var not set" ]
+    if dockerhub_password == ''
+      failed [ "#{dockerhub_password_env_var} env-var not set" ]
     end
     # careful not to show password if command fails
-    output = `#{docker_login_cmd(docker_username, docker_password)}`
+    output = `#{docker_login_cmd(dockerhub_username, dockerhub_password)}`
     status = $?.exitstatus
     unless status == success
       failed [
@@ -46,11 +46,11 @@ class Dockerhub
 
     def success; 0; end
 
-    def docker_username_env_var; 'DOCKER_USERNAME'; end
-    def docker_password_env_var; 'DOCKER_PASSWORD'; end
+    def dockerhub_username_env_var; 'DOCKER_USERNAME'; end
+    def dockerhub_password_env_var; 'DOCKER_PASSWORD'; end
 
-    def docker_username; ENV[docker_username_env_var]; end
-    def docker_password; ENV[docker_password_env_var]; end
+    def dockerhub_username; ENV[dockerhub_username_env_var]; end
+    def dockerhub_password; ENV[dockerhub_password_env_var]; end
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
