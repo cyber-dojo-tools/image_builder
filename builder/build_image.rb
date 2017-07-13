@@ -19,6 +19,20 @@ builder = ImageBuilder.new(src_dir, args)
 image_name = builder.build_and_test_image
 Dockerhub.push(image_name) if push?
 
+if ARGV.include?('--show-deps=true')
+  puts '-' * 42
+  puts 'gathering_dependencies'
+  dependencies = get_dependencies
+  puts
+  puts JSON.pretty_generate(dependencies)
+  puts
+  puts "#{dependencies.size} repos gathered"
+  puts
+  graph = dependency_graph(dependencies)
+  puts
+  puts JSON.pretty_generate(graph)
+end
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO:
 # Running Travis
@@ -26,19 +40,4 @@ Dockerhub.push(image_name) if push?
 #
 # Running locally
 # graph-chain-build all dependents
-
-=begin
-puts '-' * 42
-puts 'gathering_dependencies'
-dependencies = get_dependencies
-puts
-puts JSON.pretty_generate(dependencies)
-puts
-puts "#{dependencies.size} repos gathered"
-puts
-graph = dependency_graph(dependencies)
-puts
-puts JSON.pretty_generate(graph)
-=end
-
 
