@@ -10,7 +10,6 @@ class ImageBuilder
   end
 
   def build_and_test_image
-    banner
     if test_framework?
       check_start_point_can_be_created
     end
