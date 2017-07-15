@@ -1,7 +1,7 @@
 # image_builder
 
 [run_build_image.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/run_build_image.sh)
-is the script (containing docker commands) which all the language repos curl and then run as
+is the script (containing docker commands) which all the cyber-dojo-languages repos curl and then run as
 the only command in their .travis.yml file.
 
 There are two kinds of repos in the cyber-dojo-languages github organization,
