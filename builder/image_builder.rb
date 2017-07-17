@@ -46,8 +46,8 @@ class ImageBuilder
 
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
-    if options['runner_statefull_only']
-      puts "skipped: options['runner_statefull_only']"
+    if manifest['runner_choice'] == 'stateful'
+      puts "skipped: manifest.json ==> 'runner_choice':'stateful'"
       return
     end
     assert_timed_run_stateless(:red)
@@ -80,6 +80,10 @@ class ImageBuilder
 
   def check_start_point_src_red_green_amber_using_runner_statefull
     banner
+    if manifest['runner_choice'] == 'stateless'
+      puts "skipped: manifest.json ==> 'runner_choice':'stateless'"
+      return
+    end
     runner = RunnerServiceStatefull.new
     runner.kata_new(image_name, kata_id)
     begin
@@ -160,6 +164,13 @@ class ImageBuilder
     else
       {}
     end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def manifest
+    manifest_file = start_point_dir + '/manifest.json'
+    JSON.parse(IO.read(manifest_file))
   end
 
   # - - - - - - - - - - - - - - - - -
