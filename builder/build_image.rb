@@ -33,6 +33,8 @@ if ARGV.include?('--show-deps=true')
   puts JSON.pretty_generate(graph)
 end
 
+puts
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO:
 # Running Travis
