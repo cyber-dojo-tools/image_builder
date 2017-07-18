@@ -4,8 +4,9 @@
 is the script (containing docker commands) which all the cyber-dojo-languages repos curl and then run as
 the only command in their .travis.yml file.
 
-There are two kinds of repos in the cyber-dojo-languages github organization,
-language repos, and testFramework repos.
+There are two kinds of repos in the cyber-dojo-languages github organization:
+- language repos
+- testFramework repos
 
 # language repos
 Contain a Dockerfile which installs the language.
@@ -26,8 +27,8 @@ dockerhub.
 See [example](https://github.com/cyber-dojo-languages/python-pytest).
 
 The tests
-- Verify the start_point files using the command [ [cyber-dojo](https://github.com/cyber-dojo/commander/blob/master/cyber-dojo) start-point create name --git=REPO_URL ]
-- Verify the start_point is red
-- Verify the start_point tweaked to amber is amber
-- Verify the start_point tweaked to green is green
+- Verify the start_point files using the command [ [cyber-dojo](https://github.com/cyber-dojo/commander/blob/master/cyber-dojo) start-point create name --dir=REPO_DIR ]
+- Verify the start_point files run outcome is red
+- Verify the start_point files tweaked to amber is amber
+- Verify the start_point files tweaked to green is green
 - Notifies all dependent repos (not live yet)
