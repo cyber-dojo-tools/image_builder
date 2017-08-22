@@ -1,11 +1,4 @@
 
-# Use different language-testFramework than elixir-exunit
-# so that the dev cycle runs quicker.
-#
-# Why does a ./pipe call try and do dockerhub push if I'm not on Travis.
-# Split so push is separate command that only gets called in .travis.yml
-
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO: Don't trigger_dependent_git_repos.
 #       Instead have option to control when this run is for a single

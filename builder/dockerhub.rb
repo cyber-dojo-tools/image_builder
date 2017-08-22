@@ -1,4 +1,7 @@
 
+# Code to push a successfully built and tested
+# language/testFramework docker image to dockerhub.
+
 class Dockerhub
 
   def self.login
