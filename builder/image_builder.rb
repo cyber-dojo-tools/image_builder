@@ -85,15 +85,17 @@ class ImageBuilder
       puts "manifest.json ==> 'runner_choice':'stateless'"
       puts 'checking anyway'
     end
-    @runner = RunnerServiceStatefull.new
     in_kata {
-      assert_timed_run_statefull(:red  , 'rhino')
-      assert_timed_run_statefull(:amber, 'antelope')
-      assert_timed_run_statefull(:green, 'gopher')
+      as_avatar { |name|
+        assert_timed_run_statefull(name, :red)
+        assert_timed_run_statefull(name, :amber)
+        assert_timed_run_statefull(name, :green)
+      }
     }
   end
 
   def in_kata
+    @runner = RunnerServiceStatefull.new
     @runner.kata_new(image_name, kata_id)
     begin
       yield
@@ -102,30 +104,26 @@ class ImageBuilder
     end
   end
 
-  def assert_timed_run_statefull(colour, avatar_name)
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # TODO: this needs to be run statefully. Viz on the same avatar
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    as_avatar(avatar_name) {
-      args = [image_name]
-      args << kata_id
-      args << avatar_name
-      args << (deleted_filenames=[])
-      args << changed_files(colour)
-      args << (max_seconds=10)
-      took,sss = timed { @runner.run(*args) }
-      assert_rag(colour, sss, "dir == #{start_point_dir}")
-      puts "#{colour}: OK (~#{took} seconds)"
-    }
-  end
-
-  def as_avatar(avatar_name)
+  def as_avatar
+    avatar_name = 'rhino'
     @runner.avatar_new(image_name, kata_id, avatar_name, start_files)
     begin
-      yield
+      yield avatar_name
     ensure
       @runner.avatar_old(image_name, kata_id, avatar_name)
     end
+  end
+
+  def assert_timed_run_statefull(avatar_name, colour)
+    args = [image_name]
+    args << kata_id
+    args << avatar_name
+    args << (deleted_filenames=[])
+    args << changed_files(colour)
+    args << (max_seconds=10)
+    took,sss = timed { @runner.run(*args) }
+    assert_rag(colour, sss, "dir == #{start_point_dir}")
+    puts "#{colour}: OK (~#{took} seconds)"
   end
 
   def changed_files(colour)
@@ -136,8 +134,6 @@ class ImageBuilder
       { filename => content }
     end
   end
-
-  # - - - - - - - - - - - - - - - - -
 
   def edited_file(colour)
     args = options[colour.to_s]
@@ -156,8 +152,6 @@ class ImageBuilder
     end
     return filename, start_files[filename].sub(from,to)
   end
-
-  # - - - - - - - - - - - - - - - - -
 
   def filename_6_times_9(from)
     filenames = start_files.select { |_,content| content.include? from }
