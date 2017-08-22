@@ -3,9 +3,17 @@
 # This is the main entry-point for the image_builder
 # docker-image which includes docker-compose inside it.
 
-def success; 0; end
-def space; ' '; end
-def my_dir; File.dirname(__FILE__); end
+def success
+  0
+end
+
+def space
+  ' '
+end
+
+def my_dir
+  File.dirname(__FILE__)
+end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -120,6 +128,10 @@ def env_var(name)
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+puts "~~~~~~~~"
+puts "outer_main.rb: ARGV=#{ARGV}"
+puts "~~~~~~~~"
 
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
