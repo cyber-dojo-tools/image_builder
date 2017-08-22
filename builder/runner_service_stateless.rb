@@ -1,4 +1,4 @@
-require_relative 'http_service'
+require_relative 'http_json_service'
 
 class RunnerServiceStateless
 
@@ -12,7 +12,7 @@ class RunnerServiceStateless
 
   private
 
-  include HttpService
+  include HttpJsonService
 
   def hostname
     'runner_stateless'

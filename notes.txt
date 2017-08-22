@@ -1,4 +1,11 @@
 
+# Use different language-testFramework than elixir-exunit
+# so that the dev cycle runs quicker.
+#
+# Why does a ./pipe call try and do dockerhub push if I'm not on Travis.
+# Split so push is separate command that only gets called in .travis.yml
+
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO: Don't trigger_dependent_git_repos.
 #       Instead have option to control when this run is for a single
@@ -67,6 +74,12 @@
 # Could also use the base-dir of the dir given.
 # That would work well for a local build.
 
+
+# display timings
+# - - - - - - - -
+# I would like to scrape the Travis logs for all the language
+# repos and display the red/amber/green test durations in a
+# sorted list.
 
 
 # display version numbers

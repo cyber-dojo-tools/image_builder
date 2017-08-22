@@ -11,7 +11,7 @@
 !image_builder.rb
 !dependencies.rb
 !dockerhub.rb
-!http_service.rb
+!http_json_service.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb
 
