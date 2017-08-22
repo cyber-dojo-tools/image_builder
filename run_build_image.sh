@@ -67,7 +67,7 @@ docker run \
   --env TRAVIS_REPO_SLUG \
   --volume=/var/run/docker.sock:/var/run/docker.sock \
     cyberdojofoundation/image_builder \
-      /app/build_image.rb ${*}
+      /app/outer_main.rb ${*}
 
 exit_status=$?
 
