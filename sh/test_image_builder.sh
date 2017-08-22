@@ -5,7 +5,7 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 
 # good-test-framework
 export TRAVIS_REPO_SLUG=cyber-dojo-languages/gcc-assert
-./run_build_image.sh ${ROOT_DIR}/test/gcc-assert
+${ROOT_DIR}/run_build_image.sh ${ROOT_DIR}/test/gcc-assert
 
 # TODO: shunit2
 #

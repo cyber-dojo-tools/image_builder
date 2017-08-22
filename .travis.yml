@@ -3,4 +3,4 @@ language: generic
 
 script:
     - ./pipe_build_test.sh
-    - ./push_image.sh
+    - ./sh/push_image_builder.sh
