@@ -3,4 +3,4 @@ set -e
 
 ./build.sh
 ./test.sh
-./push.sh
+#./push.sh
