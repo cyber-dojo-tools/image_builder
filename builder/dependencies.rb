@@ -92,6 +92,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def dir_get_args(dir)
+  puts "dir_get_args(#{dir})"
   get_args(dir) { |filename| read_nil(filename) }
 end
 
