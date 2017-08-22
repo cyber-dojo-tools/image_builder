@@ -30,7 +30,7 @@ fi
 shift # ${1}
 
 if [ -z "${TRAVIS}" ]; then
-  echo "Running locally"
+  echo 'Running locally'
   readonly BASE_DIR=$(dirname ${SRC_DIR})
 else
   echo 'Running on TRAVIS'

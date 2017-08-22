@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
 
-./build.sh
-./test.sh
-#./push.sh
+./build_image_builder.sh
+./test_image_builder.sh
