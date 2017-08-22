@@ -9,16 +9,21 @@ def running_on_travis?
 end
 
 def push?
-  ARGV.include?('--push=true') || running_on_travis?
+  running_on_travis?
 end
 
-Dockerhub.login if push?
+if push?
+  Dockerhub.login
+end
+
 src_dir = ENV['SRC_DIR']
 args = dir_get_args(src_dir)
-
 builder = ImageBuilder.new(src_dir, args)
 image_name = builder.build_and_test_image
-Dockerhub.push(image_name) if push?
+
+if push?
+  Dockerhub.push(image_name)
+end
 
 if ARGV.include?('--show-deps=true')
   puts '-' * 42

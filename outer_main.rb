@@ -75,13 +75,15 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def wait_till(method_name, service_name)
-  max_wait = 5 # seconds
+  max_wait = 5   # seconds
   one_wait = 0.2 # seconds
   done = false
   tries = 0
   while !done && tries < (max_wait / one_wait)
     done = Object.send(method_name, service_name)
-    assert_shell("sleep #{one_wait}") unless done
+    unless done
+      assert_shell("sleep #{one_wait}")
+    end
     tries += 1
   end
   unless Object.send(method_name, service_name)
