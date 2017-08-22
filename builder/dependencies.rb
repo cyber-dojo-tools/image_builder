@@ -34,7 +34,7 @@ require 'json'
 # successfully updated to a new version of its base language
 # (or a newer version of the test framework) then its docker
 # image-name does not change. This decoupling means the
-# start-points do not have to also be updated.
+# start-points usually don't have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def get_dependencies

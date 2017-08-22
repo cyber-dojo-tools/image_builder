@@ -13,7 +13,13 @@ class RunnerServiceStateless
   private
 
   include HttpService
-  def hostname; 'runner_stateless'; end
-  def port; '4597'; end
+
+  def hostname
+    'runner_stateless'
+  end
+
+  def port
+    '4597'
+  end
 
 end

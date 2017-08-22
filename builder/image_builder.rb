@@ -47,7 +47,8 @@ class ImageBuilder
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
     if manifest['runner_choice'] == 'stateful'
-      puts "skipped: manifest.json ==> 'runner_choice':'stateful'"
+      puts "manifest.json ==> 'runner_choice':'stateful'"
+      puts 'skipping'
       return
     end
     assert_timed_run_stateless(:red)
@@ -81,34 +82,49 @@ class ImageBuilder
   def check_start_point_src_red_green_amber_using_runner_statefull
     banner
     if manifest['runner_choice'] == 'stateless'
-      puts "skipped: manifest.json ==> 'runner_choice':'stateless'"
-      return
+      puts "manifest.json ==> 'runner_choice':'stateless'"
+      puts 'checking anyway'
     end
-    runner = RunnerServiceStatefull.new
-    runner.kata_new(image_name, kata_id)
+    @runner = RunnerServiceStatefull.new
+    in_kata {
+      assert_timed_run_statefull(:red  , 'rhino')
+      assert_timed_run_statefull(:amber, 'antelope')
+      assert_timed_run_statefull(:green, 'gopher')
+    }
+  end
+
+  def in_kata
+    @runner.kata_new(image_name, kata_id)
     begin
-      assert_timed_run_statefull(:red  , runner, 'rhino')
-      assert_timed_run_statefull(:amber, runner, 'antelope')
-      assert_timed_run_statefull(:green, runner, 'gopher')
+      yield
     ensure
-      runner.kata_old(image_name, kata_id)
+      @runner.kata_old(image_name, kata_id)
     end
   end
 
-  def assert_timed_run_statefull(colour, runner, avatar_name)
-    begin
-      runner.avatar_new(image_name, kata_id, avatar_name, start_files)
+  def assert_timed_run_statefull(colour, avatar_name)
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # TODO: this needs to be run statefully. Viz on the same avatar
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    as_avatar(avatar_name) {
       args = [image_name]
       args << kata_id
       args << avatar_name
       args << (deleted_filenames=[])
       args << changed_files(colour)
       args << (max_seconds=10)
-      took,sss = timed { runner.run(*args) }
+      took,sss = timed { @runner.run(*args) }
       assert_rag(colour, sss, "dir == #{start_point_dir}")
       puts "#{colour}: OK (~#{took} seconds)"
+    }
+  end
+
+  def as_avatar(avatar_name)
+    @runner.avatar_new(image_name, kata_id, avatar_name, start_files)
+    begin
+      yield
     ensure
-      runner.avatar_old(image_name, kata_id, avatar_name)
+      @runner.avatar_old(image_name, kata_id, avatar_name)
     end
   end
 
@@ -157,7 +173,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def options
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # TODO: add handling of failed json parse
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     options_file = start_point_dir + '/options.json'
     if File.exists? options_file
       JSON.parse(IO.read(options_file))
@@ -201,7 +219,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def call_rag_lambda(sss)
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # TODO: improve diagnostics if cat/eval/call fails
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
     src = assert_backtick cat_rag_filename
     fn = eval(src)
@@ -263,18 +283,32 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def image_name; @args[:image_name]; end
+  def image_name
+    @args[:image_name]
+  end
 
-  def test_framework?; @args[:test_framework]; end
+  def test_framework?
+    @args[:test_framework]
+  end
 
-  def start_point_dir; src_dir + '/start_point'; end
+  def start_point_dir
+    src_dir + '/start_point'
+  end
 
-  def src_dir; @src_dir; end
+  def src_dir
+    @src_dir
+  end
 
-  def success; 0; end
+  def success
+    0
+  end
 
-  def rag_filename; '/usr/local/bin/red_amber_green.rb'; end
+  def rag_filename
+    '/usr/local/bin/red_amber_green.rb'
+  end
 
-  def kata_id; '6F4F4E4759'; end
+  def kata_id
+    '6F4F4E4759'
+  end
 
 end

@@ -41,7 +41,7 @@ fi
 # By default this lives on one network and the containers
 # created inside image_builder (from its docker-compose.yml file)
 # live on a different network, and thus the later won't be able
-# to connect to the former. To solve this I'm putting the src-dir/..
+# to see to the former. To solve this I'm putting the src-dir/..
 # data-volume-container into its own dedicated network.
 
 docker network create ${NETWORK} > /dev/null
