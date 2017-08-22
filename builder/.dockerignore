@@ -6,7 +6,7 @@
 
 #-----!Except these files
 
-!build_image.rb
+!inner_main.rb
 
 !image_builder.rb
 !dependencies.rb
