@@ -92,7 +92,6 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def dir_get_args(dir)
-  puts "dir_get_args(#{dir})"
   get_args(dir) { |filename| read_nil(filename) }
 end
 
@@ -152,7 +151,9 @@ end
 def get_args(base)
   docker_filename = base + '/docker/Dockerfile'
   dockerfile = yield(docker_filename)
-  return nil if dockerfile.nil?
+  if dockerfile.nil?
+    return nil
+  end
   args = []
   args << (image_name_filename = base + '/docker/image_name.json')
   args << (manifest_filename   = base + '/start_point/manifest.json')

@@ -129,10 +129,6 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-puts "~~~~~~~~"
-puts "outer_main.rb: ARGV=#{ARGV}"
-puts "~~~~~~~~"
-
 docker_compose 'up -d runner'
 docker_compose 'up -d runner_stateless'
 

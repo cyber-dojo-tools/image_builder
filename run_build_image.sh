@@ -4,10 +4,6 @@
 # This script is curl'd and run as the only command in each
 # cyber-dojo-language repo's .travis.yml script.
 
-echo "~~~~~~~~"
-echo "./run_build_image.sh"
-echo "~~~~~~~~"
-
 show_use() {
   echo 'Use: run_build_image.sh <SRC_DIR> [options...]'
   echo 'Options:'
@@ -40,13 +36,6 @@ else
   echo 'Running on TRAVIS'
   readonly BASE_DIR=${SRC_DIR}
 fi
-
-echo "~~~~~~~~"
-echo "./run_build_image.sh: SRC_DIR=:${SRC_DIR}:"
-echo "./run_build_image.sh: BASE_DIR=:${BASE_DIR}:"
-echo "./run_build_image.sh: ARGS=:${*}:"
-echo "~~~~~~~~"
-
 
 # I create a data-volume-container which holds src-dir/..
 # By default this lives on one network and the containers

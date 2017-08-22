@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "~~~~~~~~"
-echo "sh/INSIDE test_image_builder.sh"
-echo "~~~~~~~~"
-
 readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 
 # good-test-framework

@@ -16,11 +16,6 @@ Dockerhub.login if push?
 src_dir = ENV['SRC_DIR']
 args = dir_get_args(src_dir)
 
-puts "~~~~~~~~~~"
-puts "inner_main.rb: src_dir=:#{src_dir}:"
-puts "inner_main.rb: args=:#{args}:"
-puts "~~~~~~~~~~"
-
 builder = ImageBuilder.new(src_dir, args)
 image_name = builder.build_and_test_image
 Dockerhub.push(image_name) if push?
