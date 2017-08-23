@@ -40,6 +40,16 @@
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+# TODO: could have a flag which, when given the name of a base repo,
+#       and running locally, outputs a script of dependents, in order,
+#       which can be piped into bash/sh.
+#       Eg
+#       image_builder/run_build_image ...../python-3.6.1
+#       image_builder/run_build_image ...../python-pytest
+#       image_builder/run_build_image ...../python-behave
+#       image_builder/run_build_image ...../python-unittest
+
+
 # TODO: are we are on Travis or running locally?
 # If on Travis, then only the current dir needs to be
 # volume mounted so it is visible inside the container.

@@ -35,6 +35,6 @@ The tests
 - Verify the start_point files run outcome is red
 - Verify the start_point files tweaked to amber is amber
 - Verify the start_point files tweaked to green is green
-- Notifies all dependent repos (not live yet)
+- Triggers all dependent github repos (not live yet)
 
 - - - -
