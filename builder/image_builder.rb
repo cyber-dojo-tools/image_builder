@@ -83,7 +83,8 @@ class ImageBuilder
     banner
     if manifest['runner_choice'] == 'stateless'
       puts "manifest.json ==> 'runner_choice':'stateless'"
-      puts 'checking anyway'
+      puts 'skipping'
+      return
     end
     in_kata {
       as_avatar { |name|
