@@ -1,0 +1,93 @@
+
+# Plan is to do this in image_builder when it builds the
+# language-test-framework image.
+# Maybe by created a uuid and creating an image with the uuid as its name.
+# Then make this one FROM the uuid.
+# It creates the image with the specified name.
+# Then delete the image called uuid.
+
+# Alpine-based, explicit runner-choice==stateless
+# -----------------------------------------------
+# bash-shunit2: Modified its Dockerfile as below...
+#     verified it ../image_builder/run_build_image.sh
+# bash-unit   : Left its Dockerfile unchanged.
+#     verified it ../image_builder/run_build_image.sh
+
+
+RUN if [ ! $(getent group cyber-dojo) ]; then \
+      addgroup -g 5000 cyber-dojo; \
+    fi
+
+RUN deluser alligator 2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/alligator -s '/bin/sh' -u 40000 alligator
+
+RUN deluser antelope  2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/antelope  -s '/bin/sh' -u 40001 antelope
+
+RUN deluser bat       2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/bat       -s '/bin/sh' -u 40002 bat
+
+RUN deluser bear      2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/bear      -s '/bin/sh' -u 40003 bear
+
+RUN deluser bee       2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/bee       -s '/bin/sh' -u 40004 bee
+
+RUN deluser beetle    2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/beetle    -s '/bin/sh' -u 40005 beetle
+
+# ...
+
+RUN deluser salmon    2> /dev/null || true
+RUN adduser -D -G cyber-dojo -h /home/salmon    -s '/bin/sh' -u 40045 salmon
+
+# ...
+
+
+
+
+# Ubuntu-based, explicit runner-choice==stateless
+# python-pytest: Modified its Dockerfile as below...
+#     verified it ../image_builder/run_build_image.sh
+# python-behave: Left its Dockerfile unchanged
+#     verified it ../image_builder/run_build_image.sh
+
+
+RUN if [ ! $(getent group cyber-dojo) ]; then \
+      addgroup --gid 5000 cyber-dojo; \
+    fi
+
+RUN deluser alligator 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/alligator --ingroup cyber-dojo --uid 40000 alligator
+
+RUN deluser antelope 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/antelope --ingroup cyber-dojo --uid 40001 antelope
+
+RUN deluser bat 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/bat --ingroup cyber-dojo --uid 40002 bat
+
+RUN deluser bear 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/bear --ingroup cyber-dojo --uid 40003 bear
+
+RUN deluser bee 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/bee --ingroup cyber-dojo --uid 40004 bee
+
+RUN deluser beetle 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/beetle --ingroup cyber-dojo --uid 40005 beetle
+
+# ...
+
+RUN deluser salmon 2> /dev/null || true
+RUN adduser --disabled-password --gecos "" --home /home/salmon --ingroup cyber-dojo --uid 40045 salmon
+
+# ...
+
+
+
+# Now to repeat all 4 steps
+# with the runner-choice temporarily switched to stateful.
+
+
+
+
+
