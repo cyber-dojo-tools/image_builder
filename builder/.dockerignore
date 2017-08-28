@@ -8,10 +8,11 @@
 
 !inner_main.rb
 
-!image_builder.rb
+!all_avatars_names.rb
 !dependencies.rb
 !dockerhub.rb
 !http_json_service.rb
+!image_builder.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb
 

@@ -1,5 +1,8 @@
+require_relative 'all_avatars_names'
 require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
+require 'securerandom'
+require 'tmpdir'
 require 'json'
 
 class ImageBuilder
@@ -39,8 +42,96 @@ class ImageBuilder
 
   def build_the_image
     banner
-    assert_system "cd #{src_dir}/docker && docker build --tag #{image_name} ."
+    uuid = SecureRandom.hex[0..10].downcase
+    temp_image_name = "imagebuilder/tmp_#{uuid}"
+    assert_system "cd #{src_dir}/docker && docker build --tag #{temp_image_name} ."
+
+    Dir.mktmpdir('image_builder') do |tmp_dir|
+      docker_filename = "#{tmp_dir}/Dockerfile"
+      File.open(docker_filename, 'w') { |fd|
+        fd.write(make_users_dockerfile(temp_image_name))
+      }
+      assert_system [
+        'docker build',
+          "--file #{docker_filename}",
+          "--tag #{image_name}",
+          tmp_dir
+      ].join(' ')
+    end
+
+    assert_system "docker rmi #{temp_image_name}"
   end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def make_users_dockerfile(image_name)
+    cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
+    etc_issue = assert_backtick cmd
+    if etc_issue.include?('Alpine')
+      return alpine_dockerfile(image_name)
+    end
+    if etc_issue.include?('Ubuntu')
+      return ubuntu_dockerfile(image_name)
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def alpine_dockerfile(image_name)
+    dockerfile = [
+      "FROM #{image_name}",
+      '',
+      'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
+      '      addgroup -g 5000 cyber-dojo; \\',
+      '    fi',
+    ].join("\n")
+    all_avatars_names.each do |avatar_name|
+      user_id = 40000 + all_avatars_names.index(avatar_name)
+      dockerfile += [
+        '',
+        "RUN deluser #{avatar_name} 2> /dev/null || true",
+        'RUN adduser \\',
+        '  -D \\',                      # no password
+        '  -G cyber-dojo \\',           # group
+        "  -h /home/#{avatar_name} \\", # home-dir
+        "  -s '/bin/sh' \\",            # shell
+        "  -u #{user_id} \\",
+        "  #{avatar_name}",
+        ''
+      ].join("\n")
+    end
+    dockerfile
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def ubuntu_dockerfile(image_name)
+    dockerfile = [
+      "FROM #{image_name}",
+      '',
+      'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
+      '      addgroup --gid 5000 cyber-dojo; \\',
+      '    fi',
+    ].join("\n")
+    all_avatars_names.each do |avatar_name|
+      user_id = 40000 + all_avatars_names.index(avatar_name)
+      dockerfile += [
+        '',
+        "RUN deluser #{avatar_name} 2> /dev/null || true",
+        'RUN adduser \\',
+        '  --disabled-password \\',
+        '  --gecos "" \\',                    # don't ask for details
+        '  --ingroup cyber-dojo \\',
+        "  --home    /home/#{avatar_name} \\",
+        "  --uid #{user_id} \\",
+        "  #{avatar_name}",
+        ''
+      ].join("\n")
+    end
+    dockerfile
+  end
+
+  include AllAvatarsNames
 
   # - - - - - - - - - - - - - - - - -
 
@@ -95,6 +186,8 @@ class ImageBuilder
     }
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def in_kata
     @runner = RunnerServiceStatefull.new
     @runner.kata_new(image_name, kata_id)
@@ -105,6 +198,8 @@ class ImageBuilder
     end
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def as_avatar
     avatar_name = 'rhino'
     @runner.avatar_new(image_name, kata_id, avatar_name, start_files)
@@ -114,6 +209,8 @@ class ImageBuilder
       @runner.avatar_old(image_name, kata_id, avatar_name)
     end
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def assert_timed_run_statefull(avatar_name, colour)
     args = [image_name]
@@ -126,6 +223,8 @@ class ImageBuilder
     assert_rag(colour, sss, "dir == #{start_point_dir}")
     puts "#{colour}: OK (~#{took} seconds)"
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def changed_files(colour)
     if colour == :red

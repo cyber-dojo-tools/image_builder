@@ -1,16 +1,20 @@
 
 # Plan is to do this in image_builder when it builds the
 # language-test-framework image.
-# Maybe by created a uuid and creating an image with the uuid as its name.
-# Then make this one FROM the uuid.
+# Maybe by created a uuid and create an image with the uuid as its name.
+# Then make this one FROM the uuid
+# Will need to make a Dockerfile in /tmp
 # It creates the image with the specified name.
-# Then delete the image called uuid.
+# Always deletes the image called uuid.
 
+#
+
+#=============================================================
 # Alpine-based, explicit runner-choice==stateless
 # -----------------------------------------------
 # bash-shunit2: Modified its Dockerfile as below...
 #     verified it ../image_builder/run_build_image.sh
-# bash-unit   : Left its Dockerfile unchanged.
+# bash-shunit2: Left its Dockerfile unchanged.
 #     verified it ../image_builder/run_build_image.sh
 
 
@@ -45,11 +49,12 @@ RUN adduser -D -G cyber-dojo -h /home/salmon    -s '/bin/sh' -u 40045 salmon
 
 
 
-
+#=============================================================
 # Ubuntu-based, explicit runner-choice==stateless
+# -----------------------------------------------
 # python-pytest: Modified its Dockerfile as below...
 #     verified it ../image_builder/run_build_image.sh
-# python-behave: Left its Dockerfile unchanged
+# python-pytest: Left its Dockerfile unchanged
 #     verified it ../image_builder/run_build_image.sh
 
 
@@ -83,11 +88,58 @@ RUN adduser --disabled-password --gecos "" --home /home/salmon --ingroup cyber-d
 # ...
 
 
+#=============================================================
+# Now repeated all 4 steps with the runner-choice
+# temporarily switched to stateful. Done. Ok
 
-# Now to repeat all 4 steps
-# with the runner-choice temporarily switched to stateful.
+
+# After writing the files the stateless runner does this...
+#    assert_docker_exec(cid, "chmod 755 #{sandbox}")
+# Check if this is really necessary.
 
 
+require 'securerandom'
+  def uuid
+    SecureRandom.hex[0..10].upcase
+  end
 
+find out what OS we are on...
+  image_name is the intermediate one...
+  cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
+  etc_issue = shell.assert_exec(cmd)
+  on_ubuntu = etc_issue.include?('Ubuntu')
+  on_alpine = etc_issue.include?('Alpine')
+
+# ----------------------------------------------
+# Alpine
+
+RUN if [ ! $(getent group cyber-dojo) ]; then \
+      addgroup -g 5000 cyber-dojo; \
+    fi
+
+RUN deluser alligator 2> /dev/null || true
+RUN adduser \
+  -D \                 # no password
+  -G cyber-dojo \      # group
+  -h /home/alligator \ # home-dir
+  -s '/bin/sh' \       # shell
+  -u 40000 \           # user-id
+  alligator
+
+# ----------------------------------------------
+# Ubuntu
+
+RUN if [ ! $(getent group cyber-dojo) ]; then \
+      addgroup --gid 5000 cyber-dojo; \
+    fi
+
+RUN deluser alligator 2> /dev/null || true
+RUN adduser \
+  --disabled-password \
+  --gecos "" \              # don't ask for details
+  --home /home/alligator \
+  --ingroup cyber-dojo \
+  --uid 40000 \
+  alligator
 
 
