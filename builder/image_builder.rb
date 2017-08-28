@@ -82,11 +82,11 @@ class ImageBuilder
       "FROM #{image_name}",
       '',
       'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
-      '      addgroup -g 5000 cyber-dojo; \\',
+      "      addgroup -g #{cyber_dojo_gid} cyber-dojo; \\",
       '    fi',
     ].join("\n")
     all_avatars_names.each do |avatar_name|
-      user_id = 40000 + all_avatars_names.index(avatar_name)
+      uid = user_id(avatar_name)
       dockerfile += [
         '',
         "RUN deluser #{avatar_name} 2> /dev/null || true",
@@ -95,7 +95,7 @@ class ImageBuilder
         '  -G cyber-dojo \\',           # group
         "  -h /home/#{avatar_name} \\", # home-dir
         "  -s '/bin/sh' \\",            # shell
-        "  -u #{user_id} \\",
+        "  -u #{uid} \\",
         "  #{avatar_name}",
         ''
       ].join("\n")
@@ -110,11 +110,11 @@ class ImageBuilder
       "FROM #{image_name}",
       '',
       'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
-      '      addgroup --gid 5000 cyber-dojo; \\',
+      "      addgroup --gid #{cyber_dojo_gid} cyber-dojo; \\",
       '    fi',
     ].join("\n")
     all_avatars_names.each do |avatar_name|
-      user_id = 40000 + all_avatars_names.index(avatar_name)
+      uid = user_id(avatar_name)
       dockerfile += [
         '',
         "RUN deluser #{avatar_name} 2> /dev/null || true",
@@ -123,12 +123,20 @@ class ImageBuilder
         '  --gecos "" \\',                    # don't ask for details
         '  --ingroup cyber-dojo \\',
         "  --home    /home/#{avatar_name} \\",
-        "  --uid #{user_id} \\",
+        "  --uid #{uid} \\",
         "  #{avatar_name}",
         ''
       ].join("\n")
     end
     dockerfile
+  end
+
+  def cyber_dojo_gid
+    5000
+  end
+
+  def user_id(avatar_name)
+    40000 + all_avatars_names.index(avatar_name)
   end
 
   include AllAvatarsNames
