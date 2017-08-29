@@ -85,20 +85,21 @@ class ImageBuilder
       "      addgroup -g #{cyber_dojo_gid} cyber-dojo; \\",
       '    fi',
     ].join("\n")
+    dockerfile += "\n"
+    dockerfile += 'RUN true '
     all_avatars_names.each do |avatar_name|
       uid = user_id(avatar_name)
       dockerfile += [
-        '',
-        "RUN deluser #{avatar_name} 2> /dev/null || true",
-        'RUN adduser \\',
-        '  -D \\',                      # no password
-        '  -G cyber-dojo \\',           # group
-        "  -h /home/#{avatar_name} \\", # home-dir
-        "  -s '/bin/sh' \\",            # shell
-        "  -u #{uid} \\",
-        "  #{avatar_name}",
-        ''
-      ].join("\n")
+        "&& (deluser #{avatar_name} 2> /dev/null || true)",
+        '&& (adduser',
+        '-D',                      # no password
+        '-G cyber-dojo',           # group
+        "-h /home/#{avatar_name}", # home-dir
+        "-s '/bin/sh'",            # shell
+        "-u #{uid}",
+        avatar_name,
+        ')'
+      ].join(space)
     end
     dockerfile
   end
@@ -113,20 +114,21 @@ class ImageBuilder
       "      addgroup --gid #{cyber_dojo_gid} cyber-dojo; \\",
       '    fi',
     ].join("\n")
+    dockerfile += "\n"
+    dockerfile += 'RUN true '
     all_avatars_names.each do |avatar_name|
       uid = user_id(avatar_name)
       dockerfile += [
-        '',
-        "RUN deluser #{avatar_name} 2> /dev/null || true",
-        'RUN adduser \\',
-        '  --disabled-password \\',
-        '  --gecos "" \\',                    # don't ask for details
-        '  --ingroup cyber-dojo \\',
-        "  --home    /home/#{avatar_name} \\",
-        "  --uid #{uid} \\",
-        "  #{avatar_name}",
-        ''
-      ].join("\n")
+        "&& (deluser #{avatar_name} 2> /dev/null || true)",
+        '&& (adduser',
+        '--disabled-password',
+        '--gecos ""',                    # don't ask for details
+        '--ingroup cyber-dojo',
+        "--home /home/#{avatar_name}",
+        "--uid #{uid}",
+        avatar_name,
+        ')'
+      ].join(space)
     end
     dockerfile
   end
@@ -137,6 +139,10 @@ class ImageBuilder
 
   def user_id(avatar_name)
     40000 + all_avatars_names.index(avatar_name)
+  end
+
+  def space
+    ' '
   end
 
   include AllAvatarsNames
