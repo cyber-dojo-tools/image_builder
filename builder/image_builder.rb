@@ -68,16 +68,16 @@ class ImageBuilder
     cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
     etc_issue = assert_backtick cmd
     if etc_issue.include? 'Alpine'
-      return alpine_dockerfile(image_name)
+      return alpine_make_users_dockerfile(image_name)
     end
     if etc_issue.include? 'Ubuntu'
-      return ubuntu_dockerfile(image_name)
+      return ubuntu_make_users_dockerfile(image_name)
     end
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def alpine_dockerfile(image_name)
+  def alpine_make_users_dockerfile(image_name)
     dockerfile = [
       "FROM #{image_name}",
       '',
@@ -106,7 +106,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def ubuntu_dockerfile(image_name)
+  def ubuntu_make_users_dockerfile(image_name)
     dockerfile = [
       "FROM #{image_name}",
       '',
