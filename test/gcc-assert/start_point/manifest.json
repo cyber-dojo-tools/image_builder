@@ -12,5 +12,7 @@
 
   "image_name": "cyberdojofoundation/gcc_assert",
 
-  "filename_extension" : ".c"
+  "filename_extension" : ".c",
+
+  "runner_choice": "stateful"
 }
