@@ -133,6 +133,8 @@ class ImageBuilder
     dockerfile
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def cyber_dojo_gid
     5000
   end
@@ -161,6 +163,8 @@ class ImageBuilder
     assert_timed_run_stateless(:green)
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def assert_timed_run_stateless(colour)
     runner = RunnerServiceStateless.new
     args = [image_name]
@@ -172,6 +176,8 @@ class ImageBuilder
     assert_rag(colour, sss, "dir == #{start_point_dir}")
     puts "#{colour}: OK (~#{took} seconds)"
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def all_files(colour)
     files = start_files
@@ -249,6 +255,8 @@ class ImageBuilder
     end
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def edited_file(colour)
     args = options[colour.to_s]
     if !args.nil?
@@ -266,6 +274,8 @@ class ImageBuilder
     end
     return filename, start_files[filename].sub(from,to)
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def filename_6_times_9(from)
     filenames = start_files.select { |_,content| content.include? from }

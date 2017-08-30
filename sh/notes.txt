@@ -1,4 +1,20 @@
 
+Adding the avatar users to an image.
+This could be done on the base images (eg Alpine) rather than
+on each of the test-framework images. This would obviously save
+space (and time). How to tell if an image is a base image?
+Maybe just have an option that is passed to the run script?
+Maybe have an entry in the options.json file?
+Currently the base image docker/ directories have a file
+called image_name.json - could rename that.
+But there are a lot of base images, one for each language.
+Maybe instead rename image_name.json to options.json
+only for base OS images.
+Maybe better way is to maintain an up to date json data structure
+of all the language repos and their dependencies. Then consult
+this data structure to see whether an image is a base OS image.
+
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # TODO: Don't trigger_dependent_git_repos.
 #       Instead have option to control when this run is for a single

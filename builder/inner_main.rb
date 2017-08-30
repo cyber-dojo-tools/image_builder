@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative 'image_builder'
-require_relative 'dependencies'
+require_relative 'dir_get_args'
 require_relative 'dockerhub'
 
 def running_on_travis?
@@ -23,20 +23,6 @@ image_name = builder.build_and_test_image
 
 if push?
   Dockerhub.push(image_name)
-end
-
-if ARGV.include?('--show-deps=true')
-  puts '-' * 42
-  puts 'gathering_dependencies'
-  dependencies = get_dependencies
-  puts
-  puts JSON.pretty_generate(dependencies)
-  puts
-  puts "#{dependencies.size} repos gathered"
-  puts
-  graph = dependency_graph(dependencies)
-  puts
-  puts JSON.pretty_generate(graph)
 end
 
 puts

@@ -37,115 +37,8 @@ require 'json'
 # start-points usually don't have to also be updated.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def get_dependencies
-  ENV['TRAVIS'] == 'true' ? repo_dependencies : dir_dependencies
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def running_on_travis?
-  ENV['TRAVIS'] == 'true'
-end
-
-def dependency_graph(dependencies)
-  if running_on_travis?
-    key = ENV['TRAVIS_REPO_SLUG'].split('/')[1]
-  else
-    key = ENV['SRC_DIR']
-  end
-  root = dependencies[key].clone
-  fill_dependency_graph(root, dependencies.clone)
-  root
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def fill_dependency_graph(root, dependencies)
-  root[:children] = {}
-  dependencies.each do |dir,entry|
-    if root[:image_name] == entry[:from]
-      fill_dependency_graph(root[:children][dir] = entry.clone, dependencies)
-    end
-  end
-end
-
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-# dir
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def dir_dependencies
-  # I should be able to use Dir.glob() but I can't get it to work.
-  triples = {}
-  src_dir = ENV['SRC_DIR']
-  base_dir = File.expand_path("#{src_dir}/..", '/')
-  Dir.entries(base_dir).each do |entry|
-    #print '.'
-    dir = base_dir + '/' + entry
-    args = dir_get_args(dir)
-    triples[dir] = args unless args.nil?
-  end
-  triples
-end
-
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-# repo
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def repo_dependencies
-  triples = {}
-  base_url = 'https://raw.githubusercontent.com/cyber-dojo-languages'
-  get_repo_names.each do |repo_name|
-    # eg repo_name = 'gplusplus-catch'
-    #print '.'
-    url = base_url + '/' + repo_name + '/' + 'master'
-    args = get_args(url) { |filename| curl_nil(filename) }
-    triples[repo_name] = args unless args.nil?
-  end
-  triples
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_repo_names
-  # https://developer.github.com/v3/repos/#list-organization-repositories
-  # important to use GITHUB_TOKEN in an authenticated request
-  # so the github rate-limit is 5000 requests per hour. Non
-  # authenticated rate-limit is only 60 requests per hour.
-  github_token = ENV['GITHUB_TOKEN']
-  if github_token.nil? || github_token == ''
-    failed [ 'GITHUB_TOKEN env-var not set' ]
-  end
-  org_url = 'https://api.github.com/orgs/cyber-dojo-languages'
-  command = [
-    'curl',
-    '--silent',
-    "--user 'travisuser:#{github_token}'",
-    "--header 'Accept: application/vnd.github.v3.full+json'",
-    org_url + '/repos?per_page=1000'
-  ].join(' ')
-  response = `#{command}`
-  json = JSON.parse(response)
-  json.collect { |repo| repo['name'] }
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def curl_nil(url)
-  command = [ 'curl', '--silent', '--fail', url ].join(' ')
-  file = `#{command}`
-  $?.exitstatus == 0 ? file : nil
-end
-
-# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-# common
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 def dir_get_args(dir)
   get_args(dir) { |filename| read_nil(filename) }
-end
-
-def read_nil(filename)
-  File.exists?(filename) ? IO.read(filename) : nil
 end
 
 def get_args(base)
@@ -164,6 +57,10 @@ def get_args(base)
     image_name:get_image_name(args),
     test_framework:get_test_framework(manifest_file)
   }
+end
+
+def read_nil(filename)
+  File.exists?(filename) ? IO.read(filename) : nil
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
