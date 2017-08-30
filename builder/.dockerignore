@@ -7,10 +7,8 @@
 #-----!Except these files
 
 !inner_main.rb
-!inner_show_dependencies.rb
 
 !all_avatars_names.rb
-!dependencies.rb
 !dir_get_args.rb
 !dockerhub.rb
 !http_json_service.rb
