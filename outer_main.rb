@@ -152,7 +152,7 @@ begin
         env_var('TRAVIS_REPO_SLUG'),
           'image_builder_inner',
             '/app/inner_main.rb',
-    ].join(space) + ' ' + ARGV.join(space)
+    ].join(space)
 ensure
   docker_compose 'down'
   (service_names + [ 'cyber-dojo-image-builder' ]).each do |name|
