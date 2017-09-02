@@ -1,4 +1,5 @@
 require_relative 'all_avatars_names'
+require_relative 'assert_system'
 require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
 require 'securerandom'
@@ -10,7 +11,6 @@ class ImageBuilder
   def initialize(src_dir, args)
     @src_dir = src_dir
     @args = args
-    validate_my_data
   end
 
   def build_and_test_image
@@ -22,42 +22,11 @@ class ImageBuilder
       check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_red_green_amber_using_runner_statefull
     end
-    image_name
   end
 
   private
 
-  def validate_my_data
-    # TODO: Try the curl several times before failing?
-    banner
-    filename = 'images_info.json'
-    url = "https://raw.githubusercontent.com/cyber-dojo-languages/images_info/master/#{filename}"
-    assert_system "curl --silent -O #{url}"
-    triples = JSON.parse(IO.read("./#{filename}"))
-    triple = triples.find { |_,args| args['image_name'] == image_name }
-    if triple.nil?
-      failed bad_triple_diagnostic(url)
-    end
-    triple = triple[1]
-    unless triple['from'] == from && triple['test_framework'] == test_framework?
-      failed bad_triple_diagnostic(url)
-    end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def bad_triple_diagnostic(url)
-    [ url,
-      'does not contain an entry for:',
-      '',
-      "#{quoted('...dir...')}: {",
-      "  #{quoted('from')}: #{quoted(from)},",
-      "  #{quoted('image_name')}: #{quoted(image_name)},",
-      "  #{quoted('test_framework')}: #{quoted(test_framework?)}",
-      '},',
-      ''
-    ]
-  end
+  include AssertSystem
 
   # - - - - - - - - - - - - - - - - -
 
@@ -405,36 +374,7 @@ class ImageBuilder
   end
 
   # - - - - - - - - - - - - - - - - -
-
-  def assert_system(command)
-    system command
-    status = $?.exitstatus
-    unless status == success
-      failed command, "exit_status == #{status}"
-    end
-  end
-
-  def assert_backtick(command)
-    output = `#{command}`
-    status = $?.exitstatus
-    unless status == success
-      failed command, "exit_status == #{status}", output
-    end
-    output
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def failed(*lines)
-    print_to STDERR, 'FAILED', lines
-    exit 1
-  end
-
-  def print_to(stream, *lines)
-    lines.each { |line| stream.puts line }
-  end
-
-  # - - - - - - - - - - - - - - - - -
+  # data triple
 
   def from
     @args[:from]
@@ -448,20 +388,14 @@ class ImageBuilder
     @args[:test_framework]
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def start_point_dir
     src_dir + '/start_point'
   end
 
   def src_dir
     @src_dir
-  end
-
-  def quoted(s)
-    '"' + s.to_s + '"'
-  end
-
-  def success
-    0
   end
 
   def rag_filename
