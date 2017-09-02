@@ -44,6 +44,8 @@ class ImageBuilder
     end
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def bad_triple_diagnostic(url)
     [ url,
       'does not contain an entry for:',

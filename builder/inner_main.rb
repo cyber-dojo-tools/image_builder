@@ -21,20 +21,9 @@ args = dir_get_args(src_dir)
 builder = ImageBuilder.new(src_dir, args)
 image_name = builder.build_and_test_image
 
-if push?
+if running_on_travis?
   Dockerhub.push(image_name)
+  # Send POST to trigger immediate dependents.
+  # Probably will involve installing npm and then
+  # curling the trigger.js file used in cyber-dojo repos.
 end
-
-puts
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# TODO:
-# Running Travis
-# Send POST to trigger immediate dependents.
-# Probably will involve installing npm and then
-# curling the trigger.js file used in cyber-dojo repos.
-#
-#
-# Running locally
-# graph-chain-build all dependents?
-
