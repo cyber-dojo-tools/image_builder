@@ -10,18 +10,18 @@ class InnerMain
   def initialize
     @src_dir = ENV['SRC_DIR']
     @args = dir_get_args(@src_dir)
-    validate_my_data
+    @validated = validated_data?
   end
 
   def run
-    if running_on_travis?
+    if validated? && running_on_travis?
       Dockerhub.login
     end
 
     builder = ImageBuilder.new(@src_dir, @args)
     builder.build_and_test_image
 
-    if running_on_travis?
+    if validated? && running_on_travis?
       Dockerhub.push(image_name)
       # Send POST to trigger immediate dependents.
       # Probably will involve installing npm and then
@@ -33,6 +33,10 @@ class InnerMain
 
   include AssertSystem
   include DirGetArgs
+
+  def validated?
+    @validated
+  end
 
   def image_name
     @args[:image_name]
@@ -50,26 +54,30 @@ class InnerMain
     ENV['TRAVIS'] == 'true'
   end
 
-  def validate_my_data
-    # TODO: Try the curl several times before failing?
+  def validated_data?
     filename = 'images_info.json'
     url = "https://raw.githubusercontent.com/cyber-dojo-languages/images_info/master/#{filename}"
     assert_system "curl --silent -O #{url}"
     triples = JSON.parse(IO.read("./#{filename}"))
     triple = triples.find { |_,args| args['image_name'] == image_name }
     if triple.nil?
-      failed bad_triple_diagnostic(url)
+      print_to STDOUT, warning_triple_diagnostic(url)
+      return false
     end
     triple = triple[1]
-    unless triple['from'] == from && triple['test_framework'] == test_framework?
-      failed bad_triple_diagnostic(url)
+    if triple['from'] != from || triple['test_framework'] != test_framework?
+      print_to STDOUT, warning_triple_diagnostic(url)
+      return false
     end
+    return true
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def bad_triple_diagnostic(url)
-    [ url,
+  def warning_triple_diagnostic(url)
+    [ '',
+      'NOT doing dockerhub login/push or github triggers because',
+      url,
       'does not contain an entry for:',
       '',
       "#{quoted('...dir...')}: {",
