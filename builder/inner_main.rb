@@ -32,6 +32,7 @@ class InnerMain
   private
 
   include AssertSystem
+  include DirGetArgs
 
   def image_name
     @args[:image_name]
