@@ -1,18 +1,14 @@
 #!/usr/bin/env ruby
 
-require_relative 'image_builder'
 require_relative 'dir_get_args'
 require_relative 'dockerhub'
+require_relative 'image_builder'
 
 def running_on_travis?
   ENV['TRAVIS'] == 'true'
 end
 
-def push?
-  running_on_travis?
-end
-
-if push?
+if running_on_travis?
   Dockerhub.login
 end
 
