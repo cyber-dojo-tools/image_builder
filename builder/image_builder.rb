@@ -10,6 +10,7 @@ class ImageBuilder
   def initialize(src_dir, args)
     @src_dir = src_dir
     @args = args
+    validate_my_data
   end
 
   def build_and_test_image
@@ -25,6 +26,38 @@ class ImageBuilder
   end
 
   private
+
+  def validate_my_data
+    # TODO: Try the curl several times before failing?
+    banner
+    filename = 'images_info.json'
+    url = "https://raw.githubusercontent.com/cyber-dojo-languages/images_info/master/#{filename}"
+    assert_system "curl --silent -O #{url}"
+    triples = JSON.parse(IO.read("./#{filename}"))
+    triple = triples.find { |_,args| args['image_name'] == image_name }
+    if triple.nil?
+      failed bad_triple_diagnostic(url)
+    end
+    triple = triple[1]
+    unless triple['from'] == from && triple['test_framework'] == test_framework?
+      failed bad_triple_diagnostic(url)
+    end
+  end
+
+  def bad_triple_diagnostic(url)
+    [ url,
+      'does not contain an entry for:',
+      '',
+      "#{quoted('...dir...')}: {",
+      "  #{quoted('from')}: #{quoted(from)},",
+      "  #{quoted('image_name')}: #{quoted(image_name)},",
+      "  #{quoted('test_framework')}: #{quoted(test_framework?)}",
+      '},',
+      ''
+    ]
+  end
+
+  # - - - - - - - - - - - - - - - - -
 
   def check_start_point_can_be_created
     # TODO: Try the curl several times before failing?
@@ -401,6 +434,10 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
+  def from
+    @args[:from]
+  end
+
   def image_name
     @args[:image_name]
   end
@@ -415,6 +452,10 @@ class ImageBuilder
 
   def src_dir
     @src_dir
+  end
+
+  def quoted(s)
+    '"' + s.to_s + '"'
   end
 
   def success
