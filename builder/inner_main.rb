@@ -117,10 +117,11 @@ class InnerMain
       print_to STDOUT, 'skipped (not running on Travis)'
     end
     dependent_repos.each do |repo_name|
+      puts "  #{cdl}/#{repo_name}"
       if running_on_travis?
-        assert_system "node #{script} #{cdl}/#{repo_name}"
-      else
-        puts "  #{cdl}/#{repo_name}"
+        if repo_name != 'java-cucumberspring'
+          assert_system "node #{script} #{cdl}/#{repo_name}"
+        end
       end
     end
     puts
