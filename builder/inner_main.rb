@@ -118,9 +118,7 @@ class InnerMain
     end
     dependent_repos.each do |repo_name|
       if running_on_travis?
-        # TODO: test this more before making live.
-        # Maybe on repos with single dependent
-        # assert_system "node #{script} #{cdl}/#{repo_name}"
+        assert_system "node #{script} #{cdl}/#{repo_name}"
       else
         puts "  #{cdl}/#{repo_name}"
       end
