@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# https://docs.travis-ci.com/user/triggering-builds
+# https://developer.travis-ci.org/authentication
+# https://developer.travis-ci.org/resource/requests#create
+
+TOKEN=$1
+NAME=$2   # eg 'cyber-dojo-languages'
+TAG=$3    # eg 'java-junit'
+
+echo "TOKEN=:${TOKEN}:"
+echo "NAME=:${NAME}:"
+echo "TAG=:${TAG}:"
+
+body='{
+"request": {
+"branch":"master"
+}}'
+
+curl -s -X POST \
+   -H "Content-Type: application/json" \
+   -H "Accept: application/json" \
+   -H "Travis-API-Version: 3" \
+   -H "Authorization: token ${TOKEN}" \
+   -d "${body}" \
+   https://api.travis-ci.org/repo/${NAME}%2F${TAG}/requests

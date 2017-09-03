@@ -16,5 +16,4 @@
 !image_builder.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb
-
-!trigger-build.js
+!trigger.sh

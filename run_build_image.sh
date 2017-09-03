@@ -1,10 +1,5 @@
 #!/bin/bash
 
-ruby --version
-gem install travis -v 1.8.8 --no-rdoc --no-ri
-travis login --no-manual --github-token ${GITHUB_TOKEN}
-travis whoami
-
 # Runs image-builder on source living in SRC_DIR.
 # This script is curl'd and run as the only command in each
 # cyber-dojo-language repo's .travis.yml script.
