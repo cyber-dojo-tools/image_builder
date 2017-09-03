@@ -13,32 +13,38 @@ class InnerMain
   end
 
   def run
-    unless validated?
-      print_to STDERR, triple_diagnostic(triples_url)
-      if running_on_travis?
-        exit false
-      end
-    end
-
-    if running_on_travis?
-      Dockerhub.login
-    end
-
+    validate_image_data_triple
+    dockerhub_login
     builder = ImageBuilder.new(@src_dir, @args)
     builder.build_and_test_image
-
-    if running_on_travis?
-      Dockerhub.push(image_name)
-      # Send POST to trigger immediate dependents.
-      # Probably will involve installing npm and then
-      # curling the trigger.js file used in cyber-dojo repos.
-    end
+    dockerhub_push
+    notify_dependent_repos
   end
 
   private
 
   include AssertSystem
   include DirGetArgs
+
+  def validate_image_data_triple
+    banner
+    if validated?
+      print_to STDOUT, triple.inspect, 'OK'
+    else
+      print_to STDERR, triple_diagnostic(triples_url)
+      if running_on_travis?
+        exit false
+      end
+    end
+  end
+
+  def triple
+    {
+      "from" => from,
+      "image_name" => image_name,
+      "test_framework" => test_framework?
+    }
+  end
 
   def image_name
     @args[:image_name]
@@ -60,7 +66,7 @@ class InnerMain
       return false
     end
     triple = triple[1]
-    triple['from'] == 'X'+from && triple['test_framework'] == test_framework?
+    triple['from'] == from && triple['test_framework'] == test_framework?
   end
 
   def triples
@@ -80,14 +86,9 @@ class InnerMain
     'images_info.json'
   end
 
-  # - - - - - - - - - - - - - - - - -
-
   def triple_diagnostic(url)
-    lines = [ '' ]
-    if running_on_travis?
-      lines << 'NOT doing dockerhub login/push or github triggers because'
-    end
-    lines << [ url,
+    [ '',
+      url,
       'does not contain an entry for:',
       '',
       "#{quoted('...dir...')}: {",
@@ -105,12 +106,57 @@ class InnerMain
 
   # - - - - - - - - - - - - - - - - -
 
+  def dockerhub_login
+    banner
+    if running_on_travis?
+      Dockerhub.login
+    else
+      print_to STDOUT, 'skipped (not running on Travis)'
+    end
+  end
+
+  def dockerhub_push
+    banner
+    if running_on_travis?
+      Dockerhub.push(image_name)
+    else
+      print_to STDOUT, 'skipped (not running on Travis)'
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def notify_dependent_repos
+    banner
+    # Send POST to trigger immediate dependents.
+    # Install npm in Dockerfile
+    # Curling the trigger.js file used in cyber-dojo repos.
+    # NB: Cannot do this outside this image as part of travis script
+    # itself because that would involve editing 100+ repos.
+    dependent_repos.each do |repo_name|
+      puts "->#{repo_name}"
+    end
+    puts
+  end
+
+  def dependent_repos
+    triples.keys.select { |key| triples[key]['from'] == image_name }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def banner
+    line = '-' * 42
+    title = caller_locations(1,1)[0].label
+    print_to STDOUT, '', line, title
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
   def running_on_travis?
     ENV['TRAVIS'] == 'true'
   end
 
 end
-
-# - - - - - - - - - - - - - - - - -
 
 InnerMain.new.run
