@@ -1,5 +1,8 @@
 #!/bin/bash
 
+travis --help
+travis whoami
+
 # Runs image-builder on source living in SRC_DIR.
 # This script is curl'd and run as the only command in each
 # cyber-dojo-language repo's .travis.yml script.
