@@ -2,7 +2,7 @@
 
 ruby --version
 gem install travis -v 1.8.8 --no-rdoc --no-ri
-travis --help
+travis login --no-manual --github-token ${GITHUB_TOKEN}
 travis whoami
 
 # Runs image-builder on source living in SRC_DIR.
