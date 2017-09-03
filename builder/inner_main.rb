@@ -115,13 +115,15 @@ class InnerMain
     else
       print_to STDOUT, 'skipped (not running on Travis)'
     end
-    dependent_repos.each do |repo_name|
+    repos = dependent_repos
+    print_to STDOUT, "dependent repos: #{repos.size}"
+    repos.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       if running_on_travis?
         assert_system "./app/trigger.sh #{token} #{cdl} #{repo_name}"
       end
     end
-    puts
+    banner_end
   end
 
   def dependent_repos
@@ -135,9 +137,16 @@ class InnerMain
   # - - - - - - - - - - - - - - - - -
 
   def banner
-    line = '-' * 42
     title = caller_locations(1,1)[0].label
-    print_to STDOUT, '', line, title
+    print_to STDOUT, '', banner_line, title
+  end
+
+  def banner_end
+    print_to STDOUT, 'OK', banner_line
+  end
+
+  def banner_line
+    '-' * 42
   end
 
   # - - - - - - - - - - - - - - - - -
