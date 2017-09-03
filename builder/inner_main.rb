@@ -15,10 +15,9 @@ class InnerMain
   def run
     validate_image_data_triple
     dockerhub_login
-    builder = ImageBuilder.new(@src_dir, @args)
-    builder.build_and_test_image
-    dockerhub_push
-    notify_dependent_repos
+    build_and_test_image
+    dockerhub_push_image
+    trigger_dependent_repos
   end
 
   private
@@ -115,7 +114,12 @@ class InnerMain
     end
   end
 
-  def dockerhub_push
+  def build_and_test_image
+    builder = ImageBuilder.new(@src_dir, @args)
+    builder.build_and_test_image
+  end
+
+  def dockerhub_push_image
     banner
     if running_on_travis?
       Dockerhub.push(image_name)
@@ -126,21 +130,33 @@ class InnerMain
 
   # - - - - - - - - - - - - - - - - -
 
-  def notify_dependent_repos
+  def trigger_dependent_repos
     banner
-    # Send POST to trigger immediate dependents.
-    # Install npm in Dockerfile
-    # Curling the trigger.js file used in cyber-dojo repos.
-    # NB: Cannot do this outside this image as part of travis script
-    # itself because that would involve editing 100+ repos.
+    if running_on_travis?
+      script = 'trigger-build.js'
+      trigger_url = "https://raw.githubusercontent.com/cyber-dojo/cyber-dojo/master/shared/#{script}"
+      assert_system "curl --silent -O #{trigger_url}"
+    else
+      print_to STDOUT, 'skipped (not running on Travis)'
+    end
     dependent_repos.each do |repo_name|
-      puts "->#{repo_name}"
+      if running_on_travis?
+        # TODO: test this more before making live.
+        # Maybe on repos with single dependent
+        # assert_system "node #{script} #{cdl}/#{repo_name}"
+      else
+        puts "  #{cdl}/#{repo_name}"
+      end
     end
     puts
   end
 
   def dependent_repos
     triples.keys.select { |key| triples[key]['from'] == image_name }
+  end
+
+  def cdl
+    'cyber-dojo-languages'
   end
 
   # - - - - - - - - - - - - - - - - -
