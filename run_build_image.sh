@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ruby --version
+gem install travis -v 1.8.8 --no-rdoc --no-ri
 travis --help
 travis whoami
 
