@@ -19,7 +19,7 @@ class InnerMain
     builder.build_and_test_image
     Dockerhub.push_image(image_name)
     Dockerhub.logout
-    trigger_dependent_repos
+    #trigger_dependent_repos
   end
 
   private
@@ -110,16 +110,15 @@ class InnerMain
   def trigger_dependent_repos
     banner
     if running_on_travis?
-      #script = 'trigger-build.js'
-      #trigger_url = "https://raw.githubusercontent.com/cyber-dojo/cyber-dojo/master/shared/#{script}"
-      #assert_system "curl --silent -O #{trigger_url}"
+      script = 'trigger-build.js'
+      trigger_url = "https://raw.githubusercontent.com/cyber-dojo/cyber-dojo/master/shared/#{script}"
+      assert_system "curl --silent -O #{trigger_url}"
     else
       print_to STDOUT, 'skipped (not running on Travis)'
     end
     dependent_repos.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       if running_on_travis?
-        script = 'trigger-build.js'
         assert_system "node #{script} #{cdl}/#{repo_name}"
       end
     end

@@ -57,7 +57,7 @@ travis.authenticate({ github_token: process.env.GITHUB_TOKEN }, function(error,r
   if (error) {
     exit('authenticate({...}, ', error, response);
   } else {
-    console.log('travis.authenticate(...) passed')
+    console.log('travis.authenticate(...) success')
   }
   var repos = process.argv.slice(2);
   repos.forEach(function(repo) {
@@ -71,13 +71,13 @@ travis.authenticate({ github_token: process.env.GITHUB_TOKEN }, function(error,r
       if (error) {
         exit('repos(' + name + ',' + tag + ').builds.get(', error, response);
       } else {
-        console.log('travis.repo(...) passed')
+        console.log('travis.repo(...) success')
       }
       travis.requests.post({ build_id: response.builds[0].id }, function(error,response) {
         if (error) {
           exit('requests.post({...}, ', error, response);
         } else {
-          console.log('travis.requests.post(...) passed')
+          console.log('travis.requests.post(...) success')
         }
         console.log(repo + ':' + response.flash[0].notice);
       });
