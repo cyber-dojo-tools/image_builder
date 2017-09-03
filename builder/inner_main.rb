@@ -118,9 +118,11 @@ class InnerMain
     repos = dependent_repos
     print_to STDOUT, "dependent repos: #{repos.size}"
     repos.each do |repo_name|
-      puts "  #{cdl}/#{repo_name}"
       if running_on_travis?
         assert_system "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+        puts "\n- - - - - - - - -"
+      else
+        puts "  #{cdl}/#{repo_name}"
       end
     end
     banner_end
