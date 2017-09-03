@@ -17,3 +17,4 @@
 !runner_service_statefull.rb
 !runner_service_stateless.rb
 
+!trigger-build.js
