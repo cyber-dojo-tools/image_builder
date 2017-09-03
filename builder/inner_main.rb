@@ -14,9 +14,11 @@ class InnerMain
 
   def run
     validate_image_data_triple
-    dockerhub_login
-    build_and_test_image
-    dockerhub_push_image
+    Dockerhub.login
+    builder = ImageBuilder.new(@src_dir, @args)
+    builder.build_and_test_image
+    Dockerhub.push_image(image_name)
+    Dockerhub.logout
     trigger_dependent_repos
   end
 
@@ -101,31 +103,6 @@ class InnerMain
 
   def quoted(s)
     '"' + s.to_s + '"'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def dockerhub_login
-    banner
-    if running_on_travis?
-      Dockerhub.login
-    else
-      print_to STDOUT, 'skipped (not running on Travis)'
-    end
-  end
-
-  def build_and_test_image
-    builder = ImageBuilder.new(@src_dir, @args)
-    builder.build_and_test_image
-  end
-
-  def dockerhub_push_image
-    banner
-    if running_on_travis?
-      Dockerhub.push(image_name)
-    else
-      print_to STDOUT, 'skipped (not running on Travis)'
-    end
   end
 
   # - - - - - - - - - - - - - - - - -

@@ -6,6 +6,12 @@ class Dockerhub
 
   def self.login
     banner 'dockerhub_login'
+    if !running_on_travis?
+      print([ 'skipped (not running on Travis)' ], STDOUT)
+      banner_end
+      return
+    end
+
     if dockerhub_username == ''
       failed [ "#{dockerhub_username_env_var} env-var not set" ]
     end
@@ -25,11 +31,29 @@ class Dockerhub
     banner_end
   end
 
-  def self.push(image_name)
-    banner 'dockerhub_push'
-    print([ "pushing #{image_name}" ], STDOUT)
-    assert_system "docker push #{image_name}"
-    assert_system 'docker logout'
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  def self.push_image(image_name)
+    banner 'dockerhub_push_image'
+    if !running_on_travis?
+      print([ 'skipped (not running on Travis)' ], STDOUT)
+    else
+      print([ "pushing #{image_name}" ], STDOUT)
+      assert_system "docker push #{image_name}"
+      assert_system 'docker logout'
+    end
+    banner_end
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  def self.logout
+    banner 'dockerhub_logout'
+    if !running_on_travis?
+      print([ 'skipped (not running on Travis)' ], STDOUT)
+    else
+      assert_system 'docker logout'
+    end
     banner_end
   end
 
@@ -104,6 +128,12 @@ class Dockerhub
 
     def print(lines, stream)
       lines.each { |line| stream.puts line }
+    end
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    def running_on_travis?
+      ENV['TRAVIS'] == 'true'
     end
 
   end
