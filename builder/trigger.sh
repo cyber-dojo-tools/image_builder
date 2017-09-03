@@ -8,10 +8,6 @@ TOKEN=$1
 NAME=$2   # eg 'cyber-dojo-languages'
 TAG=$3    # eg 'java-junit'
 
-echo "TOKEN=:${TOKEN}:"
-echo "NAME=:${NAME}:"
-echo "TAG=:${TAG}:"
-
 body='{
 "request": {
 "branch":"master"
