@@ -118,7 +118,7 @@ class InnerMain
     dependent_repos.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       if running_on_travis?
-        assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+        assert_system "./app/trigger.sh #{token} #{cdl} #{repo_name}"
       end
     end
     puts
