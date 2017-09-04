@@ -26,7 +26,7 @@ module AssertSystem
   end
 
   def print_to(stream, *lines)
-    lines.each { |line| stream.puts line }
+    lines.each { |line| stream.puts '# ' + line }
   end
 
   def success

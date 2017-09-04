@@ -127,7 +127,7 @@ class Dockerhub
     end
 
     def print(lines, stream)
-      lines.each { |line| stream.puts line }
+      lines.each { |line| stream.puts '# ' + line }
     end
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - -

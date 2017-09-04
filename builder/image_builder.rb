@@ -159,8 +159,8 @@ class ImageBuilder
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
     if manifest['runner_choice'] == 'stateful'
-      puts "manifest.json ==> 'runner_choice':'stateful'"
-      puts 'skipping'
+      print_to STDOUT, "manifest.json ==> 'runner_choice':'stateful'"
+      print_to STDOUT, 'skipping'
       return
     end
     assert_timed_run_stateless(:red)
@@ -179,7 +179,7 @@ class ImageBuilder
     args << (max_seconds=10)
     took,sss = timed { runner.run(*args) }
     assert_rag(colour, sss, "dir == #{start_point_dir}")
-    puts "#{colour}: OK (~#{took} seconds)"
+    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -198,8 +198,8 @@ class ImageBuilder
   def check_start_point_src_red_green_amber_using_runner_statefull
     banner
     if manifest['runner_choice'] == 'stateless'
-      puts "manifest.json ==> 'runner_choice':'stateless'"
-      puts 'skipping'
+      print_to STDOUT, "manifest.json ==> 'runner_choice':'stateless'"
+      print_to STDOUT, 'skipping'
       return
     end
     in_kata {
@@ -246,7 +246,7 @@ class ImageBuilder
     args << (max_seconds=10)
     took,sss = timed { @runner.run(*args) }
     assert_rag(colour, sss, "dir == #{start_point_dir}")
-    puts "#{colour}: OK (~#{took} seconds)"
+    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
