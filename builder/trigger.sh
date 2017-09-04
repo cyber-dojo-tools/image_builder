@@ -22,5 +22,6 @@ curl -s -X POST \
    https://api.travis-ci.org/repo/${NAME}%2F${TAG}/requests
 
 readonly exit_status=$?
+echo ''
 echo "curl exit_status=${exit_status}"
 exit ${exit_status}
