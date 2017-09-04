@@ -40,7 +40,6 @@ class Dockerhub
     else
       print([ "pushing #{image_name}" ], STDOUT)
       assert_system "docker push #{image_name}"
-      assert_system 'docker logout'
     end
     banner_end
   end
