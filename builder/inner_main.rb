@@ -109,23 +109,33 @@ class InnerMain
 
   def trigger_dependent_repos
     banner
-    if running_on_travis?
-      assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
-      token = assert_backtick('travis token --org').strip
-    else
-      print_to STDOUT, 'skipped (not running on Travis)'
-    end
     repos = dependent_repos
     print_to STDOUT, "dependent repos: #{repos.size}"
-    repos.each do |repo_name|
-      if running_on_travis?
-        assert_system "./app/trigger.sh #{token} #{cdl} #{repo_name}"
-        puts "\n- - - - - - - - -"
-      else
-        puts "  #{cdl}/#{repo_name}"
-      end
+    if running_on_travis?
+      travis_trigger(repos)
+    else
+      local_list(repos)
     end
     banner_end
+  end
+
+  def travis_trigger(repos)
+    if repos.size == 0
+      return
+    end
+    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
+    token = assert_backtick('travis token --org').strip
+    repos.each do |repo_name|
+      assert_system "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+      puts "\n- - - - - - - - -"
+    end
+  end
+
+  def local_list(repos)
+    print_to STDOUT, 'skipped (not running on Travis)'
+    repos.each do |repo_name|
+      puts "  #{cdl}/#{repo_name}"
+    end
   end
 
   def dependent_repos
