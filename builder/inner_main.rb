@@ -127,7 +127,7 @@ class InnerMain
     token = assert_backtick('travis token --org').strip
     repos.each do |repo_name|
       assert_system "./app/trigger.sh #{token} #{cdl} #{repo_name}"
-      print_to STDOUT "\n", '- - - - - - - - -'
+      print_to STDOUT, "\n", '- - - - - - - - -'
     end
   end
 
