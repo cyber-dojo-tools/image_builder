@@ -66,7 +66,7 @@ docker run \
     cyberdojofoundation/image_builder \
       /app/outer_main.rb
 
-exit_status=$?
+readonly exit_status=$?
 
 docker rm --force --volumes ${NAME}
 

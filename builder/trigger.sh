@@ -20,3 +20,7 @@ curl -s -X POST \
    -H "Authorization: token ${TOKEN}" \
    -d "${body}" \
    https://api.travis-ci.org/repo/${NAME}%2F${TAG}/requests
+
+readonly exit_status=$?
+echo "curl exit_status=${exit_status}"
+exit ${exit_status}
