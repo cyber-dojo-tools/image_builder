@@ -110,7 +110,7 @@ class InnerMain
   def trigger_dependent_repos
     banner
     if running_on_travis?
-      assert_system "travis login --no-interactive --github-token ${GITHUB_TOKEN}"
+      assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
       token = assert_backtick('travis token --org').strip
     else
       print_to STDOUT, 'skipped (not running on Travis)'
