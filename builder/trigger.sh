@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # https://docs.travis-ci.com/user/triggering-builds
 # https://developer.travis-ci.org/authentication
