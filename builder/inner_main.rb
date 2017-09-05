@@ -126,7 +126,9 @@ class InnerMain
     assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
     token = assert_backtick('travis token --org').strip
     repos.each do |repo_name|
-      assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+      puts "  #{cdl}/#{repo_name}"
+      output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+      print_to STDOUT, output
       print_to STDOUT, "\n", '- - - - - - - - -'
     end
   end
