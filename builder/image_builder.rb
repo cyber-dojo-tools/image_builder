@@ -204,6 +204,8 @@ class ImageBuilder
     end
     in_kata {
       as_avatar { |name|
+        # do amber last to prevent amber-test-run state
+        # changes leaking into green-test run
         assert_timed_run_statefull(name, :red)
         assert_timed_run_statefull(name, :green)
         assert_timed_run_statefull(name, :amber)
@@ -277,6 +279,9 @@ class ImageBuilder
       to = '6 * 7'
       filename = filename_6_times_9(from)
     end
+    # the .sub() call must be on the start_file and not the
+    # current file (in the container) because a previous
+    # stateful test-run could have edited the file.
     return filename, start_files[filename].sub(from,to)
   end
 
