@@ -32,7 +32,7 @@ class InnerMain
     if validated?
       print_to STDOUT, triple.inspect, 'OK'
     else
-      print_to STDERR, triple_diagnostic(triples_url)
+      print_to STDERR, *triple_diagnostic(triples_url)
       if running_on_travis?
         exit false
       end
