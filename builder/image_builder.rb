@@ -91,12 +91,16 @@ class ImageBuilder
       '    fi',
     ].join("\n")
     dockerfile += "\n"
-    dockerfile += 'RUN true '
+    # Alpine linux has an unneeded existing web-proxy user
+    # called squid which is one of the avatars!
+    dockerfile += 'RUN (deluser squid 2> /dev/null || true)'
+    dockerfile += "\n"
+    add_user_commands = []
     all_avatars_names.each do |avatar_name|
       uid = user_id(avatar_name)
-      dockerfile += [
-        "&& (deluser #{avatar_name} 2> /dev/null || true)",
-        '&& (adduser',
+      add_user_command = [
+        '(',
+        'adduser',
         '-D',                      # no password
         '-G cyber-dojo',           # group
         "-h /home/#{avatar_name}", # home-dir
@@ -105,8 +109,11 @@ class ImageBuilder
         avatar_name,
         ')'
       ].join(space)
+      add_user_commands << add_user_command
     end
-    dockerfile
+    # Fail fast if avatar users have already been added
+    dockerfile += 'RUN (cat /etc/passwd | grep -q zebra:x:40063) || '
+    dockerfile + "(#{add_user_commands.join(' && ')})"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -120,22 +127,25 @@ class ImageBuilder
       '    fi',
     ].join("\n")
     dockerfile += "\n"
-    dockerfile += 'RUN true '
+    add_user_commands = []
     all_avatars_names.each do |avatar_name|
       uid = user_id(avatar_name)
-      dockerfile += [
-        "&& (deluser #{avatar_name} 2> /dev/null || true)",
-        '&& (adduser',
+      add_user_command = [
+        '(',
+        'adduser',
         '--disabled-password',
-        '--gecos ""',                    # don't ask for details
+        '--gecos ""',                   # don't ask for details
         '--ingroup cyber-dojo',
         "--home /home/#{avatar_name}",
         "--uid #{uid}",
         avatar_name,
         ')'
       ].join(space)
+      add_user_commands << add_user_command
     end
-    dockerfile
+    # Fail fast if avatar users have already been added
+    dockerfile += 'RUN (cat /etc/passwd | grep -q zebra:x:40063) || '
+    dockerfile + "     (#{add_user_commands.join(' && ')})"
   end
 
   # - - - - - - - - - - - - - - - - -
