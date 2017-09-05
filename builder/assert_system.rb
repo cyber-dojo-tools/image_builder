@@ -21,7 +21,7 @@ module AssertSystem
   # - - - - - - - - - - - - - - - - -
 
   def failed(*lines)
-    print_to STDERR, 'FAILED', lines
+    print_to STDERR, *(['FAILED'] + lines.flatten)
     exit 1
   end
 
