@@ -164,8 +164,8 @@ class ImageBuilder
       return
     end
     assert_timed_run_stateless(:red)
-    assert_timed_run_stateless(:amber)
     assert_timed_run_stateless(:green)
+    assert_timed_run_stateless(:amber)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -205,8 +205,8 @@ class ImageBuilder
     in_kata {
       as_avatar { |name|
         assert_timed_run_statefull(name, :red)
-        assert_timed_run_statefull(name, :amber)
         assert_timed_run_statefull(name, :green)
+        assert_timed_run_statefull(name, :amber)
       }
     }
   end
