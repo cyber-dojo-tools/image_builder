@@ -31,7 +31,6 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_can_be_created
-    # TODO: Try the curl several times before failing?
     banner
     script = 'cyber-dojo'
     url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
@@ -133,7 +132,7 @@ class ImageBuilder
         '(',
         'adduser',
         '--disabled-password',
-        '--gecos ""',                   # don't ask for details
+        '--gecos ""', # don't ask for details
         '--ingroup cyber-dojo',
         "--home /home/#{avatar_name}",
         "--uid #{uid}",
@@ -157,10 +156,6 @@ class ImageBuilder
     40000 + all_avatars_names.index(avatar_name)
   end
 
-  def space
-    ' '
-  end
-
   include AllAvatarsNames
 
   # - - - - - - - - - - - - - - - - -
@@ -170,11 +165,11 @@ class ImageBuilder
     if manifest['runner_choice'] == 'stateful'
       print_to STDOUT, "manifest.json ==> 'runner_choice':'stateful'"
       print_to STDOUT, 'skipping'
-      return
+    else
+      assert_timed_run_stateless(:red)
+      assert_timed_run_stateless(:green)
+      assert_timed_run_stateless(:amber)
     end
-    assert_timed_run_stateless(:red)
-    assert_timed_run_stateless(:green)
-    assert_timed_run_stateless(:amber)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -209,17 +204,17 @@ class ImageBuilder
     if manifest['runner_choice'] == 'stateless'
       print_to STDOUT, "manifest.json ==> 'runner_choice':'stateless'"
       print_to STDOUT, 'skipping'
-      return
-    end
-    in_kata {
-      as_avatar { |name|
-        # do amber last to prevent amber-test-run state
-        # changes leaking into green-test run
-        assert_timed_run_statefull(name, :red)
-        assert_timed_run_statefull(name, :green)
-        assert_timed_run_statefull(name, :amber)
+    else
+      in_kata {
+        as_avatar { |name|
+          # do amber last to prevent amber-test-run state
+          # changes 'leaking' into green-test run
+          assert_timed_run_statefull(name, :red)
+          assert_timed_run_statefull(name, :green)
+          assert_timed_run_statefull(name, :amber)
+        }
       }
-    }
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -311,7 +306,7 @@ class ImageBuilder
 
   def options
     # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # TODO: add handling of failed json parse
+    # TODO: improve diagnostics of failed json parse
     # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     options_file = start_point_dir + '/options.json'
     if File.exists? options_file
@@ -419,6 +414,10 @@ class ImageBuilder
 
   def kata_id
     '6F4F4E4759'
+  end
+
+  def space
+    ' '
   end
 
 end
