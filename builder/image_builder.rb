@@ -70,7 +70,16 @@ class ImageBuilder
 
   def print_image_info
     banner
-    assert_system "docker images" #" | grep #{image_name}"
+    index = image_name.index(':')
+    if index.nil?
+      name = image_name
+      tag = 'latest'
+    else
+      name = image_name[0..index-1]
+      version = image_name[index+1..-1]
+    end
+    spaces = '\\s+'
+    assert_system "docker images | grep -E '#{name}#{spaces}#{tag}'"
     cat_etc_issue = [
       'docker run --rm -it',
       image_name,
