@@ -70,7 +70,7 @@ class ImageBuilder
 
   def print_image_info
     banner
-    assert_system "docker images | grep #{image_name}"
+    assert_system "docker images" #" | grep #{image_name}"
     cat_etc_issue = [
       'docker run --rm -it',
       image_name,
