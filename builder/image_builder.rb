@@ -83,7 +83,8 @@ class ImageBuilder
     cat_etc_issue = [
       'docker run --rm -it',
       image_name,
-      "sh -c 'cat /etc/issue'"
+      "sh -c 'cat /etc/issue'",
+      '| grep Welcome'
     ].join(space)
     assert_system cat_etc_issue
   end
