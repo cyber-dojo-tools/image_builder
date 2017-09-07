@@ -13,6 +13,7 @@ class InnerMain
   end
 
   def run
+    t1 = Time.now
     validate_image_data_triple
     Dockerhub.login
     builder = ImageBuilder.new(@src_dir, @args)
@@ -20,12 +21,21 @@ class InnerMain
     Dockerhub.push_image(image_name)
     Dockerhub.logout
     trigger_dependent_repos
+    t2 = Time.now
+    print_date_time(t1, t2)
   end
 
   private
 
   include AssertSystem
   include DirGetArgs
+
+  def print_date_time(t1, t2)
+    banner
+    assert_system 'date'
+    hms = Time.at(t2 - t1).utc.strftime("%H:%M:%S")
+    print_to STDOUT, "took #{hms}", "\n"
+  end
 
   def validate_image_data_triple
     banner

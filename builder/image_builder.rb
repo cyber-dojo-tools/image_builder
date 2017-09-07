@@ -18,6 +18,7 @@ class ImageBuilder
       check_start_point_can_be_created
     end
     build_the_image
+    print_image_info
     if test_framework?
       check_start_point_src_red_green_amber_using_runner_stateless
       check_start_point_src_red_green_amber_using_runner_statefull
@@ -63,6 +64,19 @@ class ImageBuilder
     end
 
     assert_system "docker rmi #{temp_image_name}"
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def print_image_info
+    banner
+    assert_system "docker images | grep #{image_name}"
+    cat_etc_issue = [
+      'docker run --rm -it',
+      image_name,
+      "sh -c 'cat /etc/issue'"
+    ].join(space)
+    assert_system cat_etc_issue
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -319,6 +333,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def manifest
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # TODO: improve diagnostics of failed IO.read or json parse
+    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     manifest_file = start_point_dir + '/manifest.json'
     JSON.parse(IO.read(manifest_file))
   end
