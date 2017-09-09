@@ -317,7 +317,7 @@ class ImageBuilder
 
   def filename_6_times_9(from)
     filenames = start_files.select { |_,content| content.include? from }
-    if filenames == []
+    if filenames == {}
       failed [ "no '#{from}' file found" ]
     end
     if filenames.length > 1
