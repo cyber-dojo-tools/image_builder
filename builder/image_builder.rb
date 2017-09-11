@@ -20,8 +20,12 @@ class ImageBuilder
     build_the_image
     print_image_info
     if test_framework?
-      check_start_point_src_red_green_amber_using_runner_stateless
-      check_start_point_src_red_green_amber_using_runner_statefull
+      if manifest['runner_choice'] == 'stateless'
+        check_start_point_src_red_green_amber_using_runner_stateless
+      end
+      if manifest['runner_choice'] == 'stateful'
+        check_start_point_src_red_green_amber_using_runner_stateful
+      end
     end
   end
 
@@ -186,14 +190,9 @@ class ImageBuilder
 
   def check_start_point_src_red_green_amber_using_runner_stateless
     banner
-    if manifest['runner_choice'] == 'stateful'
-      print_to STDOUT, "manifest.json ==> 'runner_choice':'stateful'"
-      print_to STDOUT, 'skipping'
-    else
-      assert_timed_run_stateless(:red)
-      assert_timed_run_stateless(:green)
-      assert_timed_run_stateless(:amber)
-    end
+    assert_timed_run_stateless(:red)
+    assert_timed_run_stateless(:green)
+    assert_timed_run_stateless(:amber)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -223,22 +222,17 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_start_point_src_red_green_amber_using_runner_statefull
+  def check_start_point_src_red_green_amber_using_runner_stateful
     banner
-    if manifest['runner_choice'] == 'stateless'
-      print_to STDOUT, "manifest.json ==> 'runner_choice':'stateless'"
-      print_to STDOUT, 'skipping'
-    else
-      in_kata {
-        as_avatar { |name|
-          # do amber last to prevent amber-test-run state
-          # changes 'leaking' into green-test run
-          assert_timed_run_statefull(name, :red)
-          assert_timed_run_statefull(name, :green)
-          assert_timed_run_statefull(name, :amber)
-        }
+    in_kata {
+      as_avatar { |name|
+        # do amber last to prevent amber-test-run state
+        # changes 'leaking' into green-test run
+        assert_timed_run_statefull(name, :red)
+        assert_timed_run_statefull(name, :green)
+        assert_timed_run_statefull(name, :amber)
       }
-    end
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
