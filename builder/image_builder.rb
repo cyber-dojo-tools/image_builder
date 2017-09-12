@@ -117,10 +117,7 @@ class ImageBuilder
       '    fi',
     ].join("\n")
     dockerfile += "\n"
-    # Alpine linux has an unneeded existing web-proxy user
-    # called squid which is one of the avatars!
-    dockerfile += 'RUN (deluser squid 2> /dev/null || true)'
-    dockerfile += "\n"
+
     add_user_commands = []
     all_avatars_names.each do |avatar_name|
       uid = user_id(avatar_name)
