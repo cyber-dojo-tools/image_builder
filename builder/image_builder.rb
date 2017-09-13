@@ -20,10 +20,11 @@ class ImageBuilder
     build_the_image
     print_image_info
     if test_framework?
-      if manifest['runner_choice'] == 'stateless'
+      runner = manifest['runner_choice']
+      if runner.nil? || runner == 'stateless'
         check_start_point_src_red_green_amber_using_runner_stateless
       end
-      if manifest['runner_choice'] == 'stateful'
+      if runner == 'stateful'
         check_start_point_src_red_green_amber_using_runner_stateful
       end
     end
