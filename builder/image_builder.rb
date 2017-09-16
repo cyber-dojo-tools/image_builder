@@ -1,5 +1,7 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
+require_relative 'banner'
+require_relative 'print_to'
 require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
 require 'securerandom'
@@ -33,6 +35,8 @@ class ImageBuilder
   private
 
   include AssertSystem
+  include Banner
+  include PrintTo
 
   # - - - - - - - - - - - - - - - - -
 
@@ -397,19 +401,6 @@ class ImageBuilder
       files[filename] = IO.read(path)
     end
     files
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def banner
-    title = caller_locations(1,1)[0].label
-    print_to STDOUT, '', banner_line, title
-    yield
-    print_to STDOUT,  banner_line
-  end
-
-  def banner_line
-    '-' * 42
   end
 
   # - - - - - - - - - - - - - - - - -

@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 
 require_relative 'assert_system'
+require_relative 'banner'
 require_relative 'dir_get_args'
 require_relative 'dockerhub'
 require_relative 'image_builder'
+require_relative 'print_to'
 
 class InnerMain
 
@@ -28,8 +30,10 @@ class InnerMain
   private
 
   include AssertSystem
+  include Banner
   include DirGetArgs
   include Dockerhub
+  include PrintTo
 
   def print_date_time_duration(t1, t2)
     banner {
@@ -160,19 +164,6 @@ class InnerMain
 
   def cdl
     'cyber-dojo-languages'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def banner
-    title = caller_locations(1,1)[0].label
-    print_to STDOUT, '', banner_line, title
-    yield
-    print_to STDOUT, banner_line
-  end
-
-  def banner_line
-    '-' * 42
   end
 
   # - - - - - - - - - - - - - - - - -
