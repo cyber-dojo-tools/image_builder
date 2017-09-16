@@ -212,7 +212,7 @@ class ImageBuilder
     args << all_files(colour)
     args << (max_seconds=10)
     took,sss = timed { runner.run(*args) }
-    assert_rag(colour, sss, "dir == #{start_point_dir}")
+    assert_rag(colour, sss)
     print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
   end
 
@@ -277,7 +277,7 @@ class ImageBuilder
     args << changed_files(colour)
     args << (max_seconds=10)
     took,sss = timed { @runner.run(*args) }
-    assert_rag(colour, sss, "dir == #{start_point_dir}")
+    assert_rag(colour, sss)
     print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
   end
 
@@ -360,15 +360,17 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def assert_rag(expected_colour, sss, diagnostic)
+  def assert_rag(expected_colour, sss)
     actual_colour = sss['colour']
     unless expected_colour.to_s == actual_colour
-      failed [ diagnostic,
+      failed [
         "expected_colour == #{expected_colour}",
         "  actual_colour == #{actual_colour}",
-        "stdout == #{sss['stdout']}",
-        "stderr == #{sss['stderr']}",
-        "status == #{sss['status']}"
+        '',
+        "arguments passed to #{rag_filename} (inside #{image_name}):",
+        "  status == #{sss['status']}",
+        "  stdout == #{sss['stdout']}",
+        "  stderr == #{sss['stderr']}",
       ]
     end
   end
