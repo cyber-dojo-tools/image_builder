@@ -361,8 +361,8 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def assert_rag(expected_colour, sss, diagnostic)
-    actual_colour = call_rag_lambda(sss)
-    unless expected_colour == actual_colour
+    actual_colour = sss['colour']
+    unless expected_colour.to_s == actual_colour
       failed [ diagnostic,
         "expected_colour == #{expected_colour}",
         "  actual_colour == #{actual_colour}",
@@ -371,18 +371,6 @@ class ImageBuilder
         "status == #{sss['status']}"
       ]
     end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def call_rag_lambda(sss)
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # TODO: improve diagnostics if cat/eval/call fails
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    cat_rag_filename = "docker run --rm -it #{image_name} cat #{rag_filename}"
-    src = assert_backtick cat_rag_filename
-    fn = eval(src)
-    fn.call(sss['stdout'], sss['stderr'], sss['status'])
   end
 
   # - - - - - - - - - - - - - - - - -
