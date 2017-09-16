@@ -44,8 +44,8 @@ module DirGetArgs
   def get_image_name(args)
     image_name_filename = args[0]
     manifest_filename   = args[1]
-    image_name_content  = args[2] # was file
-    manifest_content    = args[3] # was file
+    image_name_content  = args[2]
+    manifest_content    = args[3]
 
     either_or = [
       "#{image_name_filename} must exist",
@@ -71,7 +71,6 @@ module DirGetArgs
       content = manifest_content
     end
     json_parse(filename, content)['image_name']
-    #JSON.parse(file)['image_name']
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
