@@ -5,55 +5,51 @@
 module Dockerhub
 
   def dockerhub_login
-    banner
-    if !running_on_travis?
-      print_to STDOUT, 'skipped (not running on Travis)'
-      banner_end
-      return
-    end
-
-    if dockerhub_username == ''
-      failed [ "#{dockerhub_username_env_var} env-var not set" ]
-    end
-    if dockerhub_password == ''
-      failed [ "#{dockerhub_password_env_var} env-var not set" ]
-    end
-    # careful not to show password if command fails
-    output = `#{docker_login_cmd(dockerhub_username, dockerhub_password)}`
-    status = $?.exitstatus
-    unless status == success
-      failed [
-        "#{docker_login_cmd('[secure]','[secure]')}",
-        "exit_status == #{status}",
-        output
-      ]
-    end
-    banner_end
+    banner {
+      if !running_on_travis?
+        print_to STDOUT, 'skipped (not running on Travis)'
+      elsif dockerhub_username == ''
+        failed "#{dockerhub_username_env_var} env-var not set"
+      elsif dockerhub_password == ''
+        failed "#{dockerhub_password_env_var} env-var not set"
+      else
+        # careful not to show password if command fails
+        output = `#{docker_login_cmd(dockerhub_username, dockerhub_password)}`
+        status = $?.exitstatus
+        unless status == success
+          failed [
+            "#{docker_login_cmd('[secure]','[secure]')}",
+            "exit_status == #{status}",
+            output
+          ]
+        end
+      end
+    }
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def dockerhub_push_image(image_name)
-    banner
-    if !running_on_travis?
-      print_to STDOUT, 'skipped (not running on Travis)'
-    else
-      print_to STDOUT, "pushing #{image_name}"
-      assert_system "docker push #{image_name}"
-    end
-    banner_end
+    banner {
+      if !running_on_travis?
+        print_to STDOUT, 'skipped (not running on Travis)'
+      else
+        print_to STDOUT, "pushing #{image_name}"
+        assert_system "docker push #{image_name}"
+      end
+    }
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def dockerhub_logout
-    banner
-    if !running_on_travis?
-      print_to STDOUT, 'skipped (not running on Travis)'
-    else
-      assert_system 'docker logout'
-    end
-    banner_end
+    banner {
+      if !running_on_travis?
+        print_to STDOUT, 'skipped (not running on Travis)'
+      else
+        assert_system 'docker logout'
+      end
+    }
   end
 
   private

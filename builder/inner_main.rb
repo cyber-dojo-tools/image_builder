@@ -22,7 +22,7 @@ class InnerMain
     dockerhub_logout
     trigger_dependent_repos
     t2 = Time.now
-    print_date_time(t1, t2)
+    print_date_time_duration(t1, t2)
   end
 
   private
@@ -31,23 +31,25 @@ class InnerMain
   include DirGetArgs
   include Dockerhub
 
-  def print_date_time(t1, t2)
-    banner
-    assert_system 'date'
-    hms = Time.at(t2 - t1).utc.strftime("%H:%M:%S")
-    print_to STDOUT, "took #{hms}", "\n"
+  def print_date_time_duration(t1, t2)
+    banner {
+      assert_system 'date'
+      hms = Time.at(t2 - t1).utc.strftime("%H:%M:%S")
+      print_to STDOUT, "took #{hms}"
+    }
   end
 
   def validate_image_data_triple
-    banner
-    if validated?
-      print_to STDOUT, triple.inspect, 'OK'
-    else
-      print_to STDERR, *triple_diagnostic(triples_url)
-      if running_on_travis?
-        exit false
+    banner {
+      if validated?
+        print_to STDOUT, triple.inspect
+      else
+        print_to STDERR, *triple_diagnostic(triples_url)
+        if running_on_travis?
+          exit false
+        end
       end
-    end
+    }
   end
 
   def triple
@@ -119,15 +121,15 @@ class InnerMain
   # - - - - - - - - - - - - - - - - -
 
   def trigger_dependent_repos
-    banner
-    repos = dependent_repos
-    print_to STDOUT, "dependent repos: #{repos.size}"
-    if running_on_travis?
-      travis_trigger(repos)
-    else
-      local_list(repos)
-    end
-    banner_end
+    banner {
+      repos = dependent_repos
+      print_to STDOUT, "dependent repos: #{repos.size}"
+      if running_on_travis?
+        travis_trigger(repos)
+      else
+        local_list(repos)
+      end
+    }
   end
 
   def travis_trigger(repos)
@@ -165,10 +167,8 @@ class InnerMain
   def banner
     title = caller_locations(1,1)[0].label
     print_to STDOUT, '', banner_line, title
-  end
-
-  def banner_end
-    print_to STDOUT, 'OK', banner_line
+    yield
+    print_to STDOUT, banner_line
   end
 
   def banner_line

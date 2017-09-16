@@ -37,61 +37,64 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_can_be_created
-    banner
-    script = 'cyber-dojo'
-    url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-    assert_system "curl --silent -O #{url}"
-    assert_system "chmod +x #{script}"
-    name = 'start-point-create-check'
-    system "./#{script} start-point rm #{name} &> /dev/null"
-    assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
+    banner {
+      script = 'cyber-dojo'
+      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
+      assert_system "curl --silent -O #{url}"
+      assert_system "chmod +x #{script}"
+      name = 'start-point-create-check'
+      system "./#{script} start-point rm #{name} &> /dev/null"
+      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def build_the_image
-    banner
-    uuid = SecureRandom.hex[0..10].downcase
-    temp_image_name = "imagebuilder/tmp_#{uuid}"
-    assert_system "cd #{src_dir}/docker && docker build --tag #{temp_image_name} ."
+    banner {
+      uuid = SecureRandom.hex[0..10].downcase
+      temp_image_name = "imagebuilder/tmp_#{uuid}"
+      assert_system "cd #{src_dir}/docker && docker build --tag #{temp_image_name} ."
 
-    Dir.mktmpdir('image_builder') do |tmp_dir|
-      docker_filename = "#{tmp_dir}/Dockerfile"
-      File.open(docker_filename, 'w') { |fd|
-        fd.write(make_users_dockerfile(temp_image_name))
-      }
-      assert_system [
-        'docker build',
-          "--file #{docker_filename}",
-          "--tag #{image_name}",
-          tmp_dir
-      ].join(' ')
-    end
+      Dir.mktmpdir('image_builder') do |tmp_dir|
+        docker_filename = "#{tmp_dir}/Dockerfile"
+        File.open(docker_filename, 'w') { |fd|
+          fd.write(make_users_dockerfile(temp_image_name))
+        }
+        assert_system [
+          'docker build',
+            "--file #{docker_filename}",
+            "--tag #{image_name}",
+            tmp_dir
+        ].join(' ')
+      end
 
-    assert_system "docker rmi #{temp_image_name}"
+      assert_system "docker rmi #{temp_image_name}"
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def print_image_info
-    banner
-    index = image_name.index(':')
-    if index.nil?
-      name = image_name
-      tag = 'latest'
-    else
-      name = image_name[0..index-1]
-      version = image_name[index+1..-1]
-    end
-    spaces = '\\s+'
-    assert_system "docker images | grep -E '#{name}#{spaces}#{tag}'"
-    cat_etc_issue = [
-      'docker run --rm -it',
-      image_name,
-      "sh -c 'cat /etc/issue'",
-      '| head -1'
-    ].join(space)
-    assert_system cat_etc_issue
+    banner {
+      index = image_name.index(':')
+      if index.nil?
+        name = image_name
+        tag = 'latest'
+      else
+        name = image_name[0..index-1]
+        version = image_name[index+1..-1]
+      end
+      spaces = '\\s+'
+      assert_system "docker images | grep -E '#{name}#{spaces}#{tag}'"
+      cat_etc_issue = [
+        'docker run --rm -it',
+        image_name,
+        "sh -c 'cat /etc/issue'",
+        '| head -1'
+      ].join(space)
+      assert_system cat_etc_issue
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -187,10 +190,11 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_stateless
-    banner
-    assert_timed_run_stateless(:red)
-    assert_timed_run_stateless(:green)
-    assert_timed_run_stateless(:amber)
+    banner {
+      assert_timed_run_stateless(:red)
+      assert_timed_run_stateless(:green)
+      assert_timed_run_stateless(:amber)
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -221,14 +225,15 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def check_start_point_src_red_green_amber_using_runner_stateful
-    banner
-    in_kata {
-      as_avatar { |name|
-        # do amber last to prevent amber-test-run state
-        # changes 'leaking' into green-test run
-        assert_timed_run_statefull(name, :red)
-        assert_timed_run_statefull(name, :green)
-        assert_timed_run_statefull(name, :amber)
+    banner {
+      in_kata {
+        as_avatar { |name|
+          # do amber last to prevent amber-test-run state
+          # changes 'leaking' into green-test run
+          assert_timed_run_statefull(name, :red)
+          assert_timed_run_statefull(name, :green)
+          assert_timed_run_statefull(name, :amber)
+        }
       }
     }
   end
@@ -397,9 +402,14 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def banner
-    line = '-' * 42
     title = caller_locations(1,1)[0].label
-    print_to STDOUT, '', line, title
+    print_to STDOUT, '', banner_line, title
+    yield
+    print_to STDOUT,  banner_line
+  end
+
+  def banner_line
+    '-' * 42
   end
 
   # - - - - - - - - - - - - - - - - -
