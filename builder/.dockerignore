@@ -15,6 +15,7 @@
 !dockerhub.rb
 !http_json_service.rb
 !image_builder.rb
+!json_parse.rb
 !print_to.rb
 !runner_service_statefull.rb
 !runner_service_stateless.rb

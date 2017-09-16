@@ -5,6 +5,7 @@ require_relative 'banner'
 require_relative 'dir_get_args'
 require_relative 'dockerhub'
 require_relative 'image_builder'
+require_relative 'json_parse'
 require_relative 'print_to'
 
 class InnerMain
@@ -33,6 +34,7 @@ class InnerMain
   include Banner
   include DirGetArgs
   include Dockerhub
+  include JsonParse
   include PrintTo
 
   def print_date_time_duration(t1, t2)

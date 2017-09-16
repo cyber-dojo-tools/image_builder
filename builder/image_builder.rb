@@ -1,12 +1,12 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
+require_relative 'json_parse'
 require_relative 'print_to'
 require_relative 'runner_service_statefull'
 require_relative 'runner_service_stateless'
 require 'securerandom'
 require 'tmpdir'
-require 'json'
 
 class ImageBuilder
 
@@ -36,6 +36,7 @@ class ImageBuilder
 
   include AssertSystem
   include Banner
+  include JsonParse
   include PrintTo
 
   # - - - - - - - - - - - - - - - - -
@@ -330,12 +331,10 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def options
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # TODO: improve diagnostics of failed json parse
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    options_file = start_point_dir + '/options.json'
-    if File.exists? options_file
-      JSON.parse(IO.read(options_file))
+    filename = start_point_dir + '/options.json'
+    if File.exists? filename
+      content = IO.read(filename)
+      json_parse(filename, content)
     else
       {}
     end
@@ -344,11 +343,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def manifest
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # TODO: improve diagnostics of failed IO.read or json parse
-    # TODO : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    manifest_file = start_point_dir + '/manifest.json'
-    JSON.parse(IO.read(manifest_file))
+    filename = start_point_dir + '/manifest.json'
+    content = IO.read(filename)
+    json_parse(filename, content)
   end
 
   # - - - - - - - - - - - - - - - - -

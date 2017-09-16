@@ -1,4 +1,3 @@
-require 'json'
 
 module DirGetArgs
 
@@ -45,8 +44,8 @@ module DirGetArgs
   def get_image_name(args)
     image_name_filename = args[0]
     manifest_filename   = args[1]
-    image_name_file     = args[2]
-    manifest_file       = args[3]
+    image_name_content  = args[2] # was file
+    manifest_content    = args[3] # was file
 
     either_or = [
       "#{image_name_filename} must exist",
@@ -54,8 +53,8 @@ module DirGetArgs
       "#{manifest_filename} must exist"
     ]
 
-    image_name = !image_name_file.nil?
-    manifest = !manifest_file.nil?
+    image_name = !image_name_content.nil?
+    manifest = !manifest_content.nil?
 
     if !image_name && !manifest
       failed either_or + [ 'neither do.' ]
@@ -64,12 +63,15 @@ module DirGetArgs
       failed either_or + [ 'but not both.' ]
     end
     if image_name
-      file = image_name_file
+      filename = image_name_filename
+      content = image_name_content
     end
     if manifest
-      file = manifest_file
+      filename = manifest_filename
+      content = manifest_content
     end
-    JSON.parse(file)['image_name']
+    json_parse(filename, content)['image_name']
+    #JSON.parse(file)['image_name']
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
