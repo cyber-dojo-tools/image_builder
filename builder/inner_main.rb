@@ -45,7 +45,9 @@ class InnerMain
 
   def validate_image_data_triple
     banner {
-      if validated?
+      if !running_on_travis?
+        print_to STDOUT, 'skipped (not running on Travis)'
+      elsif validated?
         print_to STDOUT, triple.inspect
       else
         print_to STDERR, *triple_diagnostic(triples_url)
