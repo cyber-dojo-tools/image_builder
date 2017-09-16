@@ -1,13 +1,13 @@
 
-# Code to push a successfully built and tested
+# module to push a successfully built and tested
 # language/testFramework docker image to dockerhub.
 
-class Dockerhub
+module Dockerhub
 
-  def self.login
-    banner 'dockerhub_login'
+  def dockerhub_login
+    banner
     if !running_on_travis?
-      print([ 'skipped (not running on Travis)' ], STDOUT)
+      print_to STDOUT, 'skipped (not running on Travis)'
       banner_end
       return
     end
@@ -33,12 +33,12 @@ class Dockerhub
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def self.push_image(image_name)
-    banner 'dockerhub_push_image'
+  def dockerhub_push_image(image_name)
+    banner
     if !running_on_travis?
-      print([ 'skipped (not running on Travis)' ], STDOUT)
+      print_to STDOUT, 'skipped (not running on Travis)'
     else
-      print([ "pushing #{image_name}" ], STDOUT)
+      print_to STDOUT, "pushing #{image_name}"
       assert_system "docker push #{image_name}"
     end
     banner_end
@@ -46,10 +46,10 @@ class Dockerhub
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def self.logout
-    banner 'dockerhub_logout'
+  def dockerhub_logout
+    banner
     if !running_on_travis?
-      print([ 'skipped (not running on Travis)' ], STDOUT)
+      print_to STDOUT, 'skipped (not running on Travis)'
     else
       assert_system 'docker logout'
     end
@@ -58,83 +58,34 @@ class Dockerhub
 
   private
 
-  class << self
+  def docker_login_cmd(username, password)
+    # TODO: Try this several times before failing?
+    [ 'docker login',
+        "--username #{username}",
+        "--password #{password}"
+    ].join(' ')
+  end
 
-    def docker_login_cmd(username, password)
-      # TODO: Try this several times before failing?
-      [ 'docker login',
-          "--username #{username}",
-          "--password #{password}"
-      ].join(' ')
-    end
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  def dockerhub_username_env_var
+    # should be DOCKERHUB_USERNAME but too late
+    # to change it on all the cyber-dojo-languages repos
+    'DOCKER_USERNAME'
+  end
 
-    def success; 0; end
+  def dockerhub_password_env_var
+    # should be DOCKERHUB_PASSWORD but too late
+    # to change it on all the cyber-dojo-languages repos
+    'DOCKER_PASSWORD'
+  end
 
-    def dockerhub_username_env_var
-      # should be DOCKERHUB_USERNAME but too late
-      # to change it on all the cyber-dojo-languages repos
-      'DOCKER_USERNAME'
-    end
+  def dockerhub_username
+    ENV[dockerhub_username_env_var]
+  end
 
-    def dockerhub_password_env_var
-      # should be DOCKERHUB_PASSWORD but too late
-      # to change it on all the cyber-dojo-languages repos
-      'DOCKER_PASSWORD'
-    end
-
-    def dockerhub_username
-      ENV[dockerhub_username_env_var]
-    end
-
-    def dockerhub_password
-      ENV[dockerhub_password_env_var]
-    end
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    def banner(title)
-      print([ '', banner_line, title, ], STDOUT)
-    end
-
-    def banner_end
-      print([ 'OK', banner_line ], STDOUT)
-    end
-
-    def banner_line
-      '-' * 42
-    end
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    def assert_system(command)
-      system command
-      status = $?.exitstatus
-      unless status == success
-        failed [ command, "exit_status == #{status}" ]
-      end
-    end
-
-    def failed(lines)
-      log(['FAILED'] + lines)
-      exit 1
-    end
-
-    def log(lines)
-      print(lines, STDERR)
-    end
-
-    def print(lines, stream)
-      lines.each { |line| stream.puts '# ' + line }
-    end
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    def running_on_travis?
-      ENV['TRAVIS'] == 'true'
-    end
-
+  def dockerhub_password
+    ENV[dockerhub_password_env_var]
   end
 
 end

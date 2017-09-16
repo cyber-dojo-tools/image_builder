@@ -15,11 +15,11 @@ class InnerMain
   def run
     t1 = Time.now
     validate_image_data_triple
-    Dockerhub.login
+    dockerhub_login
     builder = ImageBuilder.new(@src_dir, @args)
     builder.build_and_test_image
-    Dockerhub.push_image(image_name)
-    Dockerhub.logout
+    dockerhub_push_image(image_name)
+    dockerhub_logout
     trigger_dependent_repos
     t2 = Time.now
     print_date_time(t1, t2)
@@ -29,6 +29,7 @@ class InnerMain
 
   include AssertSystem
   include DirGetArgs
+  include Dockerhub
 
   def print_date_time(t1, t2)
     banner
