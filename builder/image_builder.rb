@@ -233,11 +233,23 @@ class ImageBuilder
     banner {
       in_kata {
         as_avatar { |name|
+          # the tar-pipe in the runner's stores file date-stamps
+          # to second granularity, the microseconds are always zero.
+          # This matters in a stateless runner since the cyber-dojo.sh
+          # file could be executing make (for example).
+          # This is very unlikely to matter for a test-event from the
+          # browser but it is quite likely to matter here since
+          # we are not doing a full browser round-trip we are calling
+          # directly into the runner service, and this is a stateful
+          # runner which is quite likely to be optimized for speed.
+          # Hence the sleeps.
+          assert_timed_run_statefull(name, :red)
+          sleep(1.5)
+          assert_timed_run_statefull(name, :green)
+          sleep(1.5)
+          assert_timed_run_statefull(name, :amber)
           # do amber last to prevent amber-test-run state
           # changes 'leaking' into green-test run
-          assert_timed_run_statefull(name, :red)
-          assert_timed_run_statefull(name, :green)
-          assert_timed_run_statefull(name, :amber)
         }
       }
     }
