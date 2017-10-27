@@ -164,7 +164,9 @@ class InnerMain
   # - - - - - - - - - - - - - - - - -
 
   def running_on_travis?
-    ENV['TRAVIS'] == 'true'
+    # return false if we are running image_builder's tests
+    ENV['TRAVIS'] == 'true' &&
+      ENV['TRAVIS_REPO_SLUG'] != 'cyber-dojo-languages/image_builder'
   end
 
 end
