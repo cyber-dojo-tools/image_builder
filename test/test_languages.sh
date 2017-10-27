@@ -7,13 +7,9 @@ test_alpine()
 {
   echo '  gcc'
   assertBuildImage /test/languages/alpine-gcc
-  echo '1'
   assertAlpineImageBuilt
-  echo '2'
   refuteStartPointCreated
-  echo '3'
   refuteRedAmberGreen
-  echo '4'
 }
 
 test_ubuntu()
