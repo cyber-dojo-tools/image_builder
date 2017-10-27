@@ -4,8 +4,7 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 assertBuildImage()
 {
   build_image $1
-  local status=$?
-  assertTrue ${status}
+  assertTrue $?
   assertNoStderr
 }
 
@@ -39,42 +38,52 @@ assertImageBuilt()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+readonly startPointCreatedMessage='check_start_point_can_be_created'
+
 assertStartPointCreated()
 {
-  assertStdoutIncludes '# check_start_point_can_be_created'
+  assertStdoutIncludes "# ${startPointCreatedMessage}"
 }
 
 refuteStartPointCreated()
 {
-  refuteStdoutIncludes '# check_start_point_can_be_created'
+  refuteStdoutIncludes "# ${startPointCreatedMessage}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+readonly startPointRedAmberGreenMessage='check_start_point_src_red_green_amber_using_runner'
+
 assertStartPointRedAmberGreenStateful()
 {
-  assertStdoutIncludes '# check_start_point_src_red_green_amber_using_runner_stateful'
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateful"
   assertRedAmberGreen
 }
 
 assertStartPointRedAmberGreenStateless()
 {
-  assertStdoutIncludes '# check_start_point_src_red_green_amber_using_runner_stateless'
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateless"
   assertRedAmberGreen
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+readonly redMessageOK='red: OK'
+readonly amberMessageOK='amber: OK'
+readonly greenMessageOK='green: OK'
+
 assertRedAmberGreen()
 {
-  assertStdoutIncludes 'red: OK'
-  assertStdoutIncludes 'green: OK'
-  assertStdoutIncludes 'amber: OK'
+  assertStdoutIncludes ${redMessageOK}
+  assertStdoutIncludes ${amberMessageOK}
+  assertStdoutIncludes ${greenMessageOK}
 }
 
 refuteRedAmberGreen()
 {
-  refuteStdoutIncludes 'red: OK'
-  refuteStdoutIncludes 'green: OK'
-  refuteStdoutIncludes 'amber: OK'
+  refuteStdoutIncludes ${redMessageOK}
+  refuteStdoutIncludes ${amberMessageOK}
+  refuteStdoutIncludes ${greenMessageOK}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
