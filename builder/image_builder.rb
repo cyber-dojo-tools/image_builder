@@ -58,7 +58,7 @@ class ImageBuilder
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"
-      assert_system "cd #{src_dir}/docker && docker build --tag #{temp_image_name} ."
+      assert_system "cd #{src_dir}/docker && docker build --no-cache --tag #{temp_image_name} ."
 
       Dir.mktmpdir('image_builder') do |tmp_dir|
         docker_filename = "#{tmp_dir}/Dockerfile"
