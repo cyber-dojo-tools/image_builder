@@ -22,11 +22,10 @@ class ImageBuilder
     build_the_image
     print_image_info
     if test_framework?
-      runner = manifest['runner_choice']
-      if runner.nil? || runner == 'stateless'
+      case manifest['runner_choice']
+      when 'stateless'
         check_start_point_src_red_green_amber_using_runner_stateless
-      end
-      if runner == 'stateful'
+      when 'stateful'
         check_start_point_src_red_green_amber_using_runner_stateful
       end
     end
