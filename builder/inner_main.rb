@@ -17,13 +17,17 @@ class InnerMain
 
   def run
     t1 = Time.now
-    validate_image_data_triple
-    dockerhub_login
+    if running_on_travis?
+      validate_image_data_triple
+      dockerhub_login
+    end
     builder = ImageBuilder.new(@src_dir, @args)
     builder.build_and_test_image
-    dockerhub_push_image(image_name)
-    dockerhub_logout
-    trigger_dependent_repos
+    if running_on_travis?
+      dockerhub_push_image(image_name)
+      dockerhub_logout
+      trigger_dependent_repos
+    end
     t2 = Time.now
     print_date_time_duration(t1, t2)
   end
@@ -47,9 +51,7 @@ class InnerMain
 
   def validate_image_data_triple
     banner {
-      if !running_on_travis?
-        print_to STDOUT, 'skipped (not running on Travis)'
-      elsif validated?
+      if validated?
         print_to STDOUT, triple.inspect
       else
         print_to STDERR, *triple_diagnostic(triples_url)
@@ -132,11 +134,7 @@ class InnerMain
     banner {
       repos = dependent_repos
       print_to STDOUT, "dependent repos: #{repos.size}"
-      if running_on_travis?
-        travis_trigger(repos)
-      else
-        local_list(repos)
-      end
+      travis_trigger(repos)
     }
   end
 
@@ -152,13 +150,6 @@ class InnerMain
       output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
       print_to STDOUT, output
       print_to STDOUT, "\n", '- - - - - - - - -'
-    end
-  end
-
-  def local_list(repos)
-    print_to STDOUT, 'skipped (not running on Travis)'
-    repos.each do |repo_name|
-      puts "  #{cdl}/#{repo_name}"
     end
   end
 

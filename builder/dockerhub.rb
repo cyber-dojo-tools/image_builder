@@ -6,9 +6,7 @@ module Dockerhub
 
   def dockerhub_login
     banner {
-      if !running_on_travis?
-        print_to STDOUT, 'skipped (not running on Travis)'
-      elsif dockerhub_username == ''
+      if dockerhub_username == ''
         failed "#{dockerhub_username_env_var} env-var not set"
       elsif dockerhub_password == ''
         failed "#{dockerhub_password_env_var} env-var not set"
@@ -31,12 +29,8 @@ module Dockerhub
 
   def dockerhub_push_image(image_name)
     banner {
-      if !running_on_travis?
-        print_to STDOUT, 'skipped (not running on Travis)'
-      else
-        print_to STDOUT, "pushing #{image_name}"
-        assert_system "docker push #{image_name}"
-      end
+      print_to STDOUT, "pushing #{image_name}"
+      assert_system "docker push #{image_name}"
     }
   end
 
@@ -44,11 +38,7 @@ module Dockerhub
 
   def dockerhub_logout
     banner {
-      if !running_on_travis?
-        print_to STDOUT, 'skipped (not running on Travis)'
-      else
-        assert_system 'docker logout'
-      end
+      assert_system 'docker logout'
     }
   end
 
