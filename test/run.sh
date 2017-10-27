@@ -1,18 +1,11 @@
 #!/bin/bash
+set -e
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
-cd ${my_dir}
 
-failed=0
-for file in ./test_*.sh; do
-  ${file}
-  if [ $? != 0 ]; then
-    failed=1
-  fi
-done
-
-exit ${failed}
-
+# in order dependency...
+${my_dir}/test_languages.sh
+${my_dir}/test_testFrameworks.sh
 
 # use good_language
 #   copy it to /tmp

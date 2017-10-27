@@ -1,4 +1,4 @@
-FROM  cyberdojofoundation/python:3.6.1
+FROM  cyberdojofoundation/ubuntu_python:image_builder_test
 LABEL maintainer=jon@jaggersoft.com
 
 RUN pip3 install --upgrade pytest

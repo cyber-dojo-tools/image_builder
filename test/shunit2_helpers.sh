@@ -17,6 +17,14 @@ assertStdoutIncludes()
   fi
 }
 
+refuteStdoutIncludes()
+{
+  local stdout="`cat ${stdoutF}`"
+  if [[ "${stdout}" == *"${1}"* ]]; then
+    fail "did not expect stdout to include ${1}"
+  fi
+}
+
 assertStderrIncludes()
 {
   local stderr="`cat ${stderrF}`"
