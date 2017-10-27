@@ -5,10 +5,14 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 
 assertBuildImage()
 {
-  build_image $1
-  cat ${stdoutF}
+  local src_dir=${ROOT_DIR}$1
+  ${ROOT_DIR}/run_build_image.sh ${src_dir} >${stdoutF} 2>${stderrF}
+  #build_image $1
+  #cat ${stdoutF}
   assertTrue $?
+  echo 'A'
   assertNoStderr
+  echo 'B'
 }
 
 build_image()
