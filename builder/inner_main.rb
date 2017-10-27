@@ -22,7 +22,7 @@ class InnerMain
       dockerhub_login
     end
     builder = ImageBuilder.new(@src_dir, @args)
-    builder.build_and_test_image
+    builder.build_and_test_image_start_point
     if running_on_travis?
       dockerhub_push_image(image_name)
       dockerhub_logout

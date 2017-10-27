@@ -15,7 +15,7 @@ class ImageBuilder
     @args = args
   end
 
-  def build_and_test_image
+  def build_and_test_image_start_point
     if test_framework?
       check_start_point_can_be_created
     end
