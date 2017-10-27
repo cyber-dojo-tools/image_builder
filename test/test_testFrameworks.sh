@@ -13,9 +13,9 @@ build_image()
 
 test___success() { :; }
 
-test_____alpine_stateful_testFramework()
+test_____alpine_testFramework_stateful()
 {
-  build_image /test/gcc-assert
+  build_image /test/test-frameworks/alpine-gcc-assert/stateful
   assertStdoutIncludes '# check_start_point_can_be_created'
   assertStdoutIncludes "adduser -D -G cyber-dojo -h /home/flamingo -s '/bin/sh' -u 40014 flamingo"
   assertStdoutIncludes 'Welcome to Alpine Linux 3.6'
@@ -26,9 +26,9 @@ test_____alpine_stateful_testFramework()
   assertNoStderr
 }
 
-test_____ubuntu_stateless_testFramework()
+test_____ubuntu_testFramework_stateless()
 {
-  build_image /test/python-pytest
+  build_image /test/test-frameworks/ubuntu-python-pytest/stateless
   assertStdoutIncludes '# check_start_point_can_be_created'
   assertStdoutIncludes "adduser --disabled-password --gecos \"\" --ingroup cyber-dojo --home /home/flamingo --uid 40014 flamingo"
   assertStdoutIncludes 'Ubuntu 17.04'
