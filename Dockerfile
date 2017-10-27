@@ -1,14 +1,28 @@
-FROM cyberdojo/docker
-MAINTAINER Jon Jagger <jon@jaggersoft.com>
+FROM  docker:latest
+LABEL maintainer=jon@jaggersoft.com
 
-ARG  DOCKER_COMPOSE_VERSION
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# install ruby
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-USER root
+RUN apk --update --no-cache add \
+    openssl ca-certificates \
+    ruby ruby-io-console ruby-dev ruby-irb ruby-bundler ruby-bigdecimal \
+    bash tzdata
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# install tini (for pid 1 zombie reaping)
+# https://github.com/krallin/tini
+
+RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ tini
 
 # - - - - - - - - - - - - - - - - - - - - - -
 # install docker-compose
+# - - - - - - - - - - - - - - - - - - - - - -
 
+ARG DOCKER_COMPOSE_VERSION
 ARG DOCKER_COMPOSE_BINARY=/usr/bin/docker-compose
+
 RUN apk add --no-cache curl openssl ca-certificates \
  && curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > ${DOCKER_COMPOSE_BINARY} \
  && chmod +x ${DOCKER_COMPOSE_BINARY} \
