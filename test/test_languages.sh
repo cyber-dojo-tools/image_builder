@@ -1,19 +1,7 @@
 #!/bin/bash
 
-readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
-
-build_image()
-{
-  local src_dir=${ROOT_DIR}$1
-  ${ROOT_DIR}/run_build_image.sh ${src_dir} >${stdoutF} 2>${stderrF}
-  assertTrue $?
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-echo '...dirs with /docker/ only ==> languages'
-
-echo '...success cases'
+echo 'dirs with /docker/ only ==> languages'
+echo 'success cases...'
 
 test_alpine()
 {
@@ -47,5 +35,8 @@ test_ubuntu()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-. ./shunit2_helpers.sh
-. ./shunit2
+readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
+
+. ${MY_DIR}/test_helpers.sh
+. ${MY_DIR}/shunit2_helpers.sh
+. ${MY_DIR}/shunit2
