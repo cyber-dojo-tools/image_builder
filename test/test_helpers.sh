@@ -6,6 +6,7 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 assertBuildImage()
 {
   build_image $1
+  cat ${stdoutF}
   assertTrue $?
   assertNoStderr
 }
