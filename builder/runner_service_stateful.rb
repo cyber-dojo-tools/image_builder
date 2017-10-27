@@ -1,6 +1,6 @@
 require_relative 'http_json_service'
 
-class RunnerServiceStatefull
+class RunnerServiceStateful
 
   def kata_new(image_name, kata_id)
     args  = [image_name, kata_id]

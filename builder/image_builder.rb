@@ -3,7 +3,7 @@ require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'json_parse'
 require_relative 'print_to'
-require_relative 'runner_service_statefull'
+require_relative 'runner_service_stateful'
 require_relative 'runner_service_stateless'
 require 'securerandom'
 require 'tmpdir'
@@ -242,11 +242,11 @@ class ImageBuilder
           # directly into the runner service, and this is a stateful
           # runner which is quite likely to be optimized for speed.
           # Hence the sleeps.
-          assert_timed_run_statefull(name, :red)
+          assert_timed_run_stateful(name, :red)
           sleep(1.5)
-          assert_timed_run_statefull(name, :green)
+          assert_timed_run_stateful(name, :green)
           sleep(1.5)
-          assert_timed_run_statefull(name, :amber)
+          assert_timed_run_stateful(name, :amber)
           # do amber last to prevent amber-test-run state
           # changes 'leaking' into green-test run
         }
@@ -257,7 +257,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def in_kata
-    @runner = RunnerServiceStatefull.new
+    @runner = RunnerServiceStateful.new
     @runner.kata_new(image_name, kata_id)
     begin
       yield
@@ -280,7 +280,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def assert_timed_run_statefull(avatar_name, colour)
+  def assert_timed_run_stateful(avatar_name, colour)
     args = [image_name]
     args << kata_id
     args << avatar_name
