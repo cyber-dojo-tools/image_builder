@@ -2,7 +2,7 @@ require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'print_to'
 
-class Dockerhub
+class DockerHub
 
   def login
     banner {
