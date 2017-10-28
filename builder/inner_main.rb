@@ -33,6 +33,11 @@ class InnerMain
 
   private
 
+  include AssertSystem
+  include Banner
+  include DirGetArgs
+  include PrintTo
+
   def travis
     @travis ||= Travis.new
   end
@@ -41,10 +46,9 @@ class InnerMain
     @dockerhub ||= DockerHub.new
   end
 
-  include AssertSystem
-  include Banner
-  include DirGetArgs
-  include PrintTo
+  def image_name
+    @args[:image_name]
+  end
 
   def print_date_time_duration(t1, t2)
     banner {
