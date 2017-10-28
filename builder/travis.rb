@@ -1,5 +1,6 @@
 require_relative 'assert_system'
 require_relative 'banner'
+require_relative 'dockerhub'
 require_relative 'dir_get_args'
 require_relative 'json_parse'
 require_relative 'print_to'
@@ -29,6 +30,7 @@ class Travis
   include AssertSystem
   include Banner
   include DirGetArgs
+  include Dockerhub
   include JsonParse
   include PrintTo
 

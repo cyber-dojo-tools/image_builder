@@ -1,10 +1,10 @@
+require_relative 'assert_system'
+require_relative 'banner'
+require_relative 'print_to'
 
-# module to push a successfully built and tested
-# language/testFramework docker image to dockerhub.
+class Dockerhub
 
-module Dockerhub
-
-  def dockerhub_login
+  def login
     banner {
       if dockerhub_username == ''
         failed "#{dockerhub_username_env_var} env-var not set"
@@ -27,7 +27,7 @@ module Dockerhub
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def dockerhub_push_image(image_name)
+  def push_image(image_name)
     banner {
       print_to STDOUT, "pushing #{image_name}"
       assert_system "docker push #{image_name}"
@@ -36,7 +36,7 @@ module Dockerhub
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def dockerhub_logout
+  def logout
     banner {
       assert_system 'docker logout'
     }
@@ -44,8 +44,11 @@ module Dockerhub
 
   private
 
+  include AssertSystem
+  include Banner
+  include PrintTo
+
   def docker_login_cmd(username, password)
-    # TODO: Try this several times before failing?
     [ 'docker login',
         "--username #{username}",
         "--password #{password}"
