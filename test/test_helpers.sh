@@ -11,7 +11,7 @@ assertBuildImage()
 build_image()
 {
   local src_dir=${ROOT_DIR}$1
-  ${ROOT_DIR}/run_build_image.sh ${src_dir} # >${stdoutF} 2>${stderrF}
+  ${ROOT_DIR}/run_build_image.sh ${src_dir} >${stdoutF} 2>${stderrF}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
