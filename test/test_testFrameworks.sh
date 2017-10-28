@@ -21,10 +21,12 @@ test_alpine_stateless()
   assertStartPointRedAmberGreenStateless
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 test_ubuntu_stateless()
 {
-  echo '  python-pytest'
-  assertBuildImage /test/test-frameworks/ubuntu-python-pytest/stateless
+  echo '  perl-testsimple'
+  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/stateless
   assertUbuntuImageBuilt
   assertStartPointCreated
   assertStartPointRedAmberGreenStateless
@@ -32,8 +34,8 @@ test_ubuntu_stateless()
 
 test_ubuntu_stateful()
 {
-  echo '  python-pytest'
-  assertBuildImage /test/test-frameworks/ubuntu-python-pytest/stateful
+  echo '  perl-testsimple'
+  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/stateful
   assertUbuntuImageBuilt
   assertStartPointCreated
   assertStartPointRedAmberGreenStateful

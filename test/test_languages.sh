@@ -14,8 +14,8 @@ test_alpine()
 
 test_ubuntu()
 {
-  echo '  python'
-  assertBuildImage /test/languages/ubuntu-python
+  echo '  perl'
+  assertBuildImage /test/languages/ubuntu-perl
   assertUbuntuImageBuilt
   refuteStartPointCreated
   refuteRedAmberGreen
