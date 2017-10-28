@@ -30,7 +30,6 @@ class Travis
   include AssertSystem
   include Banner
   include DirGetArgs
-  #include Dockerhub
   include JsonParse
   include PrintTo
 

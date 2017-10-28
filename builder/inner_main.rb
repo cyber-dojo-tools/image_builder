@@ -50,7 +50,6 @@ class InnerMain
   include AssertSystem
   include Banner
   include DirGetArgs
-  #include Dockerhub
   include JsonParse
   include PrintTo
 
@@ -61,22 +60,6 @@ class InnerMain
       print_to STDOUT, "took #{hms}"
     }
   end
-
-  #def triple
-  #  {
-  #    "from" => from,
-  #    "image_name" => image_name,
-  #    "test_framework" => test_framework?
-  #  }
-  #end
-
-  #def from
-  #  @args[:from]
-  #end
-
-  #def test_framework?
-  #  @args[:test_framework]
-  #end
 
   # - - - - - - - - - - - - - - - - -
 
