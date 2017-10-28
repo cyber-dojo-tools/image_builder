@@ -236,8 +236,8 @@ class ImageBuilder
           # to second granularity, the microseconds are always zero.
           # This matters in a stateless runner since the cyber-dojo.sh
           # file could be executing make (for example).
-          # This is very unlikely to matter for a test-event from the
-          # browser but it is quite likely to matter here since
+          # This is very unlikely to matter for a browser test-event
+          # but it is quite likely to matter here since
           # we are not doing a full browser round-trip we are calling
           # directly into the runner service, and this is a stateful
           # runner which is quite likely to be optimized for speed.
@@ -309,32 +309,32 @@ class ImageBuilder
     args = options[colour.to_s]
     if !args.nil?
       filename = args['filename']
-      from = args['from']
-      to = args['to']
+      was = args['from']
+      now = args['to']
     elsif colour == :amber
-      from = '6 * 9'
-      to = '6 * 9sdsd'
-      filename = filename_6_times_9(from)
+      was = '6 * 9'
+      now = '6 * 9sdsd'
+      filename = filename_6_times_9(was)
     elsif colour == :green
-      from = '6 * 9'
-      to = '6 * 7'
-      filename = filename_6_times_9(from)
+      was = '6 * 9'
+      now = '6 * 7'
+      filename = filename_6_times_9(was)
     end
     # the .sub() call must be on the start_file and not the
     # current file (in the container) because a previous
     # stateful test-run could have edited the file.
-    return filename, start_files[filename].sub(from,to)
+    return filename, start_files[filename].sub(was,now)
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def filename_6_times_9(from)
-    filenames = start_files.select { |_,content| content.include? from }
+  def filename_6_times_9(text)
+    filenames = start_files.select { |_,content| content.include? text }
     if filenames == {}
-      failed [ "no '#{from}' file found" ]
+      failed [ "no '#{text}' file found" ]
     end
     if filenames.length > 1
-      failed [ "multiple '#{from}' files " + filenames.inspect ]
+      failed [ "multiple '#{text}' files " + filenames.inspect ]
     end
     filenames.keys[0]
   end
