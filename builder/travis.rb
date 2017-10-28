@@ -1,6 +1,5 @@
 require_relative 'assert_system'
 require_relative 'banner'
-#require_relative 'dockerhub'
 require_relative 'dir_get_args'
 require_relative 'json_parse'
 require_relative 'print_to'
@@ -8,13 +7,13 @@ require_relative 'print_to'
 class Travis
 
   def initialize
-    @args = dir_get_args(ENV['SRC_DIR'])
+    args = dir_get_args(ENV['SRC_DIR'])
+    @image_name = args[:image_name]
+    @from = args[:from]
+    @test_framework = args[:test_framework]
   end
 
   def validate_image_data_triple
-    if !running_on_travis?
-      return
-    end
     banner {
       if validated?
         print_to STDOUT, triple.inspect
@@ -22,6 +21,14 @@ class Travis
         print_to STDERR, *triple_diagnostic(triples_url)
         exit false
       end
+    }
+  end
+
+  def trigger_dependent_repos
+    banner {
+      repos = dependent_repos
+      print_to STDOUT, "dependent repos: #{repos.size}"
+      trigger(repos)
     }
   end
 
@@ -42,25 +49,25 @@ class Travis
   end
 
   def image_name
-    @args[:image_name]
+    @image_name
   end
 
   def from
-    @args[:from]
+    @from
   end
 
   def test_framework?
-    @args[:test_framework]
+    @test_framework
   end
 
   # - - - - - - - - - - - - - - - - - - - - -
 
   def validated?
-    triple = triples.find { |_,args| args['image_name'] == image_name }
-    if triple.nil?
+    found = triples.find { |_,tri| tri['image_name'] == image_name }
+    if found.nil?
       return false
     end
-    triple = triple[1]
+    triple = found[1]
     triple['from'] == from && triple['test_framework'] == test_framework?
   end
 
@@ -103,10 +110,27 @@ class Travis
 
   # - - - - - - - - - - - - - - - - - - - - -
 
-  def running_on_travis?
-    # return false if we are running image_builder's tests
-    ENV['TRAVIS'] == 'true' &&
-      ENV['TRAVIS_REPO_SLUG'] != 'cyber-dojo-languages/image_builder'
+  def trigger(repos)
+    if repos.size == 0
+      return
+    end
+    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
+    token = assert_backtick('travis token --org').strip
+    assert_system 'travis logout'
+    repos.each do |repo_name|
+      puts "  #{cdl}/#{repo_name}"
+      output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+      print_to STDOUT, output
+      print_to STDOUT, "\n", '- - - - - - - - -'
+    end
+  end
+
+  def cdl
+    'cyber-dojo-languages'
+  end
+
+  def dependent_repos
+    triples.keys.select { |key| triples[key]['from'] == image_name }
   end
 
 end

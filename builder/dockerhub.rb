@@ -4,6 +4,20 @@ require_relative 'print_to'
 
 class DockerHub
 
+  def push(image_name)
+    login
+    begin
+      banner {
+        print_to STDOUT, "pushing #{image_name}"
+        assert_system "docker push #{image_name}"
+      }
+    ensure
+      logout
+    end
+  end
+
+  private
+
   def login
     banner {
       if dockerhub_username == ''
@@ -22,15 +36,6 @@ class DockerHub
           ]
         end
       end
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-  def push_image(image_name)
-    banner {
-      print_to STDOUT, "pushing #{image_name}"
-      assert_system "docker push #{image_name}"
     }
   end
 
