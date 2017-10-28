@@ -28,6 +28,7 @@ class Travis
 
   include AssertSystem
   include Banner
+  include DirGetArgs
   include JsonParse
   include PrintTo
 
