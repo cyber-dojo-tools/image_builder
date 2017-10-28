@@ -20,7 +20,6 @@ class InnerMain
     t1 = Time.now
     on_travis.validate_image_data_triple
     if running_on_travis?
-      #validate_image_data_triple
       dockerhub_login
     end
     builder = ImageBuilder.new(@src_dir, @args)
@@ -55,19 +54,6 @@ class InnerMain
     }
   end
 
-=begin
-    def validate_image_data_triple
-    banner {
-      if validated?
-        print_to STDOUT, triple.inspect
-      else
-        print_to STDERR, *triple_diagnostic(triples_url)
-        exit false
-      end
-    }
-  end
-=end
-
   def triple
     {
       "from" => from,
@@ -90,17 +76,6 @@ class InnerMain
 
   # - - - - - - - - - - - - - - - - -
 
-=begin
-    def validated?
-    triple = triples.find { |_,args| args['image_name'] == image_name }
-    if triple.nil?
-      return false
-    end
-    triple = triple[1]
-    triple['from'] == from && triple['test_framework'] == test_framework?
-  end
-=end
-
   def triples
     @triples ||= curled_triples
   end
@@ -117,26 +92,6 @@ class InnerMain
   def triples_filename
     'images_info.json'
   end
-
-=begin
-    def triple_diagnostic(url)
-    [ '',
-      url,
-      'does not contain an entry for:',
-      '',
-      "#{quoted('...dir...')}: {",
-      "  #{quoted('from')}: #{quoted(from)},",
-      "  #{quoted('image_name')}: #{quoted(image_name)},",
-      "  #{quoted('test_framework')}: #{quoted(test_framework?)}",
-      '},',
-      ''
-    ]
-  end
-
-  def quoted(s)
-    '"' + s.to_s + '"'
-  end
-=end
 
   # - - - - - - - - - - - - - - - - -
 
