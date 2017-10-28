@@ -55,9 +55,7 @@ class InnerMain
         print_to STDOUT, triple.inspect
       else
         print_to STDERR, *triple_diagnostic(triples_url)
-        if running_on_travis?
-          exit false
-        end
+        exit false
       end
     }
   end
