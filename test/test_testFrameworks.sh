@@ -12,6 +12,15 @@ test_alpine_stateful()
   assertStartPointRedAmberGreenStateful
 }
 
+test_alpine_stateless()
+{
+  echo '  gcc-assert'
+  assertBuildImage /test/test-frameworks/alpine-gcc-assert/stateless
+  assertAlpineImageBuilt
+  assertStartPointCreated
+  assertStartPointRedAmberGreenStateless
+}
+
 test_ubuntu_stateless()
 {
   echo '  python-pytest'
