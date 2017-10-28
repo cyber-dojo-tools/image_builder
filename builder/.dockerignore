@@ -19,4 +19,5 @@
 !print_to.rb
 !runner_service_stateful.rb
 !runner_service_stateless.rb
+!travis.rb
 !trigger.sh

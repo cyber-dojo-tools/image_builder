@@ -7,6 +7,7 @@ require_relative 'dockerhub'
 require_relative 'image_builder'
 require_relative 'json_parse'
 require_relative 'print_to'
+require_relative 'travis'
 
 class InnerMain
 
@@ -17,8 +18,9 @@ class InnerMain
 
   def run
     t1 = Time.now
+    on_travis.validate_image_data_triple
     if running_on_travis?
-      validate_image_data_triple
+      #validate_image_data_triple
       dockerhub_login
     end
     builder = ImageBuilder.new(@src_dir, @args)
@@ -33,6 +35,10 @@ class InnerMain
   end
 
   private
+
+  def on_travis
+    @travis ||= Travis.new
+  end
 
   include AssertSystem
   include Banner
@@ -49,7 +55,8 @@ class InnerMain
     }
   end
 
-  def validate_image_data_triple
+=begin
+    def validate_image_data_triple
     banner {
       if validated?
         print_to STDOUT, triple.inspect
@@ -59,6 +66,7 @@ class InnerMain
       end
     }
   end
+=end
 
   def triple
     {
@@ -82,7 +90,8 @@ class InnerMain
 
   # - - - - - - - - - - - - - - - - -
 
-  def validated?
+=begin
+    def validated?
     triple = triples.find { |_,args| args['image_name'] == image_name }
     if triple.nil?
       return false
@@ -90,6 +99,7 @@ class InnerMain
     triple = triple[1]
     triple['from'] == from && triple['test_framework'] == test_framework?
   end
+=end
 
   def triples
     @triples ||= curled_triples
@@ -108,7 +118,8 @@ class InnerMain
     'images_info.json'
   end
 
-  def triple_diagnostic(url)
+=begin
+    def triple_diagnostic(url)
     [ '',
       url,
       'does not contain an entry for:',
@@ -125,6 +136,7 @@ class InnerMain
   def quoted(s)
     '"' + s.to_s + '"'
   end
+=end
 
   # - - - - - - - - - - - - - - - - -
 
