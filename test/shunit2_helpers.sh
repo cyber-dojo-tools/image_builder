@@ -11,25 +11,31 @@ assertNoStderr() { assertStderrEquals ""; }
 
 assertStdoutIncludes()
 {
+  local expected=$1
   local stdout="`cat ${stdoutF}`"
-  if [[ "${stdout}" != *"${1}"* ]]; then
-    fail "expected stdout to include ${1}"
+  if [[ "${stdout}" != *"${expected}"* ]]; then
+    dumpStdout
+    fail "expected stdout to include ${expected}"
   fi
 }
 
 refuteStdoutIncludes()
 {
+  local unexpected=$1
   local stdout="`cat ${stdoutF}`"
-  if [[ "${stdout}" == *"${1}"* ]]; then
-    fail "did not expect stdout to include ${1}"
+  if [[ "${stdout}" == *"${unexpected}"* ]]; then
+    dumpStdout
+    fail "did not expect stdout to include ${unexpected}"
   fi
 }
 
 assertStderrIncludes()
 {
+  local expected=$1
   local stderr="`cat ${stderrF}`"
-  if [[ "${stderr}" != *"${1}"* ]]; then
-    fail "expected stderr to include ${1}"
+  if [[ "${stderr}" != *"${expected}"* ]]; then
+    dumpStderr
+    fail "expected stderr to include ${expected}"
   fi
 }
 
@@ -43,6 +49,22 @@ oneTimeSetUp()
   stderrF="${outputDir}/stderr"
   mkdirCmd='mkdir'  # save command name in variable to make future changes easy
   testDir="${SHUNIT_TMPDIR}/some_test_dir"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+dumpStdout()
+{
+  echo "<STDOUT>"
+  cat ${stdoutF}
+  echo "</STDOUT>"
+}
+
+dumpStderr()
+{
+  echo "<STDERR>"
+  cat ${stderrF}
+  echo "</STDERR>"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
