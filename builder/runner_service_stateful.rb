@@ -37,7 +37,7 @@ class RunnerServiceStateful
   include HttpJsonService
 
   def hostname
-    'runner'
+    'runner_stateful'
   end
 
   def port
