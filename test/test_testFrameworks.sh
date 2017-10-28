@@ -30,6 +30,15 @@ test_ubuntu_stateless()
   assertStartPointRedAmberGreenStateless
 }
 
+test_ubuntu_stateful()
+{
+  echo '  python-pytest'
+  assertBuildImage /test/test-frameworks/ubuntu-python-pytest/stateful
+  assertUbuntuImageBuilt
+  assertStartPointCreated
+  assertStartPointRedAmberGreenStateful
+}
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
