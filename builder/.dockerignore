@@ -12,12 +12,12 @@
 !assert_system.rb
 !banner.rb
 !dockerhub.rb
-!get_image_name.rb
 !http_json_service.rb
 !image_builder.rb
 !json_parse.rb
 !print_to.rb
 !runner_service_stateful.rb
 !runner_service_stateless.rb
+!source.rb
 !travis.rb
 !trigger.sh

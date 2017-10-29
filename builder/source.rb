@@ -1,10 +1,14 @@
+require_relative 'assert_system'
 require_relative 'json_parse'
+require_relative 'print_to'
 
-module GetImageName
+class Source
 
-  include JsonParse
+  def initialize(src_dir)
+    @src_dir = src_dir
+  end
 
-  def get_image_name(src_dir)
+  def image_name
     image_name_filename = src_dir + '/docker/image_name.json'
     manifest_filename   = src_dir + '/start_point/manifest.json'
     image_name_content = read_nil(image_name_filename)
@@ -34,14 +38,14 @@ module GetImageName
       content = manifest_content
     end
 
-    image_name = json_parse(filename, content)['image_name']
-
-    {
-      image_name:image_name
-    }
+    json_parse(filename, content)['image_name']
   end
 
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  private
+
+  include AssertSystem # failed
+  include JsonParse
+  include PrintTo
 
   def read_nil(filename)
     File.exists?(filename) ? IO.read(filename) : nil

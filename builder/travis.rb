@@ -1,6 +1,6 @@
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'get_image_name'
+require_relative 'source'
 require_relative 'dockerhub'
 require_relative 'json_parse'
 require_relative 'print_to'
@@ -9,7 +9,7 @@ class Travis
 
   def initialize
     src_dir = ENV['SRC_DIR']
-    @image_name = get_image_name(src_dir)
+    @image_name = Source.new(src_dir).image_name
 
     # all repos on Travis have a /docker/Dockerfile
     # base language repos obviously
@@ -51,7 +51,6 @@ class Travis
 
   include AssertSystem
   include Banner
-  include GetImageName
   include JsonParse
   include PrintTo
 

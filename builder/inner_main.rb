@@ -37,7 +37,6 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-
 builder = ImageBuilder.new
 if docker_dir?
   builder.build_image

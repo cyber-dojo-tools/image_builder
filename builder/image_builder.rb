@@ -1,7 +1,7 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'get_image_name'
+require_relative 'source'
 require_relative 'json_parse'
 require_relative 'print_to'
 require_relative 'runner_service_stateful'
@@ -13,7 +13,7 @@ class ImageBuilder
 
   def initialize
     @src_dir = ENV['SRC_DIR']
-    @image_name = get_image_name(@src_dir)
+    @image_name = Source.new(@src_dir).image_name
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,7 +73,6 @@ class ImageBuilder
 
   include AssertSystem
   include Banner
-  include GetImageName
   include JsonParse
   include PrintTo
 
