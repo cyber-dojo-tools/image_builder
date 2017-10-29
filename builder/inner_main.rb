@@ -22,7 +22,7 @@ if source.docker_dir?
   builder.build_image
 end
 if source.start_point.dir?
-  builder.create_start_point
+  source.start_point.test_create
 end
 if source.docker_dir? && source.start_point.dir?
   #

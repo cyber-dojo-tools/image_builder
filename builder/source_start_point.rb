@@ -1,3 +1,4 @@
+require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'failed'
 require_relative 'json_parse'
@@ -29,6 +30,21 @@ class SourceStartPoint
 
   def image_name
     manifest['image_name']
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def test_create
+    banner {
+      script = 'cyber-dojo'
+      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
+      assert_system "curl --silent -O #{url}"
+      assert_system "chmod +x #{script}"
+      name = 'start-point-create-check'
+      system "./#{script} start-point rm #{name} &> /dev/null"
+      assert_system "./#{script} start-point create #{name} --dir=#{@src_dir}"
+      print_to STDOUT, 'start point can be created'
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -258,6 +274,7 @@ class SourceStartPoint
 
   private
 
+  include AssertSystem
   include Banner
   include Failed
   include JsonParse

@@ -41,6 +41,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+=begin
   def create_start_point
     banner {
       script = 'cyber-dojo'
@@ -53,6 +54,7 @@ class ImageBuilder
       print_to STDOUT, 'start point can be created'
     }
   end
+=end
 
   private
 
