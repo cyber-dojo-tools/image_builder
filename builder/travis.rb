@@ -1,6 +1,5 @@
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'source'
 require_relative 'dockerhub'
 require_relative 'json_parse'
 require_relative 'print_to'
