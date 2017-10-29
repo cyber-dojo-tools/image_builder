@@ -400,11 +400,6 @@ class ImageBuilder
   end
 
   # - - - - - - - - - - - - - - - - -
-  # data triple
-
-  def from
-    @args[:from]
-  end
 
   def image_name
     @args[:image_name]

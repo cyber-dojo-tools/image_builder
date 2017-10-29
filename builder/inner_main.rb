@@ -45,6 +45,9 @@ if start_point_dir?
   builder.create_start_point
 end
 if docker_dir? && start_point_dir?
+  # TODO: not right. Someone could be creating
+  # a custom start_point/ and also using a custom docker/
+  # In this case, take the image_name from start_point/manifest.json
   builder.test_red_amber_green
 end
 
