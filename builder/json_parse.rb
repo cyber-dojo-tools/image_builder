@@ -1,4 +1,5 @@
 require 'json'
+require_relative 'failed'
 
 module JsonParse
 
@@ -9,5 +10,7 @@ module JsonParse
       failed "error parsing JSON file:#{filename}"
     end
   end
+
+  include Failed
 
 end

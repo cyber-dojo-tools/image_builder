@@ -12,6 +12,7 @@
 !assert_system.rb
 !banner.rb
 !dockerhub.rb
+!failed.rb
 !http_json_service.rb
 !image_builder.rb
 !json_parse.rb

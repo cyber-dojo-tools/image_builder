@@ -1,3 +1,4 @@
+require_relative 'failed'
 
 module AssertSystem
 
@@ -20,10 +21,7 @@ module AssertSystem
 
   # - - - - - - - - - - - - - - - - -
 
-  def failed(*lines)
-    print_to STDERR, *(['FAILED'] + lines.flatten)
-    exit 1
-  end
+  include Failed
 
   def success
     0

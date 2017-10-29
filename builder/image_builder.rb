@@ -2,7 +2,6 @@ require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'json_parse'
-require_relative 'print_to'
 require_relative 'runner_service_stateful'
 require_relative 'runner_service_stateless'
 require 'securerandom'
@@ -72,7 +71,6 @@ class ImageBuilder
   include AssertSystem
   include Banner
   include JsonParse
-  include PrintTo
 
   # - - - - - - - - - - - - - - - - -
 

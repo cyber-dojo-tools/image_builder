@@ -1,6 +1,5 @@
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'print_to'
 
 class DockerHub
 
@@ -20,7 +19,6 @@ class DockerHub
 
   include AssertSystem
   include Banner
-  include PrintTo
 
   def login
     banner {

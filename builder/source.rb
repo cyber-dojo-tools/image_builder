@@ -1,6 +1,5 @@
-require_relative 'assert_system'
+require_relative 'failed'
 require_relative 'json_parse'
-require_relative 'print_to'
 
 class Source
 
@@ -67,9 +66,8 @@ class Source
 
   private
 
-  include AssertSystem # TODO: for failed()
+  include Failed
   include JsonParse
-  include PrintTo
 
   def read_nil(filename)
     File.exists?(filename) ? IO.read(filename) : nil
