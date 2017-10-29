@@ -57,7 +57,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def test_red_amber_green
-    case manifest['runner_choice']
+    case source.start_point_runner_choice
     when 'stateless'
       check_start_point_src_red_green_amber_using_runner_stateless
     when 'stateful'
@@ -343,12 +343,6 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def manifest
-    json_parse(start_point_dir + '/manifest.json')
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def timed
     started = Time.now
     result = yield
@@ -377,19 +371,8 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def start_files
-    # start-point has already been verified
-    manifest_filename = start_point_dir + '/manifest.json'
-    manifest = IO.read(manifest_filename)
-    manifest = JSON.parse(manifest)
-    files = {}
-    manifest['visible_filenames'].each do |filename|
-      path = start_point_dir + '/' + filename
-      files[filename] = IO.read(path)
-    end
-    files
+    source.start_point_visible_files
   end
-
-  # - - - - - - - - - - - - - - - - -
 
   def image_name
     source.image_name

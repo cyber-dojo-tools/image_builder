@@ -23,6 +23,8 @@ class Source
     IO.read(docker_dir + '/Dockerfile')
   end
 
+  # - - - - - - - - - - - - - - - - - - - - -
+
   def start_point_dir?
     Dir.exist? start_point_dir
   end
@@ -30,6 +32,22 @@ class Source
   def start_point_dir
     dir + '/start_point'
   end
+
+  def start_point_visible_files
+    # start-point has already been verified
+    files = {}
+    manifest['visible_filenames'].each do |filename|
+      path = start_point_dir + '/' + filename
+      files[filename] = IO.read(path)
+    end
+    files
+  end
+
+  def start_point_runner_choice
+    manifest['runner_choice']
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
 
   def image_name
     image_name_filename = docker_dir + '/image_name.json'
@@ -65,6 +83,10 @@ class Source
 
   include Failed
   include JsonParse
+
+  def manifest
+    json_parse(start_point_dir + '/manifest.json')
+  end
 
   def read_nil(filename)
     File.exists?(filename) ? IO.read(filename) : nil
