@@ -13,12 +13,42 @@ def on_travis_cyber_dojo?
 
 end
 
-builder = ImageBuilder.new
-builder.build_image
-builder.create_start_point
-builder.test_red_amber_green
+# - - - - - - - - - - - - - - - - - - - - - - -
 
-if on_travis_cyber_dojo?
+def docker_dir?
+  Dir.exist? docker_dir
+end
+
+def docker_dir
+  src_dir + '/docker'
+end
+
+def start_point_dir?
+  Dir.exist? start_point_dir
+end
+
+def start_point_dir
+  src_dir + '/start_point'
+end
+
+def src_dir
+  ENV['SRC_DIR']
+end
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+
+builder = ImageBuilder.new
+if docker_dir?
+  builder.build_image
+end
+if start_point_dir?
+  builder.create_start_point
+end
+if docker_dir? && start_point_dir?
+  builder.test_red_amber_green
+end
+
+if on_travis_cyber_dojo? && docker_dir?
   travis = Travis.new
   travis.validate_image_data_triple
   travis.push_image_to_dockerhub

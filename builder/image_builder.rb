@@ -39,27 +39,31 @@ class ImageBuilder
 
       assert_system "docker rmi #{temp_image_name}"
     }
-    print_image_info
+    print_image_OS
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def create_start_point
-    if test_framework?
-      check_start_point_can_be_created
-    end
+    banner {
+      script = 'cyber-dojo'
+      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
+      assert_system "curl --silent -O #{url}"
+      assert_system "chmod +x #{script}"
+      name = 'start-point-create-check'
+      system "./#{script} start-point rm #{name} &> /dev/null"
+      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
+    }
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def test_red_amber_green
-    if test_framework?
-      case manifest['runner_choice']
-      when 'stateless'
-        check_start_point_src_red_green_amber_using_runner_stateless
-      when 'stateful'
-        check_start_point_src_red_green_amber_using_runner_stateful
-      end
+    case manifest['runner_choice']
+    when 'stateless'
+      check_start_point_src_red_green_amber_using_runner_stateless
+    when 'stateful'
+      check_start_point_src_red_green_amber_using_runner_stateful
     end
   end
 
@@ -73,21 +77,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_start_point_can_be_created
-    banner {
-      script = 'cyber-dojo'
-      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-      assert_system "curl --silent -O #{url}"
-      assert_system "chmod +x #{script}"
-      name = 'start-point-create-check'
-      system "./#{script} start-point rm #{name} &> /dev/null"
-      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def print_image_info
+  def print_image_OS
     banner {
       index = image_name.index(':')
       if index.nil?
