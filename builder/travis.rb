@@ -7,21 +7,19 @@ require_relative 'print_to'
 
 class Travis
 
-  def initialize
-    src_dir = ENV['SRC_DIR']
-    @image_name = Source.new(src_dir).image_name
+  def initialize(source)
+    @image_name = source.image_name
 
     # all repos on Travis have a /docker/Dockerfile
     # base language repos obviously
     # test-framework repos for adding in the red-amber-green regex file.
-    docker_filename = src_dir + '/docker/Dockerfile'
+    docker_filename = source.docker_dir + '/Dockerfile'
     dockerfile = IO.read(docker_filename)
     lines = dockerfile.split("\n")
     from_line = lines.find { |line| line.start_with? 'FROM' }
     @from = from_line.split[1].strip
 
-    start_point_dir = src_dir + '/start_point'
-    @test_framework = Dir.exist?(start_point_dir)
+    @test_framework = source.start_point_dir?
   end
 
   def validate_image_data_triple

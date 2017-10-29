@@ -15,44 +15,24 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-def docker_dir?
-  Dir.exist? docker_dir
-end
-
-def docker_dir
-  src_dir + '/docker'
-end
-
-def start_point_dir?
-  Dir.exist? start_point_dir
-end
-
-def start_point_dir
-  src_dir + '/start_point'
-end
-
-def src_dir
-  ENV['SRC_DIR']
-end
-
-# - - - - - - - - - - - - - - - - - - - - - - -
+source = Source.new(ENV['SRC_DIR'])
 
 builder = ImageBuilder.new
-if docker_dir?
+if source.docker_dir?
   builder.build_image
 end
-if start_point_dir?
+if source.start_point_dir?
   builder.create_start_point
 end
-if docker_dir? && start_point_dir?
+if source.docker_dir? && source.start_point_dir?
   # TODO: not right. Someone could be creating
   # a custom start_point/ and also using a custom docker/
   # In this case, take the image_name from start_point/manifest.json
   builder.test_red_amber_green
 end
 
-if on_travis_cyber_dojo? && docker_dir?
-  travis = Travis.new
+if on_travis_cyber_dojo? && source.docker_dir?
+  travis = Travis.new(source)
   travis.validate_image_data_triple
   travis.push_image_to_dockerhub
   travis.trigger_dependents

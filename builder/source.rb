@@ -8,9 +8,29 @@ class Source
     @src_dir = src_dir
   end
 
+  def dir
+    @src_dir
+  end
+
+  def docker_dir?
+    Dir.exist? docker_dir
+  end
+
+  def docker_dir
+    dir + '/docker'
+  end
+
+  def start_point_dir?
+    Dir.exist? start_point_dir
+  end
+
+  def start_point_dir
+    dir + '/start_point'
+  end
+
   def image_name
-    image_name_filename = src_dir + '/docker/image_name.json'
-    manifest_filename   = src_dir + '/start_point/manifest.json'
+    image_name_filename = docker_dir + '/image_name.json'
+    manifest_filename   = start_point_dir + '/manifest.json'
     image_name_content = read_nil(image_name_filename)
     manifest_content   = read_nil(manifest_filename)
 
@@ -43,7 +63,7 @@ class Source
 
   private
 
-  include AssertSystem # failed
+  include AssertSystem # TODO: for failed()
   include JsonParse
   include PrintTo
 
