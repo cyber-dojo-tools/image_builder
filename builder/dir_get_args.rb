@@ -5,15 +5,12 @@ module DirGetArgs
   include JsonParse
 
   def dir_get_args(src_dir)
-    docker_filename = src_dir + '/docker/Dockerfile'
-    dockerfile = read_nil(docker_filename)
     args = []
     args << (image_name_filename = src_dir + '/docker/image_name.json')
     args << (manifest_filename   = src_dir + '/start_point/manifest.json')
     args << (image_name_file = read_nil(image_name_filename))
     args << (manifest_file   = read_nil(manifest_filename))
     {
-      from:get_FROM(dockerfile),
       image_name:get_image_name(args),
       test_framework:get_test_framework(manifest_file)
     }
@@ -23,15 +20,6 @@ module DirGetArgs
 
   def read_nil(filename)
     File.exists?(filename) ? IO.read(filename) : nil
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-  def get_FROM(dockerfile)
-    # TODO: dockefile could be nil
-    lines = dockerfile.split("\n")
-    from_line = lines.find { |line| line.start_with? 'FROM' }
-    from_line.split[1].strip
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

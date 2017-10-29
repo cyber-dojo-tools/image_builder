@@ -13,7 +13,7 @@ class ImageBuilder
 
   def initialize
     @src_dir = ENV['SRC_DIR']
-    @args = dir_get_args(@src_dir)
+    @args = dir_get_args(@src_dir) # TODO: only need image_name
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -

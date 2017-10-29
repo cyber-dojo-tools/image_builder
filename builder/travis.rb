@@ -8,9 +8,20 @@ require_relative 'print_to'
 class Travis
 
   def initialize
-    args = dir_get_args(ENV['SRC_DIR'])
+    src_dir = ENV['SRC_DIR']
+    args = dir_get_args(src_dir)
+
     @image_name = args[:image_name]
-    @from = args[:from]
+
+    # all repos on Travis have a /docker/Dockerfile
+    # base language repos obviously
+    # test-framework repos for adding in the red-amber-green regex file.
+    docker_filename = src_dir + '/docker/Dockerfile'
+    dockerfile = IO.read(docker_filename)
+    lines = dockerfile.split("\n")
+    from_line = lines.find { |line| line.start_with? 'FROM' }
+    @from = from_line.split[1].strip
+
     @test_framework = args[:test_framework]
   end
 
