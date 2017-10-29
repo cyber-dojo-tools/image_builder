@@ -38,6 +38,9 @@ if source.docker_dir? && source.start_point.dir?
   #
   # This suggests the reading of files (eg in start_point)
   # should come from source.methods
+  #
+  # But at the same time, if being run on a cyber-dojo-langauges repo
+  # should check it _has_ 6*9 content
 
   source.start_point.test_red_amber_green
 end

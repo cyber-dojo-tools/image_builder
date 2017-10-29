@@ -81,11 +81,6 @@ class SourceStartPoint
   # - - - - - - - - - - - - - - - - -
 
   def start_files
-    visible_files
-  end
-
-  def visible_files
-    # start-point has already been verified
     files = {}
     manifest['visible_filenames'].each do |filename|
       files[filename] = IO.read(dir + '/' + filename)
