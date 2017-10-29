@@ -38,40 +38,29 @@ class Source
     either_or = [
       "#{image_name_filename} must exist",
       'or',
-      "#{manifest_filename} must exist"
+      "#{start_point.manifest_filename} must exist"
     ]
 
     image_name_exist = File.exist? image_name_filename
-    manifest_exist = File.exist? manifest_filename
 
-    if !image_name_exist && !manifest_exist
+    if !image_name_exist && !start_point.manifest_filename?
       failed either_or + [ 'neither do.' ]
     end
-    if image_name_exist && manifest_exist
+    if image_name_exist && start_point.manifest_filename?
       failed either_or + [ 'but not both.' ]
     end
 
     if image_name_exist
-      filename = image_name_filename
+      json_parse(image_name_filename)['image_name']
     end
-    if manifest_exist
-      filename = manifest_filename
+    if start_point.manifest_filename?
+      start_point.image_name
     end
-
-    json_parse(filename)['image_name']
   end
 
   private
 
   include Failed
   include JsonParse
-
-  def manifest_filename
-    start_point.manifest_filename
-  end
-
-  def manifest
-    json_parse(manifest_filename)
-  end
 
 end

@@ -14,6 +14,10 @@ class SourceStartPoint
     @src_dir + '/start_point'
   end
 
+  def manifest_filename?
+    File.exist? manifest_filename
+  end
+
   def manifest_filename
     dir + '/manifest.json'
   end
@@ -31,11 +35,19 @@ class SourceStartPoint
     manifest['runner_choice']
   end
 
+  def image_name
+    manifest['image_name']
+  end
+
   private
 
   include JsonParse
 
   def manifest
+    @manifest ||= read_manifest
+  end
+
+  def read_manifest
     json_parse(manifest_filename)
   end
 
