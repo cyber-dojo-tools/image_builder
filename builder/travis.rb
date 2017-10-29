@@ -117,10 +117,6 @@ class Travis
   # - - - - - - - - - - - - - - - - - - - - -
 
   def trigger(repos)
-    if repos.size == 0
-      return
-    end
-    token = get_token
     repos.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
@@ -131,13 +127,25 @@ class Travis
 
   # - - - - - - - - - - - - - - - - - - - - -
 
+  def token
+    @token ||= get_token
+  end
+
   def get_token
-    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
+    login
     begin
       token = assert_backtick('travis token --org').strip
     ensure
-      assert_system 'travis logout'
+      logout
     end
+  end
+
+  def login
+    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
+  end
+
+  def logout
+    assert_system 'travis logout'
   end
 
   # - - - - - - - - - - - - - - - - - - - - -
