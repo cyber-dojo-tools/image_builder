@@ -405,10 +405,6 @@ class ImageBuilder
     @args[:image_name]
   end
 
-  def test_framework?
-    @args[:test_framework]
-  end
-
   # - - - - - - - - - - - - - - - - -
 
   def start_point_dir
