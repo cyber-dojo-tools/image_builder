@@ -18,6 +18,10 @@ class DockerHub
 
   private
 
+  include AssertSystem
+  include Banner
+  include PrintTo
+
   def login
     banner {
       if dockerhub_username == ''
@@ -47,11 +51,7 @@ class DockerHub
     }
   end
 
-  private
-
-  include AssertSystem
-  include Banner
-  include PrintTo
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def docker_login_cmd(username, password)
     [ 'docker login',

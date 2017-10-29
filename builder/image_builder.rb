@@ -15,12 +15,43 @@ class ImageBuilder
     @args = args
   end
 
-  def build_and_test_image_start_point
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  def build_image
+    banner {
+      uuid = SecureRandom.hex[0..10].downcase
+      temp_image_name = "imagebuilder/tmp_#{uuid}"
+      assert_system "cd #{src_dir}/docker && docker build --no-cache --tag #{temp_image_name} ."
+
+      Dir.mktmpdir('image_builder') do |tmp_dir|
+        docker_filename = "#{tmp_dir}/Dockerfile"
+        File.open(docker_filename, 'w') { |fd|
+          fd.write(make_users_dockerfile(temp_image_name))
+        }
+        assert_system [
+          'docker build',
+            "--file #{docker_filename}",
+            "--tag #{image_name}",
+            tmp_dir
+        ].join(' ')
+      end
+
+      assert_system "docker rmi #{temp_image_name}"
+    }
+    print_image_info
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  def create_start_point
     if test_framework?
       check_start_point_can_be_created
     end
-    build_the_image
-    print_image_info
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  def test_red_amber_green
     if test_framework?
       case manifest['runner_choice']
       when 'stateless'
@@ -49,31 +80,6 @@ class ImageBuilder
       name = 'start-point-create-check'
       system "./#{script} start-point rm #{name} &> /dev/null"
       assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def build_the_image
-    banner {
-      uuid = SecureRandom.hex[0..10].downcase
-      temp_image_name = "imagebuilder/tmp_#{uuid}"
-      assert_system "cd #{src_dir}/docker && docker build --no-cache --tag #{temp_image_name} ."
-
-      Dir.mktmpdir('image_builder') do |tmp_dir|
-        docker_filename = "#{tmp_dir}/Dockerfile"
-        File.open(docker_filename, 'w') { |fd|
-          fd.write(make_users_dockerfile(temp_image_name))
-        }
-        assert_system [
-          'docker build',
-            "--file #{docker_filename}",
-            "--tag #{image_name}",
-            tmp_dir
-        ].join(' ')
-      end
-
-      assert_system "docker rmi #{temp_image_name}"
     }
   end
 

@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative 'assert_system'
-require_relative 'banner'
 require_relative 'dir_get_args'
-require_relative 'dockerhub'
 require_relative 'image_builder'
-require_relative 'print_to'
 require_relative 'travis'
 
 class InnerMain
@@ -16,54 +12,31 @@ class InnerMain
   end
 
   def run
-    t1 = Time.now
-
     builder = ImageBuilder.new(@src_dir, @args)
-    builder.build_and_test_image_start_point
+    builder.build_image
+    builder.create_start_point
+    builder.test_red_amber_green
 
-    if running_on_travis?
+    if on_travis_cyber_dojo?
+      travis = Travis.new
       travis.validate_image_data_triple
-      dockerhub.push(image_name)
-      travis.trigger_dependent_repos
+      travis.push_image_to_dockerhub
+      travis.trigger_dependents
     end
-
-    t2 = Time.now
-    print_date_time_duration(t1, t2)
   end
 
   private
 
-  include AssertSystem
-  include Banner
   include DirGetArgs
-  include PrintTo
 
-  def travis
-    @travis ||= Travis.new
-  end
-
-  def dockerhub
-    @dockerhub ||= DockerHub.new
-  end
-
-  def image_name
-    @args[:image_name]
-  end
-
-  def print_date_time_duration(t1, t2)
-    banner {
-      assert_system 'date'
-      hms = Time.at(t2 - t1).utc.strftime("%H:%M:%S")
-      print_to STDOUT, "took #{hms}"
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def running_on_travis?
-    # return false if we are running image_builder's tests
+  def on_travis_cyber_dojo?
+    # return false if we are running our own tests
+    repo_slug = ENV['TRAVIS_REPO_SLUG']
     ENV['TRAVIS'] == 'true' &&
-      ENV['TRAVIS_REPO_SLUG'] != 'cyber-dojo-languages/image_builder'
+      repo_slug != 'cyber-dojo-languages/image_builder' &&
+      (repo_slug.start_with?('cyber-dojo-languages/') ||
+       repo_slug.start_with?('cyber-dojo/'))
+
   end
 
 end

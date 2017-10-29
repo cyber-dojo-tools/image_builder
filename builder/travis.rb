@@ -1,6 +1,7 @@
 require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'dir_get_args'
+require_relative 'dockerhub'
 require_relative 'json_parse'
 require_relative 'print_to'
 
@@ -18,13 +19,17 @@ class Travis
       if validated?
         print_to STDOUT, triple.inspect
       else
-        print_to STDERR, *triple_diagnostic(triples_url)
+        print_to STDERR, *triple_diagnostic
         exit false
       end
     }
   end
 
-  def trigger_dependent_repos
+  def push_image_to_dockerhub
+    DockerHub.new.push(image_name)
+  end
+
+  def trigger_dependents
     banner {
       repos = dependent_repos
       print_to STDOUT, "dependent repos: #{repos.size}"
@@ -90,9 +95,9 @@ class Travis
     'images_info.json'
   end
 
-  def triple_diagnostic(url)
+  def triple_diagnostic
     [ '',
-      url,
+      triples_url,
       'does not contain an entry for:',
       '',
       "#{quoted('...dir...')}: {",
