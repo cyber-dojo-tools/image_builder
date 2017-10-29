@@ -24,21 +24,20 @@ class DockerHub
 
   def login
     banner {
-      if dockerhub_username == ''
-        failed "#{dockerhub_username_env_var} env-var not set"
-      elsif dockerhub_password == ''
-        failed "#{dockerhub_password_env_var} env-var not set"
-      else
-        # careful not to show password if command fails
-        output = `#{docker_login_cmd(dockerhub_username, dockerhub_password)}`
-        status = $?.exitstatus
-        unless status == success
-          failed [
-            "#{docker_login_cmd('[secure]','[secure]')}",
-            "exit_status == #{status}",
-            output
-          ]
-        end
+      unless ENV.has_key? dockerhub_username
+        failed "#{dockerhub_username} env-var not set"
+      end
+      unless ENV.has_key? dockerhub_password
+        failed "#{dockerhub_password} env-var not set"
+      end
+      output = `#{docker_login_cmd}`
+      status = $?.exitstatus
+      unless status == success
+        failed [
+          '[docker login] failed',
+          "exit_status == #{status}",
+          output
+        ]
       end
     }
   end
@@ -53,33 +52,26 @@ class DockerHub
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def docker_login_cmd(username, password)
-    [ 'docker login',
-        "--username #{username}",
-        "--password #{password}"
+  def docker_login_cmd
+    [ 'echo $DOCKER_PASSWORD |',
+      'docker login',
+        "--username #{ENV[dockerhub_username]}",
+        "--password-stdin"
     ].join(' ')
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def dockerhub_username_env_var
+  def dockerhub_username
     # should be DOCKERHUB_USERNAME but too late
     # to change it on all the cyber-dojo-languages repos
     'DOCKER_USERNAME'
   end
 
-  def dockerhub_password_env_var
+  def dockerhub_password
     # should be DOCKERHUB_PASSWORD but too late
     # to change it on all the cyber-dojo-languages repos
     'DOCKER_PASSWORD'
-  end
-
-  def dockerhub_username
-    ENV[dockerhub_username_env_var]
-  end
-
-  def dockerhub_password
-    ENV[dockerhub_password_env_var]
   end
 
 end
