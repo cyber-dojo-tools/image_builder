@@ -52,7 +52,7 @@ refuteStartPointCreated()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly startPointRedAmberGreenMessage='check_start_point_src_red_green_amber_using_runner'
+readonly startPointRedAmberGreenMessage='check_red_green_amber_using_runner'
 
 assertStartPointRedAmberGreenStateful()
 {
