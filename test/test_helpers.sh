@@ -32,8 +32,8 @@ assertUbuntuImageBuilt()
 
 assertImageBuilt()
 {
-  assertStdoutIncludes '# build_the_image'
-  assertStdoutIncludes '# print_image_info'
+  assertStdoutIncludes '# build_image'
+  assertStdoutIncludes '# print_image_OS'
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
