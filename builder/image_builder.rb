@@ -1,7 +1,6 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'source'
 require_relative 'json_parse'
 require_relative 'print_to'
 require_relative 'runner_service_stateful'
@@ -11,9 +10,8 @@ require 'tmpdir'
 
 class ImageBuilder
 
-  def initialize
-    @src_dir = ENV['SRC_DIR']
-    @image_name = Source.new(@src_dir).image_name
+  def initialize(source)
+    @source = source
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -22,7 +20,7 @@ class ImageBuilder
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"
-      assert_system "cd #{src_dir}/docker && docker build --no-cache --tag #{temp_image_name} ."
+      assert_system "cd #{docker_dir} && docker build --no-cache --tag #{temp_image_name} ."
 
       Dir.mktmpdir('image_builder') do |tmp_dir|
         docker_filename = "#{tmp_dir}/Dockerfile"
@@ -52,7 +50,7 @@ class ImageBuilder
       assert_system "chmod +x #{script}"
       name = 'start-point-create-check'
       system "./#{script} start-point rm #{name} &> /dev/null"
-      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
+      assert_system "./#{script} start-point create #{name} --dir=#{source.dir}"
     }
   end
 
@@ -69,7 +67,7 @@ class ImageBuilder
 
   private
 
-  attr_reader :image_name
+  attr_reader :source
 
   include AssertSystem
   include Banner
@@ -401,13 +399,19 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def start_point_dir
-    src_dir + '/start_point'
+  def image_name
+    source.image_name
   end
 
-  def src_dir
-    @src_dir
+  def docker_dir
+    source.docker_dir
   end
+
+  def start_point_dir
+    source.start_point_dir
+  end
+
+  # - - - - - - - - - - - - - - - - -
 
   def rag_filename
     '/usr/local/bin/red_amber_green.rb'

@@ -17,7 +17,7 @@ end
 
 source = Source.new(ENV['SRC_DIR'])
 
-builder = ImageBuilder.new
+builder = ImageBuilder.new(source)
 if source.docker_dir?
   builder.build_image
 end
