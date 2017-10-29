@@ -337,11 +337,7 @@ class ImageBuilder
 
   def options
     filename = start_point_dir + '/options.json'
-    if File.exist? filename
-      json_parse(filename)
-    else
-      {}
-    end
+    File.exist?(filename) ? json_parse(filename) : {}
   end
 
   # - - - - - - - - - - - - - - - - -
