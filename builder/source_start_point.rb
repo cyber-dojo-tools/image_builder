@@ -60,6 +60,12 @@ class SourceStartPoint
 
   private
 
+  include AssertSystem
+  include Banner
+  include Failed
+  include JsonParse
+  include PrintTo
+
   def visible_files
     # start-point has already been verified
     files = {}
@@ -68,6 +74,8 @@ class SourceStartPoint
     end
     files
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def runner_choice
     manifest['runner_choice']
@@ -271,14 +279,6 @@ class SourceStartPoint
   end
 
   # - - - - - - - - - - - - - - - - -
-
-  private
-
-  include AssertSystem
-  include Banner
-  include Failed
-  include JsonParse
-  include PrintTo
 
   def manifest
     @manifest ||= read_manifest

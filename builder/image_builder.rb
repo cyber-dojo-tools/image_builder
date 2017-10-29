@@ -1,9 +1,6 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'json_parse'
-require_relative 'runner_service_stateful'
-require_relative 'runner_service_stateless'
 require 'securerandom'
 require 'tmpdir'
 
@@ -19,7 +16,7 @@ class ImageBuilder
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"
-      assert_system "cd #{docker_dir} && docker build --no-cache --tag #{temp_image_name} ."
+      assert_system "cd #{source.docker_dir} && docker build --no-cache --tag #{temp_image_name} ."
 
       Dir.mktmpdir('image_builder') do |tmp_dir|
         docker_filename = "#{tmp_dir}/Dockerfile"
@@ -39,30 +36,12 @@ class ImageBuilder
     print_image_OS
   end
 
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-=begin
-  def create_start_point
-    banner {
-      script = 'cyber-dojo'
-      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-      assert_system "curl --silent -O #{url}"
-      assert_system "chmod +x #{script}"
-      name = 'start-point-create-check'
-      system "./#{script} start-point rm #{name} &> /dev/null"
-      assert_system "./#{script} start-point create #{name} --dir=#{source.dir}"
-      print_to STDOUT, 'start point can be created'
-    }
-  end
-=end
-
   private
 
   attr_reader :source
 
   include AssertSystem
   include Banner
-  include JsonParse
 
   # - - - - - - - - - - - - - - - - -
 
@@ -180,34 +159,8 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def start_files
-    source.start_point.visible_files
-  end
-
   def image_name
     source.image_name
-  end
-
-  def docker_dir
-    source.docker_dir
-  end
-
-  def start_point_dir
-    source.start_point.dir
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def rag_filename
-    '/usr/local/bin/red_amber_green.rb'
-  end
-
-  def kata_id
-    '6F4F4E4759'
-  end
-
-  def avatar_name
-    'rhino'
   end
 
   def space
