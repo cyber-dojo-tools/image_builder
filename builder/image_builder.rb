@@ -88,7 +88,7 @@ class ImageBuilder
         version = image_name[index+1..-1]
       end
       spaces = '\\s+'
-      assert_system "docker images | grep -E '#{name}#{spaces}#{tag}'"
+      assert_backtick "docker images | grep -E '#{name}#{spaces}#{tag}'"
       cat_etc_issue = [
         'docker run --rm -it',
         image_name,
