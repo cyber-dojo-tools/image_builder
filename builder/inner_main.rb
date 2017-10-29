@@ -11,7 +11,6 @@ def on_travis_cyber_dojo?
     repo_slug != 'cyber-dojo-languages/image_builder' &&
     (repo_slug.start_with?('cyber-dojo-languages/') ||
      repo_slug.start_with?('cyber-dojo/'))
-
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -26,9 +25,12 @@ if source.start_point_dir?
   builder.create_start_point
 end
 if source.docker_dir? && source.start_point_dir?
-  # TODO: not right. Someone could be creating
-  # a custom start_point/ and also using a custom docker/
-  # In this case, take the image_name from start_point/manifest.json
+  # TODO: not right. Someone could be using
+  # a custom start_point/ dir and also using a custom docker/ dir.
+  # (in this case, take the image_name from start_point/manifest.json)
+  # I need to be able to recognise src_dirs that are from a
+  # cyber-dojo-languages/ repo. Maybe do this with a git command
+  # looking at the origin URL?
   builder.test_red_amber_green
 end
 
