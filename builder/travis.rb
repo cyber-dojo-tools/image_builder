@@ -56,11 +56,9 @@ class Travis
 
   def from
     # all repos on Travis have a /docker/Dockerfile
-    # base language repos obviously
-    # test-framework repos for adding in the red-amber-green regex file.
-    docker_filename = source.docker_dir + '/Dockerfile'
-    dockerfile = IO.read(docker_filename)
-    lines = dockerfile.split("\n")
+    #   o) base language repos obviously
+    #   o) test-framework repos for adding in the red-amber-green regex file.
+    lines = source.dockerfile.split("\n")
     from_line = lines.find { |line| line.start_with? 'FROM' }
     from_line.split[1].strip
   end

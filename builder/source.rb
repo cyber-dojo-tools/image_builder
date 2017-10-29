@@ -20,6 +20,10 @@ class Source
     dir + '/docker'
   end
 
+  def dockerfile
+    IO.read(docker_dir + '/Dockerfile')
+  end
+
   def start_point_dir?
     Dir.exist? start_point_dir
   end
