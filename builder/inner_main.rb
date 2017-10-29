@@ -21,10 +21,10 @@ builder = ImageBuilder.new(source)
 if source.docker_dir?
   builder.build_image
 end
-if source.start_point_dir?
+if source.start_point.dir?
   builder.create_start_point
 end
-if source.docker_dir? && source.start_point_dir?
+if source.docker_dir? && source.start_point.dir?
   #
   # TODO: not right.
   # Suppose someone wants a local 9*6 start_point?

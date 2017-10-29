@@ -1,5 +1,6 @@
 require_relative 'failed'
 require_relative 'json_parse'
+require_relative 'source_start_point'
 
 class Source
 
@@ -25,26 +26,8 @@ class Source
 
   # - - - - - - - - - - - - - - - - - - - - -
 
-  def start_point_dir?
-    Dir.exist? start_point_dir
-  end
-
-  def start_point_dir
-    dir + '/start_point'
-  end
-
-  def start_point_visible_files
-    # start-point has already been verified
-    files = {}
-    manifest['visible_filenames'].each do |filename|
-      path = start_point_dir + '/' + filename
-      files[filename] = IO.read(path)
-    end
-    files
-  end
-
-  def start_point_runner_choice
-    manifest['runner_choice']
+  def start_point
+    SourceStartPoint.new(@src_dir)
   end
 
   # - - - - - - - - - - - - - - - - - - - - -
@@ -84,7 +67,7 @@ class Source
   include JsonParse
 
   def manifest_filename
-    start_point_dir + '/manifest.json'
+    start_point.manifest_filename
   end
 
   def manifest

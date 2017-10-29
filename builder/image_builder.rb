@@ -49,6 +49,7 @@ class ImageBuilder
       assert_system "chmod +x #{script}"
       name = 'start-point-create-check'
       system "./#{script} start-point rm #{name} &> /dev/null"
+      # TODO: s/source.dir/source.start_point.dir/
       assert_system "./#{script} start-point create #{name} --dir=#{source.dir}"
       print_to STDOUT, 'start point can be created'
     }
@@ -57,7 +58,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def test_red_amber_green
-    case source.start_point_runner_choice
+    case source.start_point.runner_choice
     when 'stateless'
       check_start_point_src_red_green_amber_using_runner_stateless
     when 'stateful'
@@ -371,7 +372,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def start_files
-    source.start_point_visible_files
+    source.start_point.visible_files
   end
 
   def image_name
@@ -383,7 +384,7 @@ class ImageBuilder
   end
 
   def start_point_dir
-    source.start_point_dir
+    source.start_point.dir
   end
 
   # - - - - - - - - - - - - - - - - -
