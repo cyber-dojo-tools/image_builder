@@ -101,22 +101,22 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def make_users_dockerfile(image_name)
-    cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
+  def make_users_dockerfile(temp_image_name)
+    cmd = "docker run --rm -it #{temp_image_name} sh -c 'cat /etc/issue'"
     etc_issue = assert_backtick cmd
     if etc_issue.include? 'Alpine'
-      return alpine_make_users_dockerfile(image_name)
+      return alpine_make_users_dockerfile(temp_image_name)
     end
     if etc_issue.include? 'Ubuntu'
-      return ubuntu_make_users_dockerfile(image_name)
+      return ubuntu_make_users_dockerfile(temp_image_name)
     end
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def alpine_make_users_dockerfile(image_name)
+  def alpine_make_users_dockerfile(temp_image_name)
     dockerfile = [
-      "FROM #{image_name}",
+      "FROM #{temp_image_name}",
       '',
       'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
       "      addgroup -g #{cyber_dojo_gid} cyber-dojo; \\",
@@ -147,9 +147,9 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def ubuntu_make_users_dockerfile(image_name)
+  def ubuntu_make_users_dockerfile(temp_image_name)
     dockerfile = [
-      "FROM #{image_name}",
+      "FROM #{temp_image_name}",
       '',
       'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
       "      addgroup --gid #{cyber_dojo_gid} cyber-dojo; \\",
