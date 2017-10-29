@@ -52,8 +52,7 @@ class Source
 
     if image_name_exist
       json_parse(image_name_filename)['image_name']
-    end
-    if start_point.manifest_filename?
+    else
       start_point.image_name
     end
   end
