@@ -51,7 +51,6 @@ class Source
 
   def image_name
     image_name_filename = docker_dir + '/image_name.json'
-    manifest_filename   = start_point_dir + '/manifest.json'
 
     either_or = [
       "#{image_name_filename} must exist",
@@ -84,12 +83,12 @@ class Source
   include Failed
   include JsonParse
 
-  def manifest
-    json_parse(start_point_dir + '/manifest.json')
+  def manifest_filename
+    start_point_dir + '/manifest.json'
   end
 
-  def read_nil(filename)
-    File.exists?(filename) ? IO.read(filename) : nil
+  def manifest
+    json_parse(manifest_filename)
   end
 
 end
