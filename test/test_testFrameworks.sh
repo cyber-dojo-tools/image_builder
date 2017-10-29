@@ -43,7 +43,7 @@ test_ubuntu_stateful()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-test_six_times_9_options()
+test_6_times_9_options()
 {
   echo '  asm-assert'
   assertBuildImage /test/test-frameworks/asm-assert
