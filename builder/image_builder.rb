@@ -54,17 +54,6 @@ class ImageBuilder
     }
   end
 
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-  def test_red_amber_green
-    case source.start_point.runner_choice
-    when 'stateless'
-      source.start_point.check_red_green_amber_using_runner_stateless
-    when 'stateful'
-      source.start_point.check_red_green_amber_using_runner_stateful
-    end
-  end
-
   private
 
   attr_reader :source

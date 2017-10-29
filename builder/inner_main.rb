@@ -39,7 +39,7 @@ if source.docker_dir? && source.start_point.dir?
   # This suggests the reading of files (eg in start_point)
   # should come from source.methods
 
-  builder.test_red_amber_green
+  source.start_point.test_red_amber_green
 end
 
 if on_travis_cyber_dojo? && source.docker_dir?

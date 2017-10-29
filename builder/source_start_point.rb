@@ -15,7 +15,7 @@ class SourceStartPoint
     Dir.exist? dir
   end
 
-  def dir
+  def dir # private?
     @src_dir + '/start_point'
   end
 
@@ -26,6 +26,23 @@ class SourceStartPoint
   def manifest_filename
     dir + '/manifest.json'
   end
+
+  def image_name
+    manifest['image_name']
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def test_red_amber_green
+    case runner_choice
+    when 'stateless'
+      check_red_green_amber_using_runner_stateless
+    when 'stateful'
+      check_red_green_amber_using_runner_stateful
+    end
+  end
+
+  private
 
   def visible_files
     # start-point has already been verified
@@ -38,10 +55,6 @@ class SourceStartPoint
 
   def runner_choice
     manifest['runner_choice']
-  end
-
-  def image_name
-    manifest['image_name']
   end
 
   # - - - - - - - - - - - - - - - - -
