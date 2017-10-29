@@ -109,19 +109,13 @@ class Travis
     ]
   end
 
-  def quoted(s)
-    '"' + s.to_s + '"'
-  end
-
   # - - - - - - - - - - - - - - - - - - - - -
 
   def trigger(repos)
     if repos.size == 0
       return
     end
-    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
-    token = assert_backtick('travis token --org').strip
-    assert_system 'travis logout'
+    token = get_token
     repos.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
@@ -130,12 +124,33 @@ class Travis
     end
   end
 
-  def cdl
-    'cyber-dojo-languages'
+  # - - - - - - - - - - - - - - - - - - - - -
+
+  def get_token
+    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
+    begin
+      token = assert_backtick('travis token --org').strip
+    ensure
+      assert_system 'travis logout'
+    end
   end
+
+  # - - - - - - - - - - - - - - - - - - - - -
 
   def dependent_repos
     triples.keys.select { |key| triples[key]['from'] == image_name }
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
+
+  def quoted(s)
+    '"' + s.to_s + '"'
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
+
+  def cdl
+    'cyber-dojo-languages'
   end
 
 end
