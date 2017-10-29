@@ -43,6 +43,17 @@ test_ubuntu_stateful()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+test_six_times_9_options()
+{
+  echo '  asm-assert'
+  assertBuildImage /test/test-frameworks/asm-assert
+  assertUbuntuImageBuilt
+  assertStartPointCreated
+  assertStartPointRedAmberGreenStateless
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
 . ${MY_DIR}/test_helpers.sh
