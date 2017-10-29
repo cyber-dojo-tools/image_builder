@@ -1,6 +1,7 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
+require_relative 'dir_get_args'
 require_relative 'json_parse'
 require_relative 'print_to'
 require_relative 'runner_service_stateful'
@@ -10,9 +11,9 @@ require 'tmpdir'
 
 class ImageBuilder
 
-  def initialize(src_dir, args)
-    @src_dir = src_dir
-    @args = args
+  def initialize
+    @src_dir = ENV['SRC_DIR']
+    @args = dir_get_args(@src_dir)
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -66,6 +67,7 @@ class ImageBuilder
 
   include AssertSystem
   include Banner
+  include DirGetArgs
   include JsonParse
   include PrintTo
 

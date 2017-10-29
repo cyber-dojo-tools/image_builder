@@ -1,18 +1,12 @@
 #!/usr/bin/env ruby
 
-require_relative 'dir_get_args'
 require_relative 'image_builder'
 require_relative 'travis'
 
 class InnerMain
 
-  def initialize
-    @src_dir = ENV['SRC_DIR']
-    @args = dir_get_args(@src_dir)
-  end
-
   def run
-    builder = ImageBuilder.new(@src_dir, @args)
+    builder = ImageBuilder.new
     builder.build_image
     builder.create_start_point
     builder.test_red_amber_green
@@ -26,8 +20,6 @@ class InnerMain
   end
 
   private
-
-  include DirGetArgs
 
   def on_travis_cyber_dojo?
     # return false if we are running our own tests
