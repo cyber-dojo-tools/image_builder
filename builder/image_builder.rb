@@ -267,7 +267,7 @@ class ImageBuilder
   def as_avatar
     @runner.avatar_new(image_name, kata_id, avatar_name, start_files)
     begin
-      yield avatar_name
+      yield
     ensure
       @runner.avatar_old(image_name, kata_id, avatar_name)
     end
