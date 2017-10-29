@@ -22,7 +22,8 @@ class Travis
     from_line = lines.find { |line| line.start_with? 'FROM' }
     @from = from_line.split[1].strip
 
-    @test_framework = args[:test_framework]
+    start_point_dir = src_dir + '/start_point'
+    @test_framework = Dir.exist?(start_point_dir)
   end
 
   def validate_image_data_triple

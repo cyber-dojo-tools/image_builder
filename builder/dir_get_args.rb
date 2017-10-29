@@ -11,8 +11,7 @@ module DirGetArgs
     args << (image_name_file = read_nil(image_name_filename))
     args << (manifest_file   = read_nil(manifest_filename))
     {
-      image_name:get_image_name(args),
-      test_framework:get_test_framework(manifest_file)
+      image_name:get_image_name(args)
     }
   end
 
@@ -54,12 +53,6 @@ module DirGetArgs
       content = manifest_content
     end
     json_parse(filename, content)['image_name']
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-  def get_test_framework(file)
-    !file.nil?
   end
 
 end
