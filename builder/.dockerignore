@@ -11,8 +11,8 @@
 !all_avatars_names.rb
 !assert_system.rb
 !banner.rb
-!dir_get_args.rb
 !dockerhub.rb
+!get_image_name.rb
 !http_json_service.rb
 !image_builder.rb
 !json_parse.rb

@@ -1,10 +1,10 @@
 require_relative 'json_parse'
 
-module DirGetArgs
+module GetImageName
 
   include JsonParse
 
-  def dir_get_args(src_dir)
+  def get_image_name(src_dir)
     image_name_filename = src_dir + '/docker/image_name.json'
     manifest_filename   = src_dir + '/start_point/manifest.json'
     image_name_content = read_nil(image_name_filename)

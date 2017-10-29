@@ -1,7 +1,7 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
-require_relative 'dir_get_args'
+require_relative 'get_image_name'
 require_relative 'json_parse'
 require_relative 'print_to'
 require_relative 'runner_service_stateful'
@@ -13,7 +13,7 @@ class ImageBuilder
 
   def initialize
     @src_dir = ENV['SRC_DIR']
-    @args = dir_get_args(@src_dir) # TODO: only need image_name
+    @image_name = get_image_name(@src_dir)
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -69,9 +69,11 @@ class ImageBuilder
 
   private
 
+  attr_reader :image_name
+
   include AssertSystem
   include Banner
-  include DirGetArgs
+  include GetImageName
   include JsonParse
   include PrintTo
 
@@ -396,12 +398,6 @@ class ImageBuilder
       files[filename] = IO.read(path)
     end
     files
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def image_name
-    @args[:image_name]
   end
 
   # - - - - - - - - - - - - - - - - -
