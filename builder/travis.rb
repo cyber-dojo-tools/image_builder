@@ -8,18 +8,7 @@ require_relative 'print_to'
 class Travis
 
   def initialize(source)
-    @image_name = source.image_name
-
-    # all repos on Travis have a /docker/Dockerfile
-    # base language repos obviously
-    # test-framework repos for adding in the red-amber-green regex file.
-    docker_filename = source.docker_dir + '/Dockerfile'
-    dockerfile = IO.read(docker_filename)
-    lines = dockerfile.split("\n")
-    from_line = lines.find { |line| line.start_with? 'FROM' }
-    @from = from_line.split[1].strip
-
-    @test_framework = source.start_point_dir?
+    @source = source
   end
 
   def validate_image_data_triple
@@ -47,6 +36,8 @@ class Travis
 
   private
 
+  attr_reader :source
+
   include AssertSystem
   include Banner
   include JsonParse
@@ -61,15 +52,22 @@ class Travis
   end
 
   def image_name
-    @image_name
+    source.image_name
   end
 
   def from
-    @from
+    # all repos on Travis have a /docker/Dockerfile
+    # base language repos obviously
+    # test-framework repos for adding in the red-amber-green regex file.
+    docker_filename = source.docker_dir + '/Dockerfile'
+    dockerfile = IO.read(docker_filename)
+    lines = dockerfile.split("\n")
+    from_line = lines.find { |line| line.start_with? 'FROM' }
+    from_line.split[1].strip
   end
 
   def test_framework?
-    @test_framework
+    source.start_point_dir?
   end
 
   # - - - - - - - - - - - - - - - - - - - - -
