@@ -34,8 +34,6 @@ class Source
   def image_name
     image_name_filename = docker_dir + '/image_name.json'
     manifest_filename   = start_point_dir + '/manifest.json'
-    image_name_content = read_nil(image_name_filename)
-    manifest_content   = read_nil(manifest_filename)
 
     either_or = [
       "#{image_name_filename} must exist",
@@ -43,25 +41,24 @@ class Source
       "#{manifest_filename} must exist"
     ]
 
-    image_name = !image_name_content.nil?
-    manifest = !manifest_content.nil?
+    image_name_exist = File.exist? image_name_filename
+    manifest_exist = File.exist? manifest_filename
 
-    if !image_name && !manifest
+    if !image_name_exist && !manifest_exist
       failed either_or + [ 'neither do.' ]
     end
-    if image_name && manifest
+    if image_name_exist && manifest_exist
       failed either_or + [ 'but not both.' ]
     end
-    if image_name
+
+    if image_name_exist
       filename = image_name_filename
-      content = image_name_content
     end
-    if manifest
+    if manifest_exist
       filename = manifest_filename
-      content = manifest_content
     end
 
-    json_parse(filename, content)['image_name']
+    json_parse(filename)['image_name']
   end
 
   private

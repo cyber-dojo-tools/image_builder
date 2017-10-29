@@ -337,9 +337,8 @@ class ImageBuilder
 
   def options
     filename = start_point_dir + '/options.json'
-    if File.exists? filename
-      content = IO.read(filename)
-      json_parse(filename, content)
+    if File.exist? filename
+      json_parse(filename)
     else
       {}
     end
@@ -348,9 +347,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def manifest
-    filename = start_point_dir + '/manifest.json'
-    content = IO.read(filename)
-    json_parse(filename, content)
+    json_parse(start_point_dir + '/manifest.json')
   end
 
   # - - - - - - - - - - - - - - - - -
