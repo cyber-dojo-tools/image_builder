@@ -3,6 +3,7 @@ require_relative 'failed'
 require_relative 'json_parse'
 require_relative 'print_to'
 require_relative 'runner_service_stateful'
+require_relative 'runner_service_stateless'
 
 class SourceStartPoint
 
@@ -41,6 +42,41 @@ class SourceStartPoint
 
   def image_name
     manifest['image_name']
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def check_red_green_amber_using_runner_stateless
+    banner {
+      assert_timed_run_stateless(:red)
+      assert_timed_run_stateless(:green)
+      assert_timed_run_stateless(:amber)
+    }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def assert_timed_run_stateless(colour)
+    runner = RunnerServiceStateless.new
+    args = [image_name]
+    args << kata_id
+    args << avatar_name
+    args << all_files(colour)
+    args << (max_seconds=10)
+    took,sss = timed { runner.run(*args) }
+    assert_rag(colour, sss)
+    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def all_files(colour)
+    files = start_files
+    if colour != :red
+      filename,content = edited_file(colour)
+      files[filename] = content
+    end
+    files
   end
 
   # - - - - - - - - - - - - - - - - -

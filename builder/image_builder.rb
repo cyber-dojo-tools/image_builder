@@ -59,7 +59,7 @@ class ImageBuilder
   def test_red_amber_green
     case source.start_point.runner_choice
     when 'stateless'
-      check_start_point_src_red_green_amber_using_runner_stateless
+      source.start_point.check_red_green_amber_using_runner_stateless
     when 'stateful'
       source.start_point.check_red_green_amber_using_runner_stateful
     end
@@ -186,111 +186,6 @@ class ImageBuilder
   end
 
   include AllAvatarsNames
-
-  # - - - - - - - - - - - - - - - - -
-
-  def check_start_point_src_red_green_amber_using_runner_stateless
-    banner {
-      assert_timed_run_stateless(:red)
-      assert_timed_run_stateless(:green)
-      assert_timed_run_stateless(:amber)
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def assert_timed_run_stateless(colour)
-    runner = RunnerServiceStateless.new
-    args = [image_name]
-    args << kata_id
-    args << avatar_name
-    args << all_files(colour)
-    args << (max_seconds=10)
-    took,sss = timed { runner.run(*args) }
-    assert_rag(colour, sss)
-    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def all_files(colour)
-    files = start_files
-    if colour != :red
-      filename,content = edited_file(colour)
-      files[filename] = content
-    end
-    files
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def edited_file(colour)
-    args = options[colour.to_s]
-    if !args.nil?
-      filename = args['filename']
-      was = args['from']
-      now = args['to']
-    elsif colour == :amber
-      was = '6 * 9'
-      now = '6 * 9sdsd'
-      filename = filename_6_times_9(was)
-    elsif colour == :green
-      was = '6 * 9'
-      now = '6 * 7'
-      filename = filename_6_times_9(was)
-    end
-    # the .sub() call must be on the start_file and not the
-    # current file (in the container) because a previous
-    # stateful test-run could have edited the file.
-    return filename, start_files[filename].sub(was,now)
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def filename_6_times_9(text)
-    filenames = start_files.select { |_,content| content.include? text }
-    if filenames == {}
-      failed [ "no '#{text}' file found" ]
-    end
-    if filenames.length > 1
-      failed [ "multiple '#{text}' files " + filenames.inspect ]
-    end
-    filenames.keys[0]
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def options
-    filename = start_point_dir + '/options.json'
-    File.exist?(filename) ? json_parse(filename) : {}
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def timed
-    started = Time.now
-    result = yield
-    stopped = Time.now
-    took = (stopped - started).round(2)
-    return took,result
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def assert_rag(expected_colour, sss)
-    actual_colour = sss['colour']
-    unless expected_colour.to_s == actual_colour
-      failed [
-        "expected_colour == #{expected_colour}",
-        "  actual_colour == #{actual_colour}",
-        '',
-        "arguments passed to #{rag_filename} (inside #{image_name}):",
-        "  status == #{sss['status']}",
-        "  stdout == #{sss['stdout']}",
-        "  stderr == #{sss['stderr']}",
-      ]
-    end
-  end
 
   # - - - - - - - - - - - - - - - - -
 
