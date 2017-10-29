@@ -16,10 +16,6 @@ class SourceStartPoint
     Dir.exist? dir
   end
 
-  def dir # private?
-    @src_dir + '/start_point'
-  end
-
   def manifest_filename?
     File.exist? manifest_filename
   end
@@ -66,6 +62,28 @@ class SourceStartPoint
   include JsonParse
   include PrintTo
 
+  def dir
+    @src_dir + '/start_point'
+  end
+
+  def manifest
+    @manifest ||= read_manifest
+  end
+
+  def read_manifest
+    json_parse(manifest_filename)
+  end
+
+  def runner_choice
+    manifest['runner_choice']
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def start_files
+    visible_files
+  end
+
   def visible_files
     # start-point has already been verified
     files = {}
@@ -73,12 +91,6 @@ class SourceStartPoint
       files[filename] = IO.read(dir + '/' + filename)
     end
     files
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def runner_choice
-    manifest['runner_choice']
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -264,28 +276,12 @@ class SourceStartPoint
 
   # - - - - - - - - - - - - - - - - -
 
-  def start_files
-    visible_files
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def kata_id
     '6F4F4E4759'
   end
 
   def avatar_name
     'rhino'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def manifest
-    @manifest ||= read_manifest
-  end
-
-  def read_manifest
-    json_parse(manifest_filename)
   end
 
 end
