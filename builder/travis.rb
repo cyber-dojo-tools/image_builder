@@ -32,7 +32,7 @@ class Travis
   def trigger_dependents
     banner {
       repos = dependent_repos
-      print_to STDOUT, "dependent repos: #{repos.size}"
+      print_to STDOUT, "number of dependent repos: #{repos.size}"
       trigger(repos)
     }
   end

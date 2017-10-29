@@ -8,7 +8,7 @@ class DockerHub
     login
     begin
       banner {
-        print_to STDOUT, "pushing #{image_name}"
+        print_to STDOUT, "pushing #{image_name} to dockerhub"
         assert_system "docker push #{image_name}"
       }
     ensure
