@@ -50,6 +50,7 @@ class ImageBuilder
       name = 'start-point-create-check'
       system "./#{script} start-point rm #{name} &> /dev/null"
       assert_system "./#{script} start-point create #{name} --dir=#{source.dir}"
+      print_to STDOUT, 'start point can be created'
     }
   end
 

@@ -38,7 +38,7 @@ assertImageBuilt()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly startPointCreatedMessage='check_start_point_can_be_created'
+readonly startPointCreatedMessage='start point can be created'
 
 assertStartPointCreated()
 {
