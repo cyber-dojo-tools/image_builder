@@ -49,8 +49,7 @@ class ImageBuilder
       assert_system "chmod +x #{script}"
       name = 'start-point-create-check'
       system "./#{script} start-point rm #{name} &> /dev/null"
-      # TODO: s/source.dir/source.start_point.dir/
-      assert_system "./#{script} start-point create #{name} --dir=#{source.dir}"
+      assert_system "./#{script} start-point create #{name} --dir=#{source.start_point.dir}"
       print_to STDOUT, 'start point can be created'
     }
   end
