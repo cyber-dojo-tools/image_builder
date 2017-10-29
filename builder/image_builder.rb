@@ -205,7 +205,7 @@ class ImageBuilder
     runner = RunnerServiceStateless.new
     args = [image_name]
     args << kata_id
-    args << 'salmon'
+    args << avatar_name
     args << all_files(colour)
     args << (max_seconds=10)
     took,sss = timed { runner.run(*args) }
@@ -229,7 +229,7 @@ class ImageBuilder
   def check_start_point_src_red_green_amber_using_runner_stateful
     banner {
       in_kata {
-        as_avatar { |name|
+        as_avatar {
           # the tar-pipe in the runner's stores file date-stamps
           # to second granularity, the microseconds are always zero.
           # This matters in a stateless runner since the cyber-dojo.sh
@@ -240,11 +240,11 @@ class ImageBuilder
           # directly into the runner service, and this is a stateful
           # runner which is quite likely to be optimized for speed.
           # Hence the sleeps.
-          assert_timed_run_stateful(name, :red)
+          assert_timed_run_stateful(:red)
           sleep(1.5)
-          assert_timed_run_stateful(name, :green)
+          assert_timed_run_stateful(:green)
           sleep(1.5)
-          assert_timed_run_stateful(name, :amber)
+          assert_timed_run_stateful(:amber)
           # do amber last to prevent amber-test-run state
           # changes 'leaking' into green-test run
         }
@@ -267,7 +267,6 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def as_avatar
-    avatar_name = 'rhino'
     @runner.avatar_new(image_name, kata_id, avatar_name, start_files)
     begin
       yield avatar_name
@@ -278,7 +277,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def assert_timed_run_stateful(avatar_name, colour)
+  def assert_timed_run_stateful(colour)
     args = [image_name]
     args << kata_id
     args << avatar_name
@@ -421,6 +420,10 @@ class ImageBuilder
 
   def kata_id
     '6F4F4E4759'
+  end
+
+  def avatar_name
+    'rhino'
   end
 
   def space
