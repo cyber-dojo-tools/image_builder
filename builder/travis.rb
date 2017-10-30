@@ -129,7 +129,11 @@ class Travis
   end
 
   def login
-    assert_system "travis login --skip-completion-check --github-token ${GITHUB_TOKEN}"
+    `travis login --skip-completion-check --github-token ${GITHUB_TOKEN}`
+    status = $?.exitstatus
+    unless status == success
+      failed "exit_status == #{status}"
+    end
   end
 
   def logout
