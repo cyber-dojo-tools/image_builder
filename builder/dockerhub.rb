@@ -3,11 +3,11 @@ require_relative 'assert_system'
 class DockerHub
 
   def initialize
-    unless ENV.has_key? dockerhub_username
-      failed "#{dockerhub_username} env-var not set"
+    unless ENV.has_key? dockerhub_username_env_var_name
+      failed "#{dockerhub_username_env_var_name} env-var not set"
     end
-    unless ENV.has_key? dockerhub_password
-      failed "#{dockerhub_password} env-var not set"
+    unless ENV.has_key? dockerhub_password_env_var_name
+      failed "#{dockerhub_password_env_var_name} env-var not set"
     end
   end
 
@@ -35,22 +35,22 @@ class DockerHub
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def docker_login
-    [ 'echo $DOCKER_PASSWORD |',
+    [ "echo $#{dockerhub_password_env_var_name} |",
       'docker login',
-        "--username #{ENV[dockerhub_username]}",
+        "--username #{ENV[dockerhub_username_env_var_name]}",
         "--password-stdin"
     ].join(' ')
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def dockerhub_username
+  def dockerhub_username_env_var_name
     # should be DOCKERHUB_USERNAME but too late
     # to change it on all the cyber-dojo-languages repos
     'DOCKER_USERNAME'
   end
 
-  def dockerhub_password
+  def dockerhub_password_env_var_name
     # should be DOCKERHUB_PASSWORD but too late
     # to change it on all the cyber-dojo-languages repos
     'DOCKER_PASSWORD'
