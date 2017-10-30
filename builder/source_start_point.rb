@@ -37,13 +37,20 @@ class SourceStartPoint
 
   # - - - - - - - - - - - - - - - - -
 
-  def test_red_amber_green
-    case runner_choice
-    when 'stateless'
-      check_red_green_amber_using_runner_stateless
-    when 'stateful'
-      check_red_green_amber_using_runner_stateful
-    end
+  def test_run
+    # TODO: Suppose someone wants a local 9*6 start_point?
+    # So __look-for__ a 9*6 file (or options.json)
+    #
+    # if start_point.has_6_times_9?
+    #   start_point.test_6_times_9_red_amber_green
+    # else
+    #   start_point.test_any_colour
+    # end
+    #
+    # But at the same time, if being run on a cyber-dojo-langauges repo
+    # should check it _has_ 6*9 content
+
+    test_6_times_9_red_amber_green
   end
 
   private
@@ -54,30 +61,13 @@ class SourceStartPoint
   include JsonParse
   include PrintTo
 
-  def runner_choice
-    manifest['runner_choice']
-  end
-
-  def manifest
-    @manifest ||= read_manifest
-  end
-
-  def read_manifest
-    json_parse(dir + '/manifest.json')
-  end
-
-  def dir
-    @src_dir + '/start_point'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def start_files
-    files = {}
-    manifest['visible_filenames'].each do |filename|
-      files[filename] = IO.read(dir + '/' + filename)
+  def test_6_times_9_red_amber_green
+    case runner_choice
+    when 'stateless'
+      check_red_green_amber_using_runner_stateless
+    when 'stateful'
+      check_red_green_amber_using_runner_stateful
     end
-    files
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -88,31 +78,6 @@ class SourceStartPoint
       assert_timed_run_stateless(:green)
       assert_timed_run_stateless(:amber)
     }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def assert_timed_run_stateless(colour)
-    runner = RunnerServiceStateless.new
-    args = [image_name]
-    args << kata_id
-    args << avatar_name
-    args << all_files(colour)
-    args << (max_seconds=10)
-    took,sss = timed { runner.run(*args) }
-    assert_rag(colour, sss)
-    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def all_files(colour)
-    files = start_files
-    if colour != :red
-      filename,content = edited_file(colour)
-      files[filename] = content
-    end
-    files
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -145,6 +110,45 @@ class SourceStartPoint
 
   # - - - - - - - - - - - - - - - - -
 
+  def assert_timed_run_stateless(colour)
+    runner = RunnerServiceStateless.new
+    args = [image_name]
+    args << kata_id
+    args << avatar_name
+    args << all_files(colour)
+    args << (max_seconds=10)
+    took,sss = timed { runner.run(*args) }
+    assert_rag(colour, sss)
+    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def assert_timed_run_stateful(colour)
+    args = [image_name]
+    args << kata_id
+    args << avatar_name
+    args << (deleted_filenames=[])
+    args << changed_files(colour)
+    args << (max_seconds=10)
+    took,sss = timed { @runner.run(*args) }
+    assert_rag(colour, sss)
+    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def all_files(colour)
+    files = start_files
+    if colour != :red
+      filename,content = edited_file(colour)
+      files[filename] = content
+    end
+    files
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
   def in_kata
     @runner = RunnerServiceStateful.new
     @runner.kata_new(image_name, kata_id)
@@ -164,20 +168,6 @@ class SourceStartPoint
     ensure
       @runner.avatar_old(image_name, kata_id, avatar_name)
     end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def assert_timed_run_stateful(colour)
-    args = [image_name]
-    args << kata_id
-    args << avatar_name
-    args << (deleted_filenames=[])
-    args << changed_files(colour)
-    args << (max_seconds=10)
-    took,sss = timed { @runner.run(*args) }
-    assert_rag(colour, sss)
-    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -259,6 +249,32 @@ class SourceStartPoint
         "  stderr == #{sss['stderr']}",
       ]
     end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def start_files
+    files = {}
+    manifest['visible_filenames'].each do |filename|
+      files[filename] = IO.read(dir + '/' + filename)
+    end
+    files
+  end
+
+  def runner_choice
+    manifest['runner_choice']
+  end
+
+  def manifest
+    @manifest ||= read_manifest
+  end
+
+  def read_manifest
+    json_parse(dir + '/manifest.json')
+  end
+
+  def dir
+    @src_dir + '/start_point'
   end
 
   # - - - - - - - - - - - - - - - - -

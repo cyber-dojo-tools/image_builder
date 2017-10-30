@@ -14,7 +14,7 @@ def on_travis_cyber_dojo?
      repo_slug.start_with?('cyber-dojo/'))
 end
 
-# - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 image_name = nil
 src_dir = ENV['SRC_DIR']
@@ -32,24 +32,10 @@ if docker.dir?
 end
 
 if start_point.dir?
-  #
-  # TODO: not right.
-  # Suppose someone wants a local 9*6 start_point?
-  # So __look-for__ a 9*6 file (or options.json)
-  #
-  # if start_point.has_6_times_9?
-  #   start_point.test_6_times_9_red_amber_green
-  # else
-  #   start_point.test_run
-  # end
-  #
-  # But at the same time, if being run on a cyber-dojo-langauges repo
-  # should check it _has_ 6*9 content
-
-  start_point.test_red_amber_green
+  start_point.test_run
 end
 
-#= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 if on_travis_cyber_dojo? && docker.dir?
   triple = {

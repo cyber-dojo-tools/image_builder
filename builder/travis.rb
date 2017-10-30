@@ -62,6 +62,7 @@ class Travis
     if found.nil?
       return false
     end
+    # TODO: check if > 1 found
     found[1]['from'] == from && found[1]['test_framework'] == test_framework?
   end
 
