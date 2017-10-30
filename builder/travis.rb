@@ -17,9 +17,7 @@ class Travis
 
   def trigger_dependents
     banner {
-      repos = dependent_repos
-      print_to STDOUT, "number of dependent repos: #{repos.size}"
-      trigger(repos)
+      trigger(dependent_repos)
     }
   end
 
@@ -103,6 +101,7 @@ class Travis
   # - - - - - - - - - - - - - - - - - - - - -
 
   def trigger(repos)
+    print_to STDOUT, "number of dependent repos: #{repos.size}"
     repos.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"

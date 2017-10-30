@@ -16,11 +16,12 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 
+image_name = nil
 src_dir = ENV['SRC_DIR']
+
 start_point = SourceStartPoint.new(src_dir)
 docker = SourceDocker.new(src_dir)
 
-image_name = nil
 if start_point.dir?
   start_point.test_create
   image_name = start_point.image_name
@@ -30,20 +31,17 @@ if docker.dir?
   image_name = docker.build_image(image_name)
 end
 
-if docker.dir? && start_point.dir?
+if start_point.dir?
   #
   # TODO: not right.
   # Suppose someone wants a local 9*6 start_point?
   # So __look-for__ a 9*6 file (or options.json)
   #
-  # if source.has_6_times_9?
-  #   builder.test_6_times_9_red_amber_green
+  # if start_point.has_6_times_9?
+  #   start_point.test_6_times_9_red_amber_green
   # else
-  #   builder.test_run
+  #   start_point.test_run
   # end
-  #
-  # This suggests the reading of files (eg in start_point)
-  # should come from source.methods
   #
   # But at the same time, if being run on a cyber-dojo-langauges repo
   # should check it _has_ 6*9 content
@@ -51,9 +49,11 @@ if docker.dir? && start_point.dir?
   start_point.test_red_amber_green
 end
 
+#= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 if on_travis_cyber_dojo? && docker.dir?
   triple = {
-      'from' => docker.from,
+      'from' => docker.image_FROM,
       'image_name' => image_name,
       'test_framework' => start_point.dir?
     }

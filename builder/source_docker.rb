@@ -18,7 +18,7 @@ class SourceDocker
     name
   end
 
-  def from
+  def image_FROM
     lines = dockerfile.split("\n")
     from_line = lines.find { |line| line.start_with? 'FROM' }
     from_line.split[1].strip
