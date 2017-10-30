@@ -38,9 +38,10 @@ class SourceStartPoint
   # - - - - - - - - - - - - - - - - -
 
   def test_run
-    # TODO: If being run on a cyber-dojo-langauges repo
-    # should check it _HAS_ got 6*9 content
-    if options? || filename_6_times_9?
+    hhg = options? || filename_6_times_9?
+    # TODO: If being run on a cyber-dojo-langauges
+    # then repo check it _HAS_ got 6*9 content
+    if hhg
       test_6_times_9_red_amber_green
     else
       test_any_colour
