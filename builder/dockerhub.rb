@@ -2,6 +2,17 @@ require_relative 'assert_system'
 
 class DockerHub
 
+  def initialize
+    unless ENV.has_key? dockerhub_username
+      failed "#{dockerhub_username} env-var not set"
+    end
+    unless ENV.has_key? dockerhub_password
+      failed "#{dockerhub_password} env-var not set"
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
   def push(image_name)
     print_to STDOUT, 'docker login'
     login
@@ -12,7 +23,7 @@ class DockerHub
       assert_system docker_push
       print_to STDOUT, 'OK'
     ensure
-      print_to STDOUT, 'docker logout ...'
+      print_to STDOUT, 'docker logout'
       logout
       print_to STDOUT, 'OK'
     end
@@ -23,12 +34,6 @@ class DockerHub
   include AssertSystem
 
   def login
-    unless ENV.has_key? dockerhub_username
-      failed "#{dockerhub_username} env-var not set"
-    end
-    unless ENV.has_key? dockerhub_password
-      failed "#{dockerhub_password} env-var not set"
-    end
     output = `#{docker_login_cmd}`
     status = $?.exitstatus
     unless status == success
