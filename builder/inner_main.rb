@@ -15,24 +15,6 @@ def on_travis_cyber_dojo?
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# Refactor:
-=begin
-image_name = nil
-if source.start_point.dir?
-  source.start_point.test_create
-  image_name = source.start_point.image_name
-end
-if source.docker_dir?
-  # if nil is passed it has to harvest image_name itself
-  # if not nil and there is an image_name.json file, warn/error
-  builder.build_image(image_name)
-end
-if ...
-  source.start_point.test_red_amber_green
-end
-# Then get rid of Source.rb
-=end
-
 
 src_dir = ENV['SRC_DIR']
 start_point = SourceStartPoint.new(src_dir)
@@ -76,7 +58,6 @@ if on_travis_cyber_dojo? && docker.dir?
       'test_framework' => start_point.dir?
     }
   travis = Travis.new(triple)
-  travis.validate_image_data_triple # TODO: move into ctor
   travis.push_image_to_dockerhub
   travis.trigger_dependents
 end

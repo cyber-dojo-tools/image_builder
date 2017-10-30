@@ -151,6 +151,8 @@ class ImageBuilder
     5000
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def user_id(avatar_name)
     40000 + all_avatars_names.index(avatar_name)
   end

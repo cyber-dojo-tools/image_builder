@@ -8,21 +8,11 @@ class Travis
 
   def initialize(triple)
     @triple = triple
-  end
-
-  def validate_image_data_triple
-    banner {
-      if validated?
-        print_to STDOUT, triple.inspect
-      else
-        print_to STDERR, *triple_diagnostic
-        exit false
-      end
-    }
+    validate_image_data_triple
   end
 
   def push_image_to_dockerhub
-    DockerHub.new.push(image_name) # TODO: move out to inner_main
+    DockerHub.new.push(image_name)
   end
 
   def trigger_dependents
@@ -41,6 +31,19 @@ class Travis
   include Banner
   include JsonParse
   include PrintTo
+
+  def validate_image_data_triple
+    banner {
+      if validated?
+        print_to STDOUT, triple.inspect
+      else
+        print_to STDERR, *triple_diagnostic
+        exit false
+      end
+    }
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
 
   def image_name
     triple['image_name']
@@ -61,8 +64,7 @@ class Travis
     if found.nil?
       return false
     end
-    triple = found[1]
-    triple['from'] == from && triple['test_framework'] == test_framework?
+    found[1]['from'] == from && found[1]['test_framework'] == test_framework?
   end
 
   # - - - - - - - - - - - - - - - - - - - - -
