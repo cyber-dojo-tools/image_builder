@@ -41,8 +41,8 @@ class DockerHub
   def docker_login
     [ "echo $#{password} |",
       'docker login',
-        "--username #{ENV[username]}",
-        "--password-stdin"
+        '--username', ENV[username],
+        '--password-stdin'
     ].join(' ')
   end
 
