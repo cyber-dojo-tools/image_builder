@@ -14,18 +14,11 @@ class DockerHub
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def push(image_name)
-    print_to STDOUT, 'docker login'
-    login
-    print_to STDOUT, 'OK'
+    ok docker_login
     begin
-      docker_push = "docker push #{image_name}"
-      print_to STDOUT, docker_push
-      assert_system docker_push
-      print_to STDOUT, 'OK'
+      ok "docker push #{image_name}"
     ensure
-      print_to STDOUT, 'docker logout'
-      logout
-      print_to STDOUT, 'OK'
+      ok 'docker logout'
     end
   end
 
@@ -33,27 +26,15 @@ class DockerHub
 
   include AssertSystem
 
-  def login
-    output = `#{docker_login_cmd}`
-    status = $?.exitstatus
-    unless status == success
-      failed [
-        '[docker login] failed',
-        "exit_status == #{status}",
-        output
-      ]
-    end
+  def ok(cmd)
+    print_to STDOUT, cmd
+    assert_system cmd
+    print_to STDOUT, 'OK'
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def logout
-    assert_system 'docker logout'
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-  def docker_login_cmd
+  def docker_login
     [ 'echo $DOCKER_PASSWORD |',
       'docker login',
         "--username #{ENV[dockerhub_username]}",
