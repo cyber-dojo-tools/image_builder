@@ -1,51 +1,49 @@
 require_relative 'assert_system'
-require_relative 'banner'
 
 class DockerHub
 
   def push(image_name)
+    print_to STDOUT, 'docker login'
     login
+    print_to STDOUT, 'OK'
     begin
-      banner {
-        print_to STDOUT, "pushing #{image_name} to dockerhub"
-        assert_system "docker push #{image_name}"
-      }
+      docker_push = "docker push #{image_name}"
+      print_to STDOUT, docker_push
+      assert_system docker_push
+      print_to STDOUT, 'OK'
     ensure
+      print_to STDOUT, 'docker logout ...'
       logout
+      print_to STDOUT, 'OK'
     end
   end
 
   private
 
   include AssertSystem
-  include Banner
 
   def login
-    banner {
-      unless ENV.has_key? dockerhub_username
-        failed "#{dockerhub_username} env-var not set"
-      end
-      unless ENV.has_key? dockerhub_password
-        failed "#{dockerhub_password} env-var not set"
-      end
-      output = `#{docker_login_cmd}`
-      status = $?.exitstatus
-      unless status == success
-        failed [
-          '[docker login] failed',
-          "exit_status == #{status}",
-          output
-        ]
-      end
-    }
+    unless ENV.has_key? dockerhub_username
+      failed "#{dockerhub_username} env-var not set"
+    end
+    unless ENV.has_key? dockerhub_password
+      failed "#{dockerhub_password} env-var not set"
+    end
+    output = `#{docker_login_cmd}`
+    status = $?.exitstatus
+    unless status == success
+      failed [
+        '[docker login] failed',
+        "exit_status == #{status}",
+        output
+      ]
+    end
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def logout
-    banner {
-      assert_system 'docker logout'
-    }
+    assert_system 'docker logout'
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -

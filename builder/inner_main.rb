@@ -44,6 +44,7 @@ if on_travis_cyber_dojo? && docker.dir?
       'test_framework' => start_point.dir?
     }
   travis = Travis.new(triple)
+  travis.validate_triple
   travis.push_image_to_dockerhub
   travis.trigger_dependents
 end
