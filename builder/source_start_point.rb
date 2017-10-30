@@ -289,6 +289,12 @@ class SourceStartPoint
 
   # - - - - - - - - - - - - - - - - -
 
+  def rag_filename
+    '/usr/local/bin/red_amber_green.rb'
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
   def kata_id
     '6F4F4E4759'
   end
