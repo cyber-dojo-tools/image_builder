@@ -2,6 +2,7 @@
 
 require_relative 'image_builder'
 require_relative 'source'
+require_relative 'source_docker'
 require_relative 'travis'
 
 def on_travis_cyber_dojo?
@@ -14,16 +15,38 @@ def on_travis_cyber_dojo?
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+# Refactor:
+=begin
+image_name = nil
+if source.start_point.dir?
+  source.start_point.test_create
+  image_name = source.start_point.image_name
+end
+if source.docker_dir?
+  # if nil is passed it has to harvest image_name itself
+  # if not nil and there is an image_name.json file, warn/error
+  builder.build_image(image_name)
+end
+if ...
+  source.start_point.test_red_amber_green
+end
+# Then get rid of Source.rb
+=end
+
 
 source = Source.new(ENV['SRC_DIR'])
 
-builder = ImageBuilder.new(source)
-if source.docker_dir?
-  builder.build_image
-end
+image_name = nil
 if source.start_point.dir?
   source.start_point.test_create
+  image_name = source.start_point.image_name
 end
+
+docker = SourceDocker.new
+if docker.dir?
+  docker.build_image(image_name)
+end
+
 if source.docker_dir? && source.start_point.dir?
   #
   # TODO: not right.
