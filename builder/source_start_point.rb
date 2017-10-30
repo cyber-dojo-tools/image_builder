@@ -8,8 +8,8 @@ require_relative 'runner_service_stateless'
 
 class SourceStartPoint
 
-  def initialize(src_dir)
-    @src_dir = src_dir
+  def initialize
+    @src_dir = ENV['SRC_DIR']
   end
 
   def dir?
@@ -30,7 +30,7 @@ class SourceStartPoint
       assert_system "chmod +x #{script}"
       name = 'start-point-create-check'
       system "./#{script} start-point rm #{name} &> /dev/null"
-      assert_system "./#{script} start-point create #{name} --dir=#{@src_dir}"
+      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
       print_to STDOUT, 'start point can be created'
     }
   end
@@ -54,6 +54,8 @@ class SourceStartPoint
   end
 
   private
+
+  attr_reader :src_dir
 
   include AssertSystem
   include Banner
@@ -269,7 +271,7 @@ class SourceStartPoint
   end
 
   def dir
-    @src_dir + '/start_point'
+    src_dir + '/start_point'
   end
 
   # - - - - - - - - - - - - - - - - -

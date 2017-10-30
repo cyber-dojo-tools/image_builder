@@ -3,8 +3,8 @@ require_relative 'json_parse'
 
 class SourceDocker
 
-  def initialize(src_dir)
-    @src_dir = src_dir
+  def initialize
+    @src_dir = ENV['SRC_DIR']
   end
 
   def dir?

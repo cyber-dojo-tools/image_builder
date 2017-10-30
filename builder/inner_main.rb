@@ -16,21 +16,17 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+start_point = SourceStartPoint.new
+docker = SourceDocker.new
+
 image_name = nil
-src_dir = ENV['SRC_DIR']
-
-start_point = SourceStartPoint.new(src_dir)
-docker = SourceDocker.new(src_dir)
-
 if start_point.dir?
   start_point.test_create
   image_name = start_point.image_name
 end
-
 if docker.dir?
   image_name = docker.build_image(image_name)
 end
-
 if start_point.dir?
   start_point.test_run
 end
@@ -39,8 +35,8 @@ end
 
 if on_travis_cyber_dojo? && docker.dir?
   triple = {
-      'from' => docker.image_FROM,
-      'image_name' => image_name,
+      'from'           => docker.image_FROM,
+      'image_name'     => image_name,
       'test_framework' => start_point.dir?
     }
   travis = Travis.new(triple)
