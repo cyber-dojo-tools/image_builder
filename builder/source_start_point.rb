@@ -38,19 +38,19 @@ class SourceStartPoint
   # - - - - - - - - - - - - - - - - -
 
   def test_run
-    # TODO: Suppose someone wants a local 9*6 start_point?
-    # So __look-for__ a 9*6 file (or options.json)
-    #
-    # if start_point.has_6_times_9?
-    #   start_point.test_6_times_9_red_amber_green
-    # else
-    #   start_point.test_any_colour
-    # end
-    #
-    # But at the same time, if being run on a cyber-dojo-langauges repo
-    # should check it _has_ 6*9 content
+    # TODO: If being run on a cyber-dojo-langauges repo
+    # should check it _HAS_ got 6*9 content
+    if options? || filename_6_times_9?
+      test_6_times_9_red_amber_green
+    else
+      test_any_colour
+    end
+  end
 
-    test_6_times_9_red_amber_green
+  def test_any_colour
+    banner {
+      print_to STDOUT, 'TODO'
+    }
   end
 
   private
@@ -198,16 +198,28 @@ class SourceStartPoint
 
   # - - - - - - - - - - - - - - - - -
 
+  def options?
+    File.exist? options_filename
+  end
+
   def options
-    filename = dir + '/options.json'
-    File.exist?(filename) ? json_parse(filename) : {
+    options? ? json_parse(options_filename) : {
       'amber' => from_to('6 * 9', '6 * 9sdsd'),
       'green' => from_to('6 * 9', '6 * 7')
     }
   end
 
+  def options_filename
+    dir + '/options.json'
+  end
+
   def from_to(from, to)
     { 'from' => from, 'to' => to }
+  end
+
+  def filename_6_times_9?
+    filenames = start_files.select { |_,content| content.include? '6 * 9' }
+    filenames.size == 1
   end
 
   def filename_6_times_9(text)
@@ -215,7 +227,7 @@ class SourceStartPoint
     if filenames == {}
       failed [ "no '#{text}' file found" ]
     end
-    if filenames.length > 1
+    if filenames.size > 1
       failed [ "multiple '#{text}' files " + filenames.inspect ]
     end
     filenames.keys[0]
