@@ -3,8 +3,8 @@ require_relative 'assert_system'
 class DockerHub
 
   def initialize
-    assert_env_var_for username
-    assert_env_var_for password
+    assert_env_var username
+    assert_env_var password
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -22,7 +22,7 @@ class DockerHub
 
   include AssertSystem
 
-  def assert_env_var_for(name)
+  def assert_env_var(name)
     unless ENV.has_key? name
       failed "#{name} env-var not set"
     end
