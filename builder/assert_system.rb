@@ -6,7 +6,7 @@ module AssertSystem
     system command
     status = $?.exitstatus
     unless status == success
-      failed command, "exit_status == #{status}"
+      failed "exit_status == #{status}"
     end
   end
 
