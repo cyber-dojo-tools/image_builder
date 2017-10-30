@@ -1,6 +1,5 @@
 require_relative 'image_builder'
 require_relative 'json_parse'
-require_relative 'source'
 
 class SourceDocker
 
@@ -14,8 +13,7 @@ class SourceDocker
 
   def build_image(name)
     name ||= json_parse(dir + '/image_name.json')['image_name']
-    source = Source.new(@src_dir)
-    builder = ImageBuilder.new(source)
+    builder = ImageBuilder.new(dir)
     builder.build_image(name)
   end
 

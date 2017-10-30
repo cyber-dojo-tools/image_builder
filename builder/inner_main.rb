@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
 require_relative 'image_builder'
-require_relative 'source'
 require_relative 'source_docker'
+require_relative 'source_start_point'
 require_relative 'travis'
 
 def on_travis_cyber_dojo?

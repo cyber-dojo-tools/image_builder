@@ -19,7 +19,6 @@
 !print_to.rb
 !runner_service_stateful.rb
 !runner_service_stateless.rb
-!source.rb
 !source_docker.rb
 !source_start_point.rb
 !travis.rb
