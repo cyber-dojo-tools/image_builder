@@ -15,6 +15,7 @@ class SourceDocker
     name ||= json_parse(dir + '/image_name.json')['image_name']
     builder = ImageBuilder.new(dir)
     builder.build_image(name)
+    name
   end
 
   def from

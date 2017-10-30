@@ -27,7 +27,7 @@ if start_point.dir?
 end
 
 if docker.dir?
-  docker.build_image(image_name)
+  image_name = docker.build_image(image_name)
 end
 
 if docker.dir? && start_point.dir?
