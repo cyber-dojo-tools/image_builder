@@ -16,14 +16,6 @@ class SourceStartPoint
     Dir.exist? dir
   end
 
-  def manifest_filename?
-    File.exist? manifest_filename
-  end
-
-  def manifest_filename
-    dir + '/manifest.json'
-  end
-
   def image_name
     manifest['image_name']
   end
@@ -62,8 +54,8 @@ class SourceStartPoint
   include JsonParse
   include PrintTo
 
-  def dir
-    @src_dir + '/start_point'
+  def runner_choice
+    manifest['runner_choice']
   end
 
   def manifest
@@ -71,11 +63,11 @@ class SourceStartPoint
   end
 
   def read_manifest
-    json_parse(manifest_filename)
+    json_parse(dir + '/manifest.json')
   end
 
-  def runner_choice
-    manifest['runner_choice']
+  def dir
+    @src_dir + '/start_point'
   end
 
   # - - - - - - - - - - - - - - - - -

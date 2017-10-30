@@ -6,8 +6,8 @@ require_relative 'print_to'
 
 class Travis
 
-  def initialize(source)
-    @source = source
+  def initialize(triple)
+    @triple = triple
   end
 
   def validate_image_data_triple
@@ -22,7 +22,7 @@ class Travis
   end
 
   def push_image_to_dockerhub
-    DockerHub.new.push(image_name)
+    DockerHub.new.push(image_name) # TODO: move out to inner_main
   end
 
   def trigger_dependents
@@ -35,36 +35,23 @@ class Travis
 
   private
 
-  attr_reader :source
+  attr_reader :triple
 
   include AssertSystem
   include Banner
   include JsonParse
   include PrintTo
 
-  def triple
-    {
-      "from" => from,
-      "image_name" => image_name,
-      "test_framework" => test_framework?
-    }
-  end
-
   def image_name
-    source.image_name
+    triple['image_name']
   end
 
   def from
-    # all repos on Travis have a /docker/Dockerfile
-    #   o) base language repos obviously
-    #   o) test-framework repos for adding in the red-amber-green regex file.
-    lines = source.dockerfile.split("\n")
-    from_line = lines.find { |line| line.start_with? 'FROM' }
-    from_line.split[1].strip
+    triple['from']
   end
 
   def test_framework?
-    source.start_point_dir?
+    triple['test_framework']
   end
 
   # - - - - - - - - - - - - - - - - - - - - -

@@ -12,7 +12,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def build_image
+  def build_image(image_name)
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"
@@ -33,7 +33,7 @@ class ImageBuilder
 
       assert_system "docker rmi #{temp_image_name}"
     }
-    print_image_OS
+    print_image_OS(image_name)
   end
 
   private
@@ -45,7 +45,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def print_image_OS
+  def print_image_OS(image_name)
     banner {
       index = image_name.index(':')
       if index.nil?
@@ -158,10 +158,6 @@ class ImageBuilder
   include AllAvatarsNames
 
   # - - - - - - - - - - - - - - - - -
-
-  def image_name
-    source.image_name
-  end
 
   def space
     ' '
