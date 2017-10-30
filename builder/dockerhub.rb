@@ -49,15 +49,21 @@ class DockerHub
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def username
-    # should be DOCKERHUB_USERNAME but too late
-    # to change it on all the cyber-dojo-languages repos
+    # The name of the environment variable holding the username.
+    # Viz, in bash, $DOCKER_USERNAME is the username.
+    # Viz, in Ruby, ENV['DOCKER_USERNAME'] is the username.
     'DOCKER_USERNAME'
+    # Should be DOCKERHUB_USERNAME but too late to
+    # change it on all the cyber-dojo-languages repos.
   end
 
   def password
-    # should be DOCKERHUB_PASSWORD but too late
-    # to change it on all the cyber-dojo-languages repos
+    # The name of the environment variable holding the password.
+    # Viz, in bash, $DOCKER_PASSWORD is the password.
+    # Viz, in Ruby, ENV['DOCKER_PASSWORD'] is the password.
     'DOCKER_PASSWORD'
+    # Should be DOCKERHUB_PASSWORD but too late to
+    # change it on all the cyber-dojo-languages repos.
   end
 
 end
