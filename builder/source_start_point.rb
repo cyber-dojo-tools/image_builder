@@ -185,26 +185,28 @@ class SourceStartPoint
 
   def edited_file(colour)
     args = options[colour.to_s]
-    if !args.nil?
-      filename = args['filename']
-      was = args['from']
-      now = args['to']
-    elsif colour == :amber
-      was = '6 * 9'
-      now = '6 * 9sdsd'
-      filename = filename_6_times_9(was)
-    elsif colour == :green
-      was = '6 * 9'
-      now = '6 * 7'
-      filename = filename_6_times_9(was)
-    end
+    from = args['from']
+    to = args['to']
+    filename = args['filename'] || filename_6_times_9(from)
     # the .sub() call must be on the start_file and not the
     # current file (in the container) because a previous
     # stateful test-run could have edited the file.
-    return filename, start_files[filename].sub(was, now)
+    return filename, start_files[filename].sub(from, to)
   end
 
   # - - - - - - - - - - - - - - - - -
+
+  def options
+    filename = dir + '/options.json'
+    File.exist?(filename) ? json_parse(filename) : {
+      'amber' => from_to('6 * 9', '6 * 9sdsd'),
+      'green' => from_to('6 * 9', '6 * 7')
+    }
+  end
+
+  def from_to(from, to)
+    { 'from' => from, 'to' => to }
+  end
 
   def filename_6_times_9(text)
     filenames = start_files.select { |_,content| content.include? text }
@@ -215,13 +217,6 @@ class SourceStartPoint
       failed [ "multiple '#{text}' files " + filenames.inspect ]
     end
     filenames.keys[0]
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def options
-    filename = dir + '/options.json'
-    File.exist?(filename) ? json_parse(filename) : {}
   end
 
   # - - - - - - - - - - - - - - - - -
