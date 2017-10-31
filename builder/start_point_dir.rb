@@ -58,8 +58,7 @@ class StartPointDir
       check_red_green_amber_using_runner_stateful
     when 'processful'
       @runner = RunnerServiceProcessful.new
-      puts 'USING... runner_processful' # TODO
-      check_red_green_amber_using_runner_stateful
+      check_red_green_amber_using_runner_processful
     end
   end
 
@@ -74,22 +73,38 @@ class StartPointDir
   end
 
   # - - - - - - - - - - - - - - - - -
+  # The tar-pipe in the runner's stores file date-stamps
+  # to second granularity, the microseconds are always zero
+  # (because the runners are based on Alpine).
+  # This matters in a stateless runner since the cyber-dojo.sh
+  # file could be executing make (for example).
+  # This is very unlikely to matter for a browser test-event
+  # but it is quite likely to matter here since
+  # we are not doing a full browser round-trip we are calling
+  # directly into the runner service, and this is a stateful
+  # runner which is quite likely to be optimized for speed.
+  # Hence the sleeps.
 
   def check_red_green_amber_using_runner_stateful
     banner {
       in_kata {
         as_avatar {
-          # The tar-pipe in the runner's stores file date-stamps
-          # to second granularity, the microseconds are always zero
-          # (because the runners are based on Alpine).
-          # This matters in a stateless runner since the cyber-dojo.sh
-          # file could be executing make (for example).
-          # This is very unlikely to matter for a browser test-event
-          # but it is quite likely to matter here since
-          # we are not doing a full browser round-trip we are calling
-          # directly into the runner service, and this is a stateful
-          # runner which is quite likely to be optimized for speed.
-          # Hence the sleeps.
+          assert_timed_run_stateful(:red)
+          sleep(1.5)
+          assert_timed_run_stateful(:green)
+          sleep(1.5)
+          assert_timed_run_stateful(:amber)
+          # do amber last to prevent amber-test-run state
+          # changes 'leaking' into green-test run
+        }
+      }
+    }
+  end
+
+  def check_red_green_amber_using_runner_processful
+    banner {
+      in_kata {
+        as_avatar {
           assert_timed_run_stateful(:red)
           sleep(1.5)
           assert_timed_run_stateful(:green)
