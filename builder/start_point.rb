@@ -16,22 +16,6 @@ class StartPoint
 
   # - - - - - - - - - - - - - - - - -
 
-  def docker_dirs
-    Dir["#{src_dir}/**/Dockerfile"].map { |path|
-      DockerDir.new(File.dirname(path))
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def start_point_dirs
-    Dir["#{src_dir}/**/manifest.json"].map { |path|
-      StartPointDir.new(File.dirname(path))
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def assert_create
     banner {
       script = 'cyber-dojo'
@@ -45,6 +29,18 @@ class StartPoint
     }
   end
 
+  # - - - - - - - - - - - - - - - - -
+
+  def dirs
+    # TODO: need to check that a named docker-image is
+    # used in at least one manifest.json file.
+    # TODO: If there is only one docker_dir and one start_point_dir
+    # then the start-point dir's manifest determines the image_name
+    # and the docker_dir does not need an image_name.json file.
+    # Otherwise it does.
+    return docker_dirs, start_point_dirs
+  end
+
   private
 
   attr_reader :src_dir
@@ -52,5 +48,19 @@ class StartPoint
   include AssertSystem
   include Banner
   include PrintTo
+
+  def docker_dirs
+    Dir["#{src_dir}/**/Dockerfile"].map { |path|
+      DockerDir.new(File.dirname(path))
+    }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def start_point_dirs
+    Dir["#{src_dir}/**/manifest.json"].map { |path|
+      StartPointDir.new(File.dirname(path))
+    }
+  end
 
 end

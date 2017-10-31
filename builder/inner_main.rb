@@ -16,22 +16,13 @@ def on_travis_cyber_dojo?
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# If there is only one docker_dir and one start_point_dir
-# then the start-point dir's manifest determines the image_name
-# and the docker_dir does not need an image_name.json file.
-# Otherwise it does.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Also need to check that a named docker-image is
-# used in at least one manifest.json file.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 start_point = StartPoint.new(ENV['SRC_DIR'])
 start_point.assert_create
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-docker_dirs = start_point.docker_dirs
-start_point_dirs = start_point.start_point_dirs
+docker_dirs,start_point_dirs = start_point.dirs
 
 docker_dir = docker_dirs[0]
 start_point_dir = start_point_dirs[0]
