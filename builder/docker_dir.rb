@@ -31,7 +31,7 @@ class DockerDir
   include JsonParse
 
   def dockerfile
-    IO.read(name + '/Dockerfile')
+    IO.read(dir_name + '/Dockerfile')
   end
 
   def image_name
