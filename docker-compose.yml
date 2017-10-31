@@ -15,13 +15,26 @@ services:
     memswap_limit: 2G
     restart: "no"
     depends_on:
-      - runner_stateful
       - runner_stateless
+      - runner_stateful
+      - runner_processful
     networks:
       - default
       - src_dir_network
     volumes_from:
       - container:src_dir_container:ro
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  runner_stateless:
+    user: root
+    image: cyberdojo/runner_stateless
+    container_name: cyber-dojo-runner-stateless
+    read_only: true
+    tmpfs: /tmp
+    mem_limit: 2G
+    memswap_limit: 2G
+    restart: "no"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -37,10 +50,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  runner_stateless:
+  runner_processful:
     user: root
-    image: cyberdojo/runner_stateless
-    container_name: cyber-dojo-runner-stateless
+    image: cyberdojo/runner_processful
+    container_name: cyber-dojo-runner-processful
     read_only: true
     tmpfs: /tmp
     mem_limit: 2G
@@ -48,3 +61,5 @@ services:
     restart: "no"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+

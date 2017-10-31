@@ -18,6 +18,7 @@
 !image_builder.rb
 !json_parse.rb
 !print_to.rb
+!runner_service_processful.rb
 !runner_service_stateful.rb
 !runner_service_stateless.rb
 !start_point.rb

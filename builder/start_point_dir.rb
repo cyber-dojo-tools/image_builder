@@ -2,8 +2,9 @@ require_relative 'banner'
 require_relative 'failed'
 require_relative 'json_parse'
 require_relative 'print_to'
-require_relative 'runner_service_stateful'
 require_relative 'runner_service_stateless'
+require_relative 'runner_service_stateful'
+require_relative 'runner_service_processful'
 
 class StartPointDir
 
@@ -55,8 +56,10 @@ class StartPointDir
     when 'stateful'
       @runner = RunnerServiceStateful.new
       check_red_green_amber_using_runner_stateful
-    #when 'processful'
-    #  check_red_green_amber_using_runner_processful
+    when 'processful'
+      @runner = RunnerServiceProcessful.new
+      puts 'USING... runner_processful' # TODO
+      check_red_green_amber_using_runner_stateful
     end
   end
 
