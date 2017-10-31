@@ -11,8 +11,7 @@ def on_travis_cyber_dojo?
   repo_slug = ENV['TRAVIS_REPO_SLUG']
   ENV['TRAVIS'] == 'true' &&
     repo_slug != 'cyber-dojo-languages/image_builder' &&
-    (repo_slug.start_with?('cyber-dojo-languages/') ||
-     repo_slug.start_with?('cyber-dojo/'))
+      repo_slug.start_with?('cyber-dojo-languages/')
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
