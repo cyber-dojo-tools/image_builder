@@ -4,6 +4,7 @@ require_relative 'docker_dir'
 require_relative 'failed'
 require_relative 'print_to'
 require_relative 'start_point_dir'
+require_relative 'travis'
 
 class StartPoint
 
@@ -34,14 +35,46 @@ class StartPoint
 
   # - - - - - - - - - - - - - - - - -
 
-  def dirs
+  def check_all
     # TODO: need to check that a named docker-image is
     # used in at least one manifest.json file.
     # TODO: If there is only one docker_dir and one start_point_dir
     # then the start-point dir's manifest determines the image_name
     # and the docker_dir does not need an image_name.json file.
     # Otherwise it does.
-    return docker_dirs, start_point_dirs
+
+    docker_dirs = get_docker_dirs
+    start_point_dirs = get_start_point_dirs
+
+    docker_dir = docker_dirs[0]
+    start_point_dir = start_point_dirs[0]
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    image_name = nil
+    if start_point_dir
+      image_name = start_point_dir.image_name
+    end
+    if docker_dir
+      image_name = docker_dir.build_image(image_name)
+    end
+    if start_point_dir
+      start_point_dir.test_run
+    end
+
+    # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+    if on_travis_cyber_dojo? && docker_dir
+      triple = {
+          'from'           => docker_dir.image_FROM,
+          'image_name'     => image_name,
+          'test_framework' => !start_point_dir.nil?
+        }
+      travis = Travis.new(triple)
+      travis.validate_triple
+      travis.push_image_to_dockerhub
+      travis.trigger_dependents
+    end
   end
 
   private
@@ -52,7 +85,7 @@ class StartPoint
   include Banner
   include PrintTo
 
-  def docker_dirs
+  def get_docker_dirs
     Dir["#{src_dir}/**/Dockerfile"].map { |path|
       DockerDir.new(File.dirname(path))
     }
@@ -60,10 +93,20 @@ class StartPoint
 
   # - - - - - - - - - - - - - - - - -
 
-  def start_point_dirs
+  def get_start_point_dirs
     Dir["#{src_dir}/**/manifest.json"].map { |path|
       StartPointDir.new(File.dirname(path))
     }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def on_travis_cyber_dojo?
+    # return false if we are running our own tests
+    repo_slug = ENV['TRAVIS_REPO_SLUG']
+    ENV['TRAVIS'] == 'true' &&
+      repo_slug != 'cyber-dojo-languages/image_builder' &&
+        repo_slug.start_with?('cyber-dojo-languages/')
   end
 
 end
