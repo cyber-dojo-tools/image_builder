@@ -7,9 +7,7 @@ class DockerDir
     @dir_name = dir_name
   end
 
-  def exist?
-    Dir.exist? dir_name
-  end
+  attr_reader :dir_name
 
   def build_image(name)
     name ||= image_name
@@ -25,8 +23,6 @@ class DockerDir
   end
 
   private
-
-  attr_reader :dir_name
 
   include JsonParse
 

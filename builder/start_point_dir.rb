@@ -13,12 +13,6 @@ class StartPointDir
 
   # - - - - - - - - - - - - - - - - -
 
-  def exist?
-    Dir.exist? dir_name
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def image_name
     manifest['image_name']
   end

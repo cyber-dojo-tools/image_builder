@@ -16,13 +16,6 @@ def on_travis_cyber_dojo?
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# does src_dir have a start_point_type.json file?
-# if so, this is the dir to do test_create() on.
-# If this works, I can find all the manifest.json files
-# underneath this dir and process them each. Names...
-# [start_point_dir] - contains a start_point_type.json file, contains 1 or more
-# [start_point] - a dir holding a manifest.json file.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # If there is only one docker_dir and one start_point_dir
 # then the start-point dir's manifest determines the image_name
 # and the docker_dir does not need an image_name.json file.
@@ -32,33 +25,37 @@ end
 # used in at least one manifest.json file.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-src_dir = ENV['SRC_DIR']
-start_point = StartPoint.new(src_dir)
-if start_point.exist?
-  start_point.test_create
-end
+start_point = StartPoint.new(ENV['SRC_DIR'])
+start_point.assert_create
 
-start_point_dir = StartPointDir.new(src_dir + '/start_point')
-docker_dir = DockerDir.new(src_dir + '/docker')
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+docker_dirs = start_point.docker_dirs
+start_point_dirs = start_point.start_point_dirs
+
+docker_dir = docker_dirs[0]
+start_point_dir = start_point_dirs[0]
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 image_name = nil
-if start_point_dir.exist?
+if start_point_dir
   image_name = start_point_dir.image_name
 end
-if docker_dir.exist?
+if docker_dir
   image_name = docker_dir.build_image(image_name)
 end
-if start_point_dir.exist?
+if start_point_dir
   start_point_dir.test_run
 end
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-if on_travis_cyber_dojo? && docker_dir.exist?
+if on_travis_cyber_dojo? && docker_dir
   triple = {
       'from'           => docker_dir.image_FROM,
       'image_name'     => image_name,
-      'test_framework' => start_point_dir.exist?
+      'test_framework' => !start_point_dir.nil?
     }
   travis = Travis.new(triple)
   travis.validate_triple
