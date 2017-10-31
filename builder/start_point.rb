@@ -23,8 +23,11 @@ class StartPoint
       assert_system "curl --silent -O #{url}"
       assert_system "chmod +x #{script}"
       name = 'start-point-create-check'
-      system "./#{script} start-point rm #{name} &> /dev/null"
-      assert_system "./#{script} start-point create #{name} --dir=#{src_dir}"
+      rm_cmd = "./#{script} start-point rm #{name} &> /dev/null"
+      create_cmd = "./#{script} start-point create #{name} --dir=#{src_dir}"
+      system rm_cmd
+      assert_system create_cmd
+      assert_system rm_cmd
       print_to STDOUT, 'start point can be created'
     }
   end
