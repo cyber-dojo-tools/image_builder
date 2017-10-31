@@ -12,7 +12,7 @@ class SourceStartPoint
     @src_dir = src_dir
   end
 
-  def dir?
+  def exist?
     Dir.exist? dir
   end
 
