@@ -3,6 +3,7 @@
 require_relative 'image_builder'
 require_relative 'docker_dir'
 require_relative 'source_start_point'
+require_relative 'start_point'
 require_relative 'travis'
 
 def on_travis_cyber_dojo?
@@ -14,7 +15,7 @@ def on_travis_cyber_dojo?
      repo_slug.start_with?('cyber-dojo/'))
 end
 
-src_dir = ENV['SRC_DIR']
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # does src_dir have a start_point_type.json file?
 # if so, this is the dir to do test_create() on.
 # If this works, I can find all the manifest.json files
@@ -31,13 +32,17 @@ src_dir = ENV['SRC_DIR']
 # used in at least one manifest.json file.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+src_dir = ENV['SRC_DIR']
+start_point = StartPoint.new(src_dir)
+if start_point.exist?
+  start_point.test_create
+end
 
 start_point_dir = SourceStartPoint.new(src_dir)
 docker_dir = DockerDir.new(src_dir + '/docker')
 
 image_name = nil
 if start_point_dir.exist?
-  start_point_dir.test_create
   image_name = start_point_dir.image_name
 end
 if docker_dir.exist?
