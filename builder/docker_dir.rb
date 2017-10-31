@@ -7,7 +7,7 @@ class DockerDir
     @dir_name = dir_name
   end
 
-  attr_reader :dir_name
+  # - - - - - - - - - - - - - - - - -
 
   def build_image(name)
     name ||= image_name
@@ -16,6 +16,8 @@ class DockerDir
     name
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def image_FROM
     lines = dockerfile.split("\n")
     from_line = lines.find { |line| line.start_with? 'FROM' }
@@ -23,6 +25,8 @@ class DockerDir
   end
 
   private
+
+  attr_reader :dir_name
 
   include JsonParse
 
