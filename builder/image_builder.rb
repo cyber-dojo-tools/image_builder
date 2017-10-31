@@ -6,8 +6,8 @@ require 'tmpdir'
 
 class ImageBuilder
 
-  def initialize(docker_dir)
-    @docker_dir = docker_dir
+  def initialize(dir_name)
+    @dir_name = dir_name
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -16,7 +16,7 @@ class ImageBuilder
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"
-      assert_system "cd #{docker_dir} && docker build --no-cache --tag #{temp_image_name} ."
+      assert_system "cd #{dir_name} && docker build --no-cache --tag #{temp_image_name} ."
 
       Dir.mktmpdir('image_builder') do |tmp_dir|
         docker_filename = "#{tmp_dir}/Dockerfile"
@@ -38,7 +38,7 @@ class ImageBuilder
 
   private
 
-  attr_reader :docker_dir
+  attr_reader :dir_name
 
   include AssertSystem
   include Banner

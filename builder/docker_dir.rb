@@ -1,18 +1,18 @@
 require_relative 'image_builder'
 require_relative 'json_parse'
 
-class SourceDocker
+class DockerDir
 
   def initialize(dir_name)
     @dir_name = dir_name
   end
 
-  def dir?
+  def exist?
     Dir.exist? dir_name
   end
 
   def build_image(name)
-    name ||= json_parse(dir_name + '/image_name.json')['image_name']
+    name ||= image_name
     builder = ImageBuilder.new(dir_name)
     builder.build_image(name)
     name
@@ -31,7 +31,11 @@ class SourceDocker
   include JsonParse
 
   def dockerfile
-    IO.read(dir_name + '/Dockerfile')
+    IO.read(name + '/Dockerfile')
+  end
+
+  def image_name
+    json_parse(dir_name + '/image_name.json')['image_name']
   end
 
 end

@@ -11,6 +11,7 @@
 !all_avatars_names.rb
 !assert_system.rb
 !banner.rb
+!docker_dir.rb
 !dockerhub.rb
 !failed.rb
 !http_json_service.rb
@@ -19,7 +20,6 @@
 !print_to.rb
 !runner_service_stateful.rb
 !runner_service_stateless.rb
-!source_docker.rb
 !source_start_point.rb
 !travis.rb
 !trigger.sh
