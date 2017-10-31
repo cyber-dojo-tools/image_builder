@@ -36,8 +36,10 @@ class StartPoint
   # - - - - - - - - - - - - - - - - -
 
   def check_all
+
     # TODO: need to check that a named docker-image is
     # used in at least one manifest.json file.
+
     # TODO: If there is only one docker_dir and one start_point_dir
     # then the start-point dir's manifest determines the image_name
     # and the docker_dir does not need an image_name.json file.
@@ -48,8 +50,6 @@ class StartPoint
 
     docker_dir = docker_dirs[0]
     start_point_dir = start_point_dirs[0]
-
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     image_name = nil
     if start_point_dir
@@ -62,9 +62,12 @@ class StartPoint
       start_point_dir.test_run
     end
 
-    # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    if on_travis? &&
+        github_org == 'cyber-dojo-languages' &&
+          repo_name != 'image_builder' &&
+            docker_dir
 
-    if on_travis_cyber_dojo? && docker_dir
+      # assert start_point_dirs.size == 1
       triple = {
           'from'           => docker_dir.image_FROM,
           'image_name'     => image_name,
@@ -101,12 +104,21 @@ class StartPoint
 
   # - - - - - - - - - - - - - - - - -
 
-  def on_travis_cyber_dojo?
-    # return false if we are running our own tests
-    repo_slug = ENV['TRAVIS_REPO_SLUG']
-    ENV['TRAVIS'] == 'true' &&
-      repo_slug != 'cyber-dojo-languages/image_builder' &&
-        repo_slug.start_with?('cyber-dojo-languages/')
+  def on_travis?
+    ENV['TRAVIS'] == 'true'
+  end
+
+  def github_org
+    repo_slug.split('/')[0]
+  end
+
+  def repo_name
+    repo_slug.split('/')[1]
+  end
+
+  def repo_slug
+    # org-name/repo-name
+    ENV['TRAVIS_REPO_SLUG']
   end
 
 end
