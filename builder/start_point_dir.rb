@@ -50,9 +50,13 @@ class StartPointDir
   def test_6_times_9_red_amber_green
     case runner_choice
     when 'stateless'
+      @runner = RunnerServiceStateless.new
       check_red_green_amber_using_runner_stateless
     when 'stateful'
+      @runner = RunnerServiceStateful.new
       check_red_green_amber_using_runner_stateful
+    #when 'processful'
+    #  check_red_green_amber_using_runner_processful
     end
   end
 
@@ -72,8 +76,9 @@ class StartPointDir
     banner {
       in_kata {
         as_avatar {
-          # the tar-pipe in the runner's stores file date-stamps
-          # to second granularity, the microseconds are always zero.
+          # The tar-pipe in the runner's stores file date-stamps
+          # to second granularity, the microseconds are always zero
+          # (because the runners are based on Alpine).
           # This matters in a stateless runner since the cyber-dojo.sh
           # file could be executing make (for example).
           # This is very unlikely to matter for a browser test-event
@@ -97,13 +102,12 @@ class StartPointDir
   # - - - - - - - - - - - - - - - - -
 
   def assert_timed_run_stateless(colour)
-    runner = RunnerServiceStateless.new
     args = [image_name]
     args << kata_id
     args << avatar_name
     args << all_files(colour)
     args << (max_seconds=10)
-    took,sss = timed { runner.run(*args) }
+    took,sss = timed { @runner.run(*args) }
     assert_rag(colour, sss)
     print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
   end
@@ -136,7 +140,6 @@ class StartPointDir
   # - - - - - - - - - - - - - - - - -
 
   def in_kata
-    @runner = RunnerServiceStateful.new
     @runner.kata_new(image_name, kata_id)
     begin
       yield
