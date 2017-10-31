@@ -21,6 +21,6 @@
 !runner_service_stateful.rb
 !runner_service_stateless.rb
 !start_point.rb
-!source_start_point.rb
+!start_point_dir.rb
 !travis.rb
 !trigger.sh

@@ -2,7 +2,7 @@
 
 require_relative 'image_builder'
 require_relative 'docker_dir'
-require_relative 'source_start_point'
+require_relative 'start_point_dir'
 require_relative 'start_point'
 require_relative 'travis'
 
@@ -38,7 +38,7 @@ if start_point.exist?
   start_point.test_create
 end
 
-start_point_dir = SourceStartPoint.new(src_dir)
+start_point_dir = StartPointDir.new(src_dir + '/start_point')
 docker_dir = DockerDir.new(src_dir + '/docker')
 
 image_name = nil

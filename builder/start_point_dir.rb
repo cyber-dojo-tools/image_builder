@@ -5,15 +5,19 @@ require_relative 'print_to'
 require_relative 'runner_service_stateful'
 require_relative 'runner_service_stateless'
 
-class SourceStartPoint
+class StartPointDir
 
-  def initialize(src_dir)
-    @src_dir = src_dir
+  def initialize(dir_name)
+    @dir_name = dir_name
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def exist?
-    Dir.exist? dir
+    Dir.exist? dir_name
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def image_name
     manifest['image_name']
@@ -34,7 +38,7 @@ class SourceStartPoint
 
   private
 
-  attr_reader :src_dir
+  attr_reader :dir_name
 
   include Banner
   include Failed
@@ -196,7 +200,7 @@ class SourceStartPoint
   end
 
   def options_filename
-    dir + '/options.json'
+    dir_name + '/options.json'
   end
 
   def from_to(from, to)
@@ -251,7 +255,7 @@ class SourceStartPoint
   def start_files
     files = {}
     manifest['visible_filenames'].each do |filename|
-      files[filename] = IO.read(dir + '/' + filename)
+      files[filename] = IO.read(dir_name + '/' + filename)
     end
     files
   end
@@ -265,11 +269,7 @@ class SourceStartPoint
   end
 
   def read_manifest
-    json_parse(dir + '/manifest.json')
-  end
-
-  def dir
-    src_dir + '/start_point'
+    json_parse(dir_name + '/manifest.json')
   end
 
   # - - - - - - - - - - - - - - - - -
