@@ -16,8 +16,9 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-start_point = SourceStartPoint.new
-docker = SourceDocker.new
+src_dir = ENV['SRC_DIR']
+start_point = SourceStartPoint.new(src_dir)
+docker = SourceDocker.new(src_dir + '/docker')
 
 image_name = nil
 if start_point.dir?

@@ -8,8 +8,8 @@ require_relative 'runner_service_stateless'
 
 class SourceStartPoint
 
-  def initialize
-    @src_dir = ENV['SRC_DIR']
+  def initialize(src_dir)
+    @src_dir = src_dir
   end
 
   def dir?
@@ -48,12 +48,6 @@ class SourceStartPoint
     end
   end
 
-  def test_any_colour
-    banner {
-      print_to STDOUT, 'TODO'
-    }
-  end
-
   private
 
   attr_reader :src_dir
@@ -63,6 +57,14 @@ class SourceStartPoint
   include Failed
   include JsonParse
   include PrintTo
+
+  def test_any_colour
+    banner {
+      print_to STDOUT, 'TODO'
+    }
+  end
+
+  # - - - - - - - - - - - - - - - - -
 
   def test_6_times_9_red_amber_green
     case runner_choice

@@ -3,17 +3,17 @@ require_relative 'json_parse'
 
 class SourceDocker
 
-  def initialize
-    @src_dir = ENV['SRC_DIR']
+  def initialize(dir_name)
+    @dir_name = dir_name
   end
 
   def dir?
-    Dir.exist? dir
+    Dir.exist? dir_name
   end
 
   def build_image(name)
-    name ||= json_parse(dir + '/image_name.json')['image_name']
-    builder = ImageBuilder.new(dir)
+    name ||= json_parse(dir_name + '/image_name.json')['image_name']
+    builder = ImageBuilder.new(dir_name)
     builder.build_image(name)
     name
   end
@@ -26,14 +26,12 @@ class SourceDocker
 
   private
 
+  attr_reader :dir_name
+
   include JsonParse
 
-  def dir
-    @src_dir + '/docker'
-  end
-
   def dockerfile
-    IO.read(dir + '/Dockerfile')
+    IO.read(dir_name + '/Dockerfile')
   end
 
 end
