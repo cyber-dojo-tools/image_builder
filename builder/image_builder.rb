@@ -83,34 +83,43 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def alpine_make_users_dockerfile(temp_image_name)
-    dockerfile = [
-      "FROM #{temp_image_name}",
-      '',
-      'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
-      "      addgroup -g #{cyber_dojo_gid} cyber-dojo; \\",
-      '    fi',
+    [ "FROM #{temp_image_name}",
+      idempotent_alpine_add_cyberdojo_group_command,
+      idempotent_alpine_add_avatar_users_command
     ].join("\n")
-    dockerfile += "\n"
+  end
 
-    add_user_commands = []
-    all_avatars_names.each do |avatar_name|
-      uid = user_id(avatar_name)
-      add_user_command = [
-        '(',
-        'adduser',
-        '-D',                      # no password
-        '-G cyber-dojo',           # group
-        "-h /home/#{avatar_name}", # home-dir
-        "-s '/bin/sh'",            # shell
-        "-u #{uid}",
-        avatar_name,
-        ')'
-      ].join(space)
-      add_user_commands << add_user_command
-    end
+  def idempotent_alpine_add_cyberdojo_group_command
+    [ 'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
+      "      addgroup -g #{cyber_dojo_gid} cyber-dojo; \\",
+      '    fi'
+    ].join("\n")
+  end
+
+  def idempotent_alpine_add_avatar_users_command
+    add_avatar_users_command =
+      all_avatars_names.collect { |name|
+        alpine_add_avatar_user_command(name)
+      }.join(' && ')
     # Fail fast if avatar users have already been added
-    dockerfile += 'RUN (cat /etc/passwd | grep -q zebra:x:40063) || '
-    dockerfile + "(#{add_user_commands.join(' && ')})"
+    [ 'RUN (cat /etc/passwd | grep -q zebra:x:40063) || \\',
+      "    (#{add_avatar_users_command})"
+    ].join("\n")
+  end
+
+  def alpine_add_avatar_user_command(name)
+    uid = user_id(name)
+    [
+      '(',
+      'adduser',
+      '-D',               # no password
+      '-G cyber-dojo',    # group
+      "-h /home/#{name}", # home-dir
+      "-s '/bin/sh'",     # shell
+      "-u #{uid}",
+      name,
+      ')'
+    ].join(space)
   end
 
   # - - - - - - - - - - - - - - - - -
