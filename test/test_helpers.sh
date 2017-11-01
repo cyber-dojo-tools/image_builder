@@ -20,7 +20,7 @@ assertAlpineImageBuilt()
 {
   assertImageBuilt
   assertStdoutIncludes "adduser -D -G cyber-dojo -h /home/flamingo -s '/bin/sh' -u 40014 flamingo"
-  assertStdoutIncludes 'Welcome to Alpine Linux'
+  assertStdoutIncludes 'Alpine'
 }
 
 assertUbuntuImageBuilt()

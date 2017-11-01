@@ -45,43 +45,6 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def print_image_OS(image_name)
-    banner {
-      index = image_name.index(':')
-      if index.nil?
-        name = image_name
-        tag = 'latest'
-      else
-        name = image_name[0..index-1]
-        version = image_name[index+1..-1]
-      end
-      spaces = '\\s+'
-      assert_backtick "docker images | grep -E '#{name}#{spaces}#{tag}'"
-      cat_etc_issue = [
-        'docker run --rm -it',
-        image_name,
-        "sh -c 'cat /etc/issue'",
-        '| head -1'
-      ].join(space)
-      assert_system cat_etc_issue
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def get_os(image_name)
-    cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
-    etc_issue = assert_backtick cmd
-    if etc_issue.include? 'Alpine'
-      return :alpine
-    end
-    if etc_issue.include? 'Ubuntu'
-      return :ubuntu
-    end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def add_users_dockerfile(temp_image_name)
     os = get_os(temp_image_name)
     lined "FROM #{temp_image_name}",
@@ -94,11 +57,11 @@ class ImageBuilder
 
   def idempotent_add_cyberdojo_group_command(os)
     case os
-    when :alpine
+    when :Alpine
       sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
                 "      addgroup -g #{cyber_dojo_gid} cyber-dojo;",
                 '    fi'
-    when :ubuntu
+    when :Ubuntu
       sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
                 "      addgroup --gid #{cyber_dojo_gid} cyber-dojo;",
                 '    fi'
@@ -113,7 +76,8 @@ class ImageBuilder
         add_avatar_user_command(os, name)
       }.join(' && ')
     # Fail fast if avatar users have already been added
-    sh_splice 'RUN (cat /etc/passwd | grep -q zebra:x:40063) ||',
+    zebra_uid = user_id('zebra')
+    sh_splice "RUN (cat /etc/passwd | grep -q zebra:x:#{zebra_uid}) ||",
               "    (#{add_avatar_users_command})"
   end
 
@@ -121,7 +85,7 @@ class ImageBuilder
 
   def add_avatar_user_command(os, name)
     case os
-    when :alpine
+    when :Alpine
       spaced '(',
         'adduser',
         '-D',               # no password
@@ -131,7 +95,7 @@ class ImageBuilder
         "-u #{user_id(name)}",
         name,
       ')'
-    when :ubuntu
+    when :Ubuntu
       spaced '(',
         'adduser',
         '--disabled-password',
@@ -141,6 +105,27 @@ class ImageBuilder
         "--uid #{user_id(name)}",
         name,
       ')'
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def print_image_OS(image_name)
+    banner {
+      puts get_os(image_name)
+    }
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def get_os(image_name)
+    cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
+    etc_issue = assert_backtick cmd
+    if etc_issue.include? 'Alpine'
+      return :Alpine
+    end
+    if etc_issue.include? 'Ubuntu'
+      return :Ubuntu
     end
   end
 
