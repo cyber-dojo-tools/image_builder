@@ -21,7 +21,7 @@ class ImageBuilder
       Dir.mktmpdir('image_builder') do |tmp_dir|
         docker_filename = "#{tmp_dir}/Dockerfile"
         File.open(docker_filename, 'w') { |fd|
-          fd.write(make_users_dockerfile(temp_image_name))
+          fd.write(add_users_dockerfile(temp_image_name))
         }
         assert_system [
           'docker build',
@@ -69,89 +69,79 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def make_users_dockerfile(temp_image_name)
-    cmd = "docker run --rm -it #{temp_image_name} sh -c 'cat /etc/issue'"
+  def get_os(image_name)
+    cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
     etc_issue = assert_backtick cmd
     if etc_issue.include? 'Alpine'
-      return alpine_make_users_dockerfile(temp_image_name)
+      return :alpine
     end
     if etc_issue.include? 'Ubuntu'
-      return ubuntu_make_users_dockerfile(temp_image_name)
+      return :ubuntu
     end
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def alpine_make_users_dockerfile(temp_image_name)
+  def add_users_dockerfile(temp_image_name)
+    os = get_os(temp_image_name)
     lined "FROM #{temp_image_name}",
           '',
-          idempotent_alpine_add_cyberdojo_group_command,
-          idempotent_alpine_add_avatar_users_command
-  end
-
-  def idempotent_alpine_add_cyberdojo_group_command
-    sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
-              "      addgroup -g #{cyber_dojo_gid} cyber-dojo;",
-              '    fi'
-  end
-
-  def idempotent_alpine_add_avatar_users_command
-    add_avatar_users_command =
-      all_avatars_names.collect { |name|
-        alpine_add_avatar_user_command(name)
-      }.join(' && ')
-    # Fail fast if avatar users have already been added
-    sh_splice 'RUN (cat /etc/passwd | grep -q zebra:x:40063) ||',
-              "    (#{add_avatar_users_command})"
-  end
-
-  def alpine_add_avatar_user_command(name)
-    spaced '(',
-      'adduser',
-      '-D',               # no password
-      '-G cyber-dojo',    # group
-      "-h /home/#{name}", # home-dir
-      "-s '/bin/sh'",     # shell
-      "-u #{user_id(name)}",
-      name,
-    ')'
+          idempotent_add_cyberdojo_group_command(os),
+          idempotent_add_avatar_users_command(os)
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def ubuntu_make_users_dockerfile(temp_image_name)
-    lined "FROM #{temp_image_name}",
-          '',
-          idempotent_ubuntu_add_cyberdojo_group_command,
-          idempotent_ubuntu_add_avatar_users_command
+  def idempotent_add_cyberdojo_group_command(os)
+    case os
+    when :alpine
+      sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
+                "      addgroup -g #{cyber_dojo_gid} cyber-dojo;",
+                '    fi'
+    when :ubuntu
+      sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
+                "      addgroup --gid #{cyber_dojo_gid} cyber-dojo;",
+                '    fi'
+    end
   end
 
-  def idempotent_ubuntu_add_cyberdojo_group_command
-    sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
-              "      addgroup --gid #{cyber_dojo_gid} cyber-dojo;",
-              '    fi'
-  end
+  # - - - - - - - - - - - - - - - - -
 
-  def idempotent_ubuntu_add_avatar_users_command
+  def idempotent_add_avatar_users_command(os)
     add_avatar_users_command =
       all_avatars_names.collect { |name|
-        ubuntu_add_avatar_user_command(name)
+        add_avatar_user_command(os, name)
       }.join(' && ')
     # Fail fast if avatar users have already been added
     sh_splice 'RUN (cat /etc/passwd | grep -q zebra:x:40063) ||',
               "    (#{add_avatar_users_command})"
   end
 
-  def ubuntu_add_avatar_user_command(name)
-    spaced '(',
-      'adduser',
-      '--disabled-password',
-      '--gecos ""', # don't ask for details
-      '--ingroup cyber-dojo',
-      "--home /home/#{name}",
-      "--uid #{user_id(name)}",
-      name,
-    ')'
+  # - - - - - - - - - - - - - - - - -
+
+  def add_avatar_user_command(os, name)
+    case os
+    when :alpine
+      spaced '(',
+        'adduser',
+        '-D',               # no password
+        '-G cyber-dojo',    # group
+        "-h /home/#{name}", # home-dir
+        "-s '/bin/sh'",     # shell
+        "-u #{user_id(name)}",
+        name,
+      ')'
+    when :ubuntu
+      spaced '(',
+        'adduser',
+        '--disabled-password',
+        '--gecos ""', # don't ask for details
+        '--ingroup cyber-dojo',
+        "--home /home/#{name}",
+        "--uid #{user_id(name)}",
+        name,
+      ')'
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
