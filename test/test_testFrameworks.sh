@@ -1,7 +1,17 @@
 #!/bin/bash
 
-echo 'dirs with docker/ and start_point/ ==> test-frameworks default start-points'
+echo '-----------------------------------------'
+echo 'testing test-frameworks'
 echo 'success cases...'
+
+test_alpine_stateless()
+{
+  echo '  gcc-assert'
+  assertBuildImage /test/test-frameworks/alpine-gcc-assert/stateless
+  assertAlpineImageBuilt
+  assertStartPointCreated
+  assertStartPointRedAmberGreenStateless
+}
 
 test_alpine_stateful()
 {
@@ -12,13 +22,13 @@ test_alpine_stateful()
   assertStartPointRedAmberGreenStateful
 }
 
-test_alpine_stateless()
+test_alpine_processful()
 {
   echo '  gcc-assert'
-  assertBuildImage /test/test-frameworks/alpine-gcc-assert/stateless
+  assertBuildImage /test/test-frameworks/alpine-gcc-assert/processful
   assertAlpineImageBuilt
   assertStartPointCreated
-  assertStartPointRedAmberGreenStateless
+  assertStartPointRedAmberGreenProcessful
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -39,6 +49,15 @@ test_ubuntu_stateful()
   assertUbuntuImageBuilt
   assertStartPointCreated
   assertStartPointRedAmberGreenStateful
+}
+
+test_ubuntu_processful()
+{
+  echo '  perl-testsimple'
+  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/processful
+  assertUbuntuImageBuilt
+  assertStartPointCreated
+  assertStartPointRedAmberGreenProcessful
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

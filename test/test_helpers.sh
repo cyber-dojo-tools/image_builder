@@ -54,15 +54,21 @@ refuteStartPointCreated()
 
 readonly startPointRedAmberGreenMessage='check_red_green_amber_using_runner'
 
+assertStartPointRedAmberGreenStateless()
+{
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateless"
+  assertRedAmberGreen
+}
+
 assertStartPointRedAmberGreenStateful()
 {
   assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateful"
   assertRedAmberGreen
 }
 
-assertStartPointRedAmberGreenStateless()
+assertStartPointRedAmberGreenProcessful()
 {
-  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateless"
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_processful"
   assertRedAmberGreen
 }
 
