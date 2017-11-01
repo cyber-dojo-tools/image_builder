@@ -58,14 +58,22 @@ class ImageBuilder
   def idempotent_add_cyberdojo_group_command(os)
     case os
     when :Alpine
-      sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
-                "      addgroup -g #{cyber_dojo_gid} cyber-dojo;",
+      sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
+                "      addgroup -g #{group_id} #{group_name};",
                 '    fi'
     when :Ubuntu
-      sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
-                "      addgroup --gid #{cyber_dojo_gid} cyber-dojo;",
+      sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
+                "      addgroup --gid #{group_id} #{group_name};",
                 '    fi'
     end
+  end
+
+  def group_name
+    'cyber-dojo'
+  end
+
+  def group_id
+    5000
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -81,16 +89,14 @@ class ImageBuilder
               "    (#{add_avatar_users_command})"
   end
 
-  # - - - - - - - - - - - - - - - - -
-
   def add_avatar_user_command(os, name)
     case os
     when :Alpine
       spaced '(',
         'adduser',
         '-D',               # no password
-        '-G cyber-dojo',    # group
-        "-h /home/#{name}", # home-dir
+        "-G #{group_name}",
+        "-h #{home_dir(name)}",
         "-s '/bin/sh'",     # shell
         "-u #{user_id(name)}",
         name,
@@ -100,13 +106,23 @@ class ImageBuilder
         'adduser',
         '--disabled-password',
         '--gecos ""', # don't ask for details
-        '--ingroup cyber-dojo',
-        "--home /home/#{name}",
+        "--ingroup #{group_name}",
+        "--home #{home_dir(name)}",
         "--uid #{user_id(name)}",
         name,
       ')'
     end
   end
+
+  def home_dir(avatar_name)
+    "/home/#{avatar_name}"
+  end
+
+  def user_id(avatar_name)
+    40000 + all_avatars_names.index(avatar_name)
+  end
+
+  include AllAvatarsNames
 
   # - - - - - - - - - - - - - - - - -
 
@@ -115,8 +131,6 @@ class ImageBuilder
       puts get_os(image_name)
     }
   end
-
-  # - - - - - - - - - - - - - - - - -
 
   def get_os(image_name)
     cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
@@ -128,20 +142,6 @@ class ImageBuilder
       return :Ubuntu
     end
   end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def cyber_dojo_gid
-    5000
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def user_id(avatar_name)
-    40000 + all_avatars_names.index(avatar_name)
-  end
-
-  include AllAvatarsNames
 
   # - - - - - - - - - - - - - - - - -
 
