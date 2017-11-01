@@ -13,6 +13,8 @@ class SourceDir
       failed "#{dir_name} does not exist"
     end
     @dir_name = dir_name
+    @docker_dirs = get_docker_dirs
+    @start_point_dirs = get_start_point_dirs
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -40,31 +42,25 @@ class SourceDir
   # - - - - - - - - - - - - - - - - -
 
   def check_all
-    docker_dirs = get_docker_dirs
-    start_point_dirs = get_start_point_dirs
-
-    if from_cdl?
-      # assert docker_dirs.size == 1
-      docker_dir = docker_dirs[0]
-      # assert [0,1].include start_point_dirs.size
-      start_point_dir = start_point_dirs[0]
-
-      if start_point_dir
-        image_name = start_point_dir.image_name
-        docker_dir.build_image(image_name)
-        start_point_dir.test_run
+    if docker_dirs.size == 1
+      case start_point_dirs.size
+      when 0
+        # language-base
+        image_name = docker_dirs[0].build_image(nil)
+      when 1
+        # test-framework
+        image_name = start_point_dirs[0].image_name
+        docker_dirs[0].build_image(image_name)
+        start_point_dirs[0].test_run
       else
-        image_name = docker_dir.build_image(nil)
+        puts "docker_dirs.size == 1 -> else{TODO}"
       end
 
-      if on_travis? &&
-          github_org == 'cyber-dojo-languages' &&
-            repo_name != 'image_builder'
-
+      if on_cdl_travis?
         triple = {
-            'from'           => docker_dir.image_FROM,
+            'from'           => docker_dirs[0].image_FROM,
             'image_name'     => image_name,
-            'test_framework' => !start_point_dir.nil?
+            'test_framework' => !start_point_dirs[0].nil?
           }
         travis = Travis.new(triple)
         travis.validate_triple
@@ -72,7 +68,7 @@ class SourceDir
         travis.trigger_dependents
       end
     else
-      puts "TODO"
+      puts "docker_dirs.size != #{docker_dirs.size} -> else{TODO}"
       # TODO: check that a named docker-image is
       # used in at least one start-point-dir's manifest.json file
       # or that there are no start-point-dirs.
@@ -84,7 +80,7 @@ class SourceDir
 
   private
 
-  attr_reader :dir_name
+  attr_reader :dir_name, :docker_dirs, :start_point_dirs
 
   include AssertSystem
   include Banner
@@ -106,9 +102,10 @@ class SourceDir
 
   # - - - - - - - - - - - - - - - - -
 
-  def from_cdl?
-    origin = `cd #{dir_name} && git ls-remote --get-url origin`.strip
-    origin.start_with? 'https://github.com/cyber-dojo-languages/'
+  def on_cdl_travis?
+    on_travis? &&
+      github_org == 'cyber-dojo-languages' &&
+        repo_name != 'image_builder'
   end
 
   def on_travis?

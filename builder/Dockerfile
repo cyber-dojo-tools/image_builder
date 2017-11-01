@@ -3,12 +3,11 @@ LABEL maintainer=jon@jaggersoft.com
 
 # image_builder is written in ruby
 # it curls the cyber-dojo script which in turn requires bash.
-# it runs a git command to determine remote's url
 
 RUN apk update \
  && apk upgrade \
  && apk add \
-      ruby-dev ruby libffi-dev ruby-bundler curl bash git
+      ruby-dev ruby libffi-dev ruby-bundler curl bash
 
 # travis.rb uses the travis CLI which is
 # installed as part of the travis gem

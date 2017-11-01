@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo 'dirs with /docker/ only ==> languages'
+echo 'dirs with docker/ only ==> languages'
 echo 'success cases...'
 
 test_alpine()

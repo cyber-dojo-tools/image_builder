@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo 'dirs with /docker/ and start_point/ ==> test-frameworks default start-points'
+echo 'dirs with docker/ and start_point/ ==> test-frameworks default start-points'
 echo 'success cases...'
 
 test_alpine_stateful()
