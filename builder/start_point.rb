@@ -18,19 +18,21 @@ class StartPoint
   # - - - - - - - - - - - - - - - - -
 
   def assert_create
-    banner {
-      script = 'cyber-dojo'
-      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-      assert_system "curl --silent -O #{url}"
-      assert_system "chmod +x #{script}"
-      name = 'start-point-create-check'
-      remove_cmd = "./#{script} start-point rm     #{name} &> /dev/null"
-      create_cmd = "./#{script} start-point create #{name} --dir=#{src_dir}"
-      system remove_cmd
-      assert_system create_cmd
-      assert_system remove_cmd
-      print_to STDOUT, 'start point can be created'
-    }
+    if File.exist? src_dir + '/start_point_type.json'
+      banner {
+        script = 'cyber-dojo'
+        url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
+        assert_system "curl --silent -O #{url}"
+        assert_system "chmod +x #{script}"
+        name = 'start-point-create-check'
+        remove_cmd = "./#{script} start-point rm     #{name} &> /dev/null"
+        create_cmd = "./#{script} start-point create #{name} --dir=#{src_dir}"
+        system remove_cmd
+        assert_system create_cmd
+        assert_system remove_cmd
+        print_to STDOUT, 'start point can be created'
+      }
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
