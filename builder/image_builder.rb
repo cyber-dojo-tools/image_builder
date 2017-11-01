@@ -83,18 +83,16 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def alpine_make_users_dockerfile(temp_image_name)
-    [ "FROM #{temp_image_name}",
-      '',
-      idempotent_alpine_add_cyberdojo_group_command,
-      idempotent_alpine_add_avatar_users_command
-    ].join("\n")
+    lined "FROM #{temp_image_name}",
+          '',
+          idempotent_alpine_add_cyberdojo_group_command,
+          idempotent_alpine_add_avatar_users_command
   end
 
   def idempotent_alpine_add_cyberdojo_group_command
-    [ 'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
-      "      addgroup -g #{cyber_dojo_gid} cyber-dojo; \\",
-      '    fi'
-    ].join("\n")
+    sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
+              "      addgroup -g #{cyber_dojo_gid} cyber-dojo;",
+              '    fi'
   end
 
   def idempotent_alpine_add_avatar_users_command
@@ -103,40 +101,35 @@ class ImageBuilder
         alpine_add_avatar_user_command(name)
       }.join(' && ')
     # Fail fast if avatar users have already been added
-    [ 'RUN (cat /etc/passwd | grep -q zebra:x:40063) || \\',
-      "    (#{add_avatar_users_command})"
-    ].join("\n")
+    sh_splice 'RUN (cat /etc/passwd | grep -q zebra:x:40063) ||',
+              "    (#{add_avatar_users_command})"
   end
 
   def alpine_add_avatar_user_command(name)
-    uid = user_id(name)
-    [ '(',
+    spaced '(',
       'adduser',
       '-D',               # no password
       '-G cyber-dojo',    # group
       "-h /home/#{name}", # home-dir
       "-s '/bin/sh'",     # shell
-      "-u #{uid}",
+      "-u #{user_id(name)}",
       name,
-      ')'
-    ].join(space)
+    ')'
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def ubuntu_make_users_dockerfile(temp_image_name)
-    [ "FROM #{temp_image_name}",
-      '',
-      idempotent_ubuntu_add_cyberdojo_group_command,
-      idempotent_ubuntu_add_avatar_users_command
-    ].join("\n")
+    lined "FROM #{temp_image_name}",
+          '',
+          idempotent_ubuntu_add_cyberdojo_group_command,
+          idempotent_ubuntu_add_avatar_users_command
   end
 
   def idempotent_ubuntu_add_cyberdojo_group_command
-    [ 'RUN if [ ! $(getent group cyber-dojo) ]; then \\',
-      "      addgroup --gid #{cyber_dojo_gid} cyber-dojo; \\",
-      '    fi'
-    ].join("\n")
+    sh_splice 'RUN if [ ! $(getent group cyber-dojo) ]; then',
+              "      addgroup --gid #{cyber_dojo_gid} cyber-dojo;",
+              '    fi'
   end
 
   def idempotent_ubuntu_add_avatar_users_command
@@ -145,24 +138,20 @@ class ImageBuilder
         ubuntu_add_avatar_user_command(name)
       }.join(' && ')
     # Fail fast if avatar users have already been added
-    [ 'RUN (cat /etc/passwd | grep -q zebra:x:40063) || \\',
-      "    (#{add_avatar_users_command})"
-    ].join("\n")
+    sh_splice 'RUN (cat /etc/passwd | grep -q zebra:x:40063) ||',
+              "    (#{add_avatar_users_command})"
   end
 
   def ubuntu_add_avatar_user_command(name)
-    uid = user_id(name)
-    [
-      '(',
+    spaced '(',
       'adduser',
       '--disabled-password',
       '--gecos ""', # don't ask for details
       '--ingroup cyber-dojo',
       "--home /home/#{name}",
-      "--uid #{uid}",
+      "--uid #{user_id(name)}",
       name,
-      ')'
-    ].join(space)
+    ')'
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -180,6 +169,18 @@ class ImageBuilder
   include AllAvatarsNames
 
   # - - - - - - - - - - - - - - - - -
+
+  def sh_splice(*lines)
+    lines.join(space + '\\' + "\n")
+  end
+
+  def lined(*lines)
+    lines.join("\n")
+  end
+
+  def spaced(*words)
+    words.join(space)
+  end
 
   def space
     ' '
