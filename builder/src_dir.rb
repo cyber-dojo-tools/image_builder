@@ -40,47 +40,45 @@ class SourceDir
   # - - - - - - - - - - - - - - - - -
 
   def check_all
-
-    # TODO: need to check that a named docker-image is
-    # used in at least one manifest.json file.
-
-    # TODO: If there is only one docker_dir and one start_point_dir
-    # then the start-point dir's manifest determines the image_name
-    # and the docker_dir does not need an image_name.json file.
-    # Otherwise it does.
-
     docker_dirs = get_docker_dirs
     start_point_dirs = get_start_point_dirs
 
-    docker_dir = docker_dirs[0]
-    start_point_dir = start_point_dirs[0]
+    if from_cdl?
+      # assert docker_dirs.size == 1
+      docker_dir = docker_dirs[0]
+      # assert [0,1].include start_point_dirs.size
+      start_point_dir = start_point_dirs[0]
 
-    image_name = nil
-    if start_point_dir
-      image_name = start_point_dir.image_name
-    end
-    if docker_dir
-      image_name = docker_dir.build_image(image_name)
-    end
-    if start_point_dir
-      start_point_dir.test_run
-    end
+      if start_point_dir
+        image_name = start_point_dir.image_name
+        docker_dir.build_image(image_name)
+        start_point_dir.test_run
+      else
+        image_name = docker_dir.build_image(nil)
+      end
 
-    if on_travis? &&
-        github_org == 'cyber-dojo-languages' &&
-          repo_name != 'image_builder' &&
-            docker_dir
+      if on_travis? &&
+          github_org == 'cyber-dojo-languages' &&
+            repo_name != 'image_builder'
 
-      # assert start_point_dirs.size == 1
-      triple = {
-          'from'           => docker_dir.image_FROM,
-          'image_name'     => image_name,
-          'test_framework' => !start_point_dir.nil?
-        }
-      travis = Travis.new(triple)
-      travis.validate_triple
-      travis.push_image_to_dockerhub
-      travis.trigger_dependents
+        triple = {
+            'from'           => docker_dir.image_FROM,
+            'image_name'     => image_name,
+            'test_framework' => !start_point_dir.nil?
+          }
+        travis = Travis.new(triple)
+        travis.validate_triple
+        travis.push_image_to_dockerhub
+        travis.trigger_dependents
+      end
+    else
+      puts "TODO"
+      # TODO: check that a named docker-image is
+      # used in at least one start-point-dir's manifest.json file
+      # or that there are no start-point-dirs.
+      # TODO:
+      # If the start-point-dirs all share the same image-name
+      # then if there is one docker-dir, it uses this image-name
     end
   end
 
@@ -107,6 +105,11 @@ class SourceDir
   end
 
   # - - - - - - - - - - - - - - - - -
+
+  def from_cdl?
+    origin = `cd #{dir_name} && git ls-remote --get-url origin`.strip
+    origin.start_with? 'https://github.com/cyber-dojo-languages/'
+  end
 
   def on_travis?
     ENV['TRAVIS'] == 'true'
