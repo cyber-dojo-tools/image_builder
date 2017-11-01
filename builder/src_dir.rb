@@ -6,33 +6,35 @@ require_relative 'print_to'
 require_relative 'start_point_dir'
 require_relative 'travis'
 
-class StartPoint
+class SourceDir
 
-  def initialize(src_dir)
-    unless Dir.exist? src_dir
-      failed "#{src_dir} does not exist"
+  def initialize(dir_name)
+    unless Dir.exist? dir_name
+      failed "#{dir_name} does not exist"
     end
-    @src_dir = src_dir
+    @dir_name = dir_name
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def assert_create
-    if File.exist? src_dir + '/start_point_type.json'
-      banner {
-        script = 'cyber-dojo'
-        url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
-        assert_system "curl --silent -O #{url}"
-        assert_system "chmod +x #{script}"
-        name = 'start-point-create-check'
-        remove_cmd = "./#{script} start-point rm     #{name} &> /dev/null"
-        create_cmd = "./#{script} start-point create #{name} --dir=#{src_dir}"
-        system remove_cmd
-        assert_system create_cmd
-        assert_system remove_cmd
-        print_to STDOUT, 'start point can be created'
-      }
-    end
+  def start_point?
+    File.exist? dir_name + '/start_point_type.json'
+  end
+
+  def assert_create_start_point
+    banner {
+      script = 'cyber-dojo'
+      url = "https://raw.githubusercontent.com/cyber-dojo/commander/master/#{script}"
+      assert_system "curl --silent -O #{url}"
+      assert_system "chmod +x #{script}"
+      name = 'start-point-create-check'
+      remove_cmd = "./#{script} start-point rm     #{name} &> /dev/null"
+      create_cmd = "./#{script} start-point create #{name} --dir=#{dir_name}"
+      system remove_cmd
+      assert_system create_cmd
+      assert_system remove_cmd
+      print_to STDOUT, 'start point can be created'
+    }
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -84,14 +86,14 @@ class StartPoint
 
   private
 
-  attr_reader :src_dir
+  attr_reader :dir_name
 
   include AssertSystem
   include Banner
   include PrintTo
 
   def get_docker_dirs
-    Dir["#{src_dir}/**/Dockerfile"].map { |path|
+    Dir["#{dir_name}/**/Dockerfile"].map { |path|
       DockerDir.new(File.dirname(path))
     }
   end
@@ -99,7 +101,7 @@ class StartPoint
   # - - - - - - - - - - - - - - - - -
 
   def get_start_point_dirs
-    Dir["#{src_dir}/**/manifest.json"].map { |path|
+    Dir["#{dir_name}/**/manifest.json"].map { |path|
       StartPointDir.new(File.dirname(path))
     }
   end

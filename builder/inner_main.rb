@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
-require_relative 'start_point'
+require_relative 'src_dir'
 
-start_point = StartPoint.new(ENV['SRC_DIR'])
-start_point.assert_create
-start_point.check_all
+src_dir = SourceDir.new(ENV['SRC_DIR'])
+if src_dir.start_point?
+  src_dir.assert_create_start_point
+end
+src_dir.check_all
