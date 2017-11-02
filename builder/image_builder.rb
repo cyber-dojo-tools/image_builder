@@ -45,48 +45,33 @@ class ImageBuilder
         ].join(space)
       end
 
-      # Need to change FROM in dockerfile with temp_image_name.
-      # An in-place change will alter the original file since
-      # SRC_DIR is a volume-mount which does not create copies.
-      # I'd much prefer to volume-mount read-only.
-      #
+      # Need to change FROM in dockerfile to temp_image_name.
+      # An in-place change would alter the original file if
+      # SRC_DIR was a read-write volume-mount.
+      # I'd much prefer to volume-mount SRC_DIR read-only.
       # Options?
-      # 1. Can I create a mutated Dockerfile in tmp/ and use that?
-      # No, because the Dockerfile must be within the build context.
       #
-      # 2. Can you pipe stdin as the Dockerfile?
-      # Possibly, but it is a recent feature.
-      # https://github.com/docker/docker.github.io/issues/3538
-      # Not even documented yet. Can I depend on that. No.
+      # 1. Can you create a mutated Dockerfile in tmp/ and use that?
+      # No, because a named Dockerfile must be within the build context.
       #
-      # 3. Create another Dockerfile next to it.
-      # This is the least bad so I am reluctantly
-      # do a read-write volume-mount of SRC_DIR in docker-compose.yml
+      # 2. Can you create a mutated Dockerfile and stdin-pipe it?
+      # Yes, see https://github.com/docker/docker.github.io/issues/3538
+      # It's not documented yet. But it does work and retains
+      # the still specified build-context dir. And I can reply on it
+      # since this [docker build] command is itself running inside
+      # the image_builder docker image!
 
-      dockerfile = "#{dir_name}/Dockerfile"
-      temp_dockerfile = dockerfile + ".#{temp_image_name}"
-
-      sed_cmd = [
-        'sed -E ',
+      assert_system [
+        'sed -E',
         "'s/FROM.*$/FROM #{temp_image_name}/'",
-        dockerfile,
-        '>',
-        temp_dockerfile
+        "#{dir_name}/Dockerfile",
+        '|',
+        'docker build',
+        '--no-cache',
+        "--tag #{image_name}",
+        '--file -', # Dockerfile from stdin
+        dir_name
       ].join(space)
-
-      assert_system sed_cmd
-      begin
-        assert_system [
-          'docker build',
-          '--no-cache',
-          "--tag #{image_name}",
-          "--file #{temp_dockerfile}",
-          dir_name
-        ].join(space)
-      ensure
-        assert_system "rm #{temp_dockerfile}"
-        assert_system "docker rmi #{temp_image_name}"
-      end
     }
     print_image_OS(image_name)
   end
