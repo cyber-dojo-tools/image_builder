@@ -159,7 +159,7 @@ class ImageBuilder
 
   def print_image_OS(image_name)
     banner {
-      puts get_os(image_name)
+      puts get_os(image_name).to_s + " image built OK"
     }
   end
 

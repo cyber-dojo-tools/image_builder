@@ -18,22 +18,24 @@ build_image()
 
 assertAlpineImageBuilt()
 {
-  assertImageBuilt
-  assertStdoutIncludes "adduser -D -G cyber-dojo -h /home/flamingo -s '/bin/sh' -u 40014 flamingo"
-  assertStdoutIncludes 'Alpine'
+  assertStdoutIncludes "Alpine image built OK"
 }
 
 assertUbuntuImageBuilt()
 {
-  assertImageBuilt
-  assertStdoutIncludes "adduser --disabled-password --gecos \"\" --ingroup cyber-dojo --home /home/flamingo --uid 40014 flamingo"
-  assertStdoutIncludes 'Ubuntu'
+  assertStdoutIncludes 'Ubuntu image built OK'
 }
 
-assertImageBuilt()
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+assertAlpineAvatarUsersAdded()
 {
-  assertStdoutIncludes '# build_image'
-  assertStdoutIncludes '# print_image_OS'
+  assertStdoutIncludes "adduser -D -G cyber-dojo -h /home/flamingo -s '/bin/sh' -u 40014 flamingo"
+}
+
+assertUbuntuAvatarUsersAdded()
+{
+  assertStdoutIncludes "adduser --disabled-password --gecos \"\" --ingroup cyber-dojo --home /home/flamingo --uid 40014 flamingo"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

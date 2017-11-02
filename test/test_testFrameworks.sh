@@ -9,6 +9,7 @@ test_alpine_stateless()
   echo '  java-junit'
   assertBuildImage /test/test-frameworks/alpine-java-junit/stateless
   assertAlpineImageBuilt
+  assertAlpineAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenStateless
 }
@@ -18,6 +19,7 @@ test_alpine_stateful()
   echo '  java-junit'
   assertBuildImage /test/test-frameworks/alpine-java-junit/stateful
   assertAlpineImageBuilt
+  assertAlpineAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenStateful
 }
@@ -27,6 +29,7 @@ test_alpine_processful()
   echo '  java-junit'
   assertBuildImage /test/test-frameworks/alpine-java-junit/processful
   assertAlpineImageBuilt
+  assertAlpineAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenProcessful
 }
@@ -38,6 +41,7 @@ test_ubuntu_stateless()
   echo '  perl-testsimple'
   assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/stateless
   assertUbuntuImageBuilt
+  assertUbuntuAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenStateless
 }
@@ -47,6 +51,7 @@ test_ubuntu_stateful()
   echo '  perl-testsimple'
   assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/stateful
   assertUbuntuImageBuilt
+  assertUbuntuAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenStateful
 }
@@ -56,6 +61,7 @@ test_ubuntu_processful()
   echo '  perl-testsimple'
   assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/processful
   assertUbuntuImageBuilt
+  assertUbuntuAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenProcessful
 }
@@ -67,6 +73,7 @@ test_6_times_9_options()
   echo '  asm-assert'
   assertBuildImage /test/test-frameworks/asm-assert
   assertUbuntuImageBuilt
+  assertUbuntuAvatarUsersAdded
   assertStartPointCreated
   assertStartPointRedAmberGreenStateless
 }
