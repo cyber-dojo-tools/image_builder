@@ -13,6 +13,10 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def build_image(image_name)
+    # This builds the supplied Dockerfile and then
+    # runs another generated Dockerfile to add group/users.
+    # Is it better to do it the other way round?
+    # It would mean the users were available in the supplied Dockerfile
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"
@@ -49,13 +53,16 @@ class ImageBuilder
     os = get_os(temp_image_name)
     lined "FROM #{temp_image_name}",
           '',
-          idempotent_add_cyberdojo_group_command(os),
-          idempotent_add_avatar_users_command(os)
+          add_cyberdojo_group_command(os),
+          remove_alpine_squid_webproxy_user_command(os),
+          add_avatar_users_command(os)
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def idempotent_add_cyberdojo_group_command(os)
+  def add_cyberdojo_group_command(os)
+    # Must be idempotent because Dockerfile could be based
+    # on a docker-image which already has been through this.
     case os
     when :Alpine
       sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
@@ -78,7 +85,27 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def idempotent_add_avatar_users_command(os)
+  def remove_alpine_squid_webproxy_user_command(os)
+    # Alpine linux has an unneeded existing web-proxy
+    # user called squid which is one of the avatars!
+    # Be very careful about removing this squid user because
+    # we could be running FROM a docker-image which has already
+    # been through the image-builder processing, in which case
+    # it will already have _our_ squid user.
+    grep_passwd = 'cat /etc/passwd | grep -q'
+    squid_id = user_id('squid')
+    squid_exists = "(#{grep_passwd} squid:x:)"
+    not_our_squid = "!(#{grep_passwd} squid:x:#{squid_id}:#{group_id})"
+    os == :Alpine ?
+      "RUN (#{squid_exists} && #{not_our_squid} && (deluser squid)) || true" :
+      ''
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def add_avatar_users_command(os)
+    # Must be idempotent because Dockerfile could be based
+    # on a docker-image which already has been through this.
     add_avatar_users_command =
       all_avatars_names.collect { |name|
         add_avatar_user_command(os, name)
