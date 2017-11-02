@@ -13,33 +13,73 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def build_image(from, image_name)
-    # This builds the supplied Dockerfile and then
-    # runs another generated Dockerfile to add group/users.
-    # Is it better to do it the other way round?
-    # It would mean the users were available in the supplied Dockerfile
+    # This adds the cyber-dojo group and the 64 avatar
+    # user to the created docker image.
     #
-    # This could be necessary.
-    # eg, the javascript-cucumber Dockerfile
-    # creates a symlink for each avatar users.
+    # Question: should this extra processing happen
+    #           before or after the commands inside the
+    #           supplied Dockerfile?
+    #
+    # Answer: before.
+    #
+    # Reason: It allows the supplied Dockerfile to
+    #         contain commands related to the users.
+    #         For example, javascript-cucumber
+    #         creates a node_modules dir symlink
+    #         for all 64 avatar users.
+
     banner {
       uuid = SecureRandom.hex[0..10].downcase
-      temp_image_name = "imagebuilder/tmp_#{uuid}"
-      assert_system "cd #{dir_name} && docker build --no-cache --tag #{temp_image_name} ."
+      temp_image_name = "imagebuilder_temp_#{uuid}"
 
       Dir.mktmpdir('image_builder') do |tmp_dir|
         docker_filename = "#{tmp_dir}/Dockerfile"
         File.open(docker_filename, 'w') { |fd|
-          fd.write(add_users_dockerfile(temp_image_name))
+          fd.write(add_users_dockerfile(from))
         }
         assert_system [
           'docker build',
             "--file #{docker_filename}",
-            "--tag #{image_name}",
+            "--tag #{temp_image_name}",
             tmp_dir
-        ].join(' ')
+        ].join(space)
       end
 
-      assert_system "docker rmi #{temp_image_name}"
+      # Need to replace FROM in dockerfile with temp_image_name
+      # But in-place replacing it will replace it in the actual
+      # original since a volume-mount does not create copies.
+      # I can't just make a new Dockerfile in another location
+      # since I will lose the [docker build] context dir
+      # Can you pipe stdin as the Dockerfile?
+      # Possibly, but it is a recent feature.
+      # https://github.com/docker/docker.github.io/issues/3538
+      # Do I want to depend on that. No.
+      # So I am creating another Dockerfile next to it.
+
+      dockerfile = "#{dir_name}/Dockerfile"
+      temp_dockerfile = dockerfile + ".#{temp_image_name}"
+
+      sed_cmd = [
+        'sed -E ',
+        "'s/FROM.*$/FROM #{temp_image_name}/'",
+        dockerfile,
+        '>',
+        temp_dockerfile
+      ].join(space)
+
+      assert_system sed_cmd
+      begin
+        assert_system [
+          'docker build',
+          '--no-cache',
+          "--tag #{image_name}",
+          "--file #{temp_dockerfile}",
+          dir_name
+        ].join(space)
+      ensure
+        assert_system "rm #{temp_dockerfile}"
+        assert_system "docker rmi #{temp_image_name}"
+      end
     }
     print_image_OS(image_name)
   end
@@ -53,9 +93,9 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_users_dockerfile(temp_image_name)
-    os = get_os(temp_image_name)
-    lined "FROM #{temp_image_name}",
+  def add_users_dockerfile(from)
+    os = get_os(from)
+    lined "FROM #{from}",
           '',
           add_cyberdojo_group_command(os),
           remove_alpine_squid_webproxy_user_command(os),
@@ -65,8 +105,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def add_cyberdojo_group_command(os)
-    # Must be idempotent because Dockerfile could be based
-    # on a docker-image which already has been through this.
+    # Must be idempotent because Dockerfile could be
+    # based on a docker-image which already has been
+    # through image-builder processing
     case os
     when :Alpine
       sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
@@ -90,9 +131,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def remove_alpine_squid_webproxy_user_command(os)
-    # Alpine linux has an unneeded existing web-proxy
+    # Alpine linux has an (unneeded by me) existing web-proxy
     # user called squid which is one of the avatars!
-    # Be very careful about removing this squid user because
+    # Being very careful about removing this squid user because
     # we could be running FROM a docker-image which has already
     # been through the image-builder processing, in which case
     # it will already have _our_ squid user.
@@ -108,8 +149,9 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def add_avatar_users_command(os)
-    # Must be idempotent because Dockerfile could be based
-    # on a docker-image which already has been through this.
+    # Must be idempotent because Dockerfile could be
+    # based on a docker-image which already has been
+    # through image-builder processing
     add_avatar_users_command =
       all_avatars_names.collect { |name|
         add_avatar_user_command(os, name)
