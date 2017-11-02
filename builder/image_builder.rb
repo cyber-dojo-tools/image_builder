@@ -12,15 +12,15 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  def build_image(image_name)
+  def build_image(from, image_name)
     # This builds the supplied Dockerfile and then
     # runs another generated Dockerfile to add group/users.
     # Is it better to do it the other way round?
     # It would mean the users were available in the supplied Dockerfile
     #
     # This could be necessary.
-    # eg, the javascript-cucumber Dockerfile created a symlink for
-    # all the avatar users.
+    # eg, the javascript-cucumber Dockerfile
+    # creates a symlink for each avatar users.
     banner {
       uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder/tmp_#{uuid}"

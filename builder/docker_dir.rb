@@ -12,7 +12,7 @@ class DockerDir
   def build_image(name)
     name ||= image_name
     builder = ImageBuilder.new(dir_name)
-    builder.build_image(name)
+    builder.build_image(image_FROM, name)
     name
   end
 
