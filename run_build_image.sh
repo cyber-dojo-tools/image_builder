@@ -1,8 +1,32 @@
 #!/bin/bash
+set -e
 
-# Runs image-builder on source living in SRC_DIR.
-# This script is curl'd and run as the only command in each
-# cyber-dojo-language repo's .travis.yml script.
+# Runs image-builder on source living in SRC_DIR to
+#   o) build zero or more docker-images
+#   o) test zero or more start-point directories.
+#
+# This script is curl'd and run in the .travis.yml script
+# of each cyber-dojo-language (github org) repo.
+
+readonly SRC_DIR=${1:-${PWD}}
+readonly NETWORK=src_dir_network
+readonly NAME=src_dir_container
+
+# TODO?: check if $SRC_DIR is relative and if it is
+#       expand it based on PWD, otherwise you cant create the volume
+
+check_use()
+{
+  if [ -z "${SRC_DIR}" ] || [ "${1}" == '--help' ]; then
+    show_use
+    exit 1
+  fi
+  if [ ! -d "${SRC_DIR}" ]; then
+    show_use
+    echo "SRC_DIR <${SRC_DIR}> does not exist"
+    exit 1
+  fi
+}
 
 show_use() {
   echo 'Use: run_build_image.sh <SRC_DIR> '
@@ -11,66 +35,95 @@ show_use() {
   echo ''
 }
 
-readonly SRC_DIR=${1:-${PWD}}
-readonly NETWORK=src_dir_network
-readonly NAME=src_dir_container
+#- - - - - - - - - - - - - - - - - - - - - - -
 
-if [ -z "${SRC_DIR}" ] || [ "${1}" == '--help' ]; then
-  show_use
-  exit 1
-fi
+show_location()
+{
+  if [ ! -z "${TRAVIS}" ]; then
+    echo 'Running on TRAVIS'
+  else
+    echo 'Running locally'
+  fi
+}
 
-if [ ! -d "${SRC_DIR}" ]; then
-  show_use
-  echo "SRC_DIR <${SRC_DIR}> does not exist"
-  exit 1
-fi
+#- - - - - - - - - - - - - - - - - - - - - - -
 
-shift # ${1}
+network_create()
+{
+  NETWORK_CREATED=false
+  docker network create ${NETWORK} > /dev/null
+  NETWORK_CREATED=true
+}
 
-if [ ! -z "${TRAVIS}" ]; then
-  echo 'Running on TRAVIS'
-else
-  echo 'Running locally'
-fi
+network_remove()
+{
+  if "${NETWORK_CREATED}" == "true"; then
+    echo 'clean-up: [docker network rm]'
+    docker network rm ${NETWORK} > /dev/null
+  fi
+}
 
-# I create a data-volume-container which holds src-dir
-# By default this lives on one network and the containers
-# created inside image_builder (from its docker-compose.yml file)
-# live on a different network, and thus the later won't be able
-# to see to the former. To solve this I'm putting the src-dir
-# data-volume-container into its own dedicated network.
+# - - - - - - - - - - - - - - - - - -
 
-docker network create ${NETWORK} > /dev/null
-
-docker create \
-  --volume=${SRC_DIR}:${SRC_DIR} \
-  --name=${NAME} \
-  --network=${NETWORK} \
-  cyberdojofoundation/image_builder \
-    /bin/true > /dev/null
-
-docker run \
-  --user=root \
-  --network=${NETWORK} \
-  --rm \
-  --interactive \
-  --tty \
-  --env DOCKER_USERNAME \
-  --env DOCKER_PASSWORD \
-  --env GITHUB_TOKEN \
-  --env SRC_DIR=${SRC_DIR} \
-  --env TRAVIS \
-  --env TRAVIS_REPO_SLUG \
-  --volume=/var/run/docker.sock:/var/run/docker.sock \
+volume_create()
+{
+  # I create a data-volume-container which holds src-dir
+  # By default this lives on one network and the containers
+  # created _inside_ image_builder (from its docker-compose.yml file)
+  # live on a different network, and thus the later won't be able
+  # to see to the former. To solve this I'm putting the src-dir
+  # data-volume-container into its own dedicated network.
+  VOLUME_CREATED=false
+  docker create \
+    --volume=${SRC_DIR}:${SRC_DIR} \
+    --name=${NAME} \
+    --network=${NETWORK} \
     cyberdojofoundation/image_builder \
-      /app/outer_main.rb
+      /bin/true > /dev/null
+  VOLUME_CREATED=true
+}
 
-readonly exit_status=$?
+volume_remove()
+{
+  if "${VOLUME_CREATED}" == "true"; then
+    echo 'clean-up: [docker volume rm]'
+    docker volume rm --force ${NAME} > /dev/null
+    docker rm ${NAME} > /dev/null
+  fi
+}
 
-docker rm --force --volumes ${NAME}
+# - - - - - - - - - - - - - - - - - -
 
-docker network rm ${NETWORK}
+run()
+{
+  docker run \
+    --user=root \
+    --network=${NETWORK} \
+    --rm \
+    --interactive \
+    --tty \
+    --env DOCKER_USERNAME \
+    --env DOCKER_PASSWORD \
+    --env GITHUB_TOKEN \
+    --env SRC_DIR=${SRC_DIR} \
+    --env TRAVIS \
+    --env TRAVIS_REPO_SLUG \
+    --volume=/var/run/docker.sock:/var/run/docker.sock \
+      cyberdojofoundation/image_builder \
+        /app/outer_main.rb
+}
 
-echo "exit_status=${exit_status}"
-exit ${exit_status}
+# - - - - - - - - - - - - - - - - - -
+
+exit_handler()
+{
+  volume_remove
+  network_remove
+}
+
+check_use
+trap exit_handler INT EXIT
+show_location
+volume_create
+network_create
+run
