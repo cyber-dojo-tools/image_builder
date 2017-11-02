@@ -6,8 +6,8 @@ echo 'success cases...'
 
 test_alpine()
 {
-  echo '  gcc'
-  assertBuildImage /test/languages/alpine-gcc
+  echo '  java'
+  assertBuildImage /test/languages/alpine-java
   assertAlpineImageBuilt
   refuteStartPointCreated
   refuteRedAmberGreen

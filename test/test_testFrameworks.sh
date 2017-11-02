@@ -6,8 +6,8 @@ echo 'success cases...'
 
 test_alpine_stateless()
 {
-  echo '  gcc-assert'
-  assertBuildImage /test/test-frameworks/alpine-gcc-assert/stateless
+  echo '  java-junit'
+  assertBuildImage /test/test-frameworks/alpine-java-junit/stateless
   assertAlpineImageBuilt
   assertStartPointCreated
   assertStartPointRedAmberGreenStateless
@@ -15,8 +15,8 @@ test_alpine_stateless()
 
 test_alpine_stateful()
 {
-  echo '  gcc-assert'
-  assertBuildImage /test/test-frameworks/alpine-gcc-assert/stateful
+  echo '  java-junit'
+  assertBuildImage /test/test-frameworks/alpine-java-junit/stateful
   assertAlpineImageBuilt
   assertStartPointCreated
   assertStartPointRedAmberGreenStateful
@@ -24,8 +24,8 @@ test_alpine_stateful()
 
 test_alpine_processful()
 {
-  echo '  gcc-assert'
-  assertBuildImage /test/test-frameworks/alpine-gcc-assert/processful
+  echo '  java-junit'
+  assertBuildImage /test/test-frameworks/alpine-java-junit/processful
   assertAlpineImageBuilt
   assertStartPointCreated
   assertStartPointRedAmberGreenProcessful
