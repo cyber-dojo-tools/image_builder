@@ -300,7 +300,7 @@ class StartPointDir
   end
 
   def avatar_name
-    'rhino'
+    'squid'
   end
 
 end
