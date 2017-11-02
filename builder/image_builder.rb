@@ -45,16 +45,23 @@ class ImageBuilder
         ].join(space)
       end
 
-      # Need to replace FROM in dockerfile with temp_image_name
-      # But in-place replacing it will replace it in the actual
-      # original since a volume-mount does not create copies.
-      # I can't just make a new Dockerfile in another location
-      # since I will lose the [docker build] context dir
-      # Can you pipe stdin as the Dockerfile?
+      # Need to change FROM in dockerfile with temp_image_name.
+      # An in-place change will alter the original file since
+      # SRC_DIR is a volume-mount which does not create copies.
+      # I'd much prefer to volume-mount read-only.
+      #
+      # Options?
+      # 1. Can I create a mutated Dockerfile in tmp/ and use that?
+      # No, because the Dockerfile must be within the build context.
+      #
+      # 2. Can you pipe stdin as the Dockerfile?
       # Possibly, but it is a recent feature.
       # https://github.com/docker/docker.github.io/issues/3538
-      # Do I want to depend on that. No.
-      # So I am creating another Dockerfile next to it.
+      # Not even documented yet. Can I depend on that. No.
+      #
+      # 3. Create another Dockerfile next to it.
+      # This is the least bad so I am reluctantly
+      # do a read-write volume-mount of SRC_DIR in docker-compose.yml
 
       dockerfile = "#{dir_name}/Dockerfile"
       temp_dockerfile = dockerfile + ".#{temp_image_name}"
