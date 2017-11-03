@@ -53,6 +53,7 @@ class ImageBuilder
       }
       assert_system [
         'docker build',
+          '--no-cache',
           "--file #{docker_filename}",
           "--tag #{temp_image_name}",
           tmp_dir
