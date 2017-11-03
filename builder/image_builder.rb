@@ -64,32 +64,42 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def replace_from(temp_image_name, image_name)
-    # Need to change FROM in dockerfile to temp_image_name.
+    # Need to change FROM in Dockerfile to temp_image_name.
     # An in-place change would alter the original file if
-    # SRC_DIR was a read-write volume-mount.
-    # I'd much prefer to volume-mount SRC_DIR read-only.
-    # Options?
-    #
-    # 1. Can you create a mutated Dockerfile in tmp/ and use that?
-    # No, because a named Dockerfile must be within the build context.
-    #
-    # 2. Can you create a mutated Dockerfile and stdin-pipe it?
-    # Yes, see https://github.com/docker/docker.github.io/issues/3538
-    # It's not documented yet. But it does work and retains
-    # the still specified build-context dir. And I can reply on it
-    # since this [docker build] command is itself running inside
-    # the image_builder docker image!
-    assert_system [
-      'sed -E',
-      "'s/FROM.*$/FROM #{temp_image_name}/'",
-      "#{dir_name}/Dockerfile",
-      '|',
-      'docker build',
-      '--no-cache',
-      "--tag #{image_name}",
-      '--file -', # Dockerfile from stdin
-      dir_name
-    ].join(space)
+    # SRC_DIR was a read-write volume-mount. I'd much prefer
+    # to volume-mount SRC_DIR read-only. Options?
+    # Can you create a mutated Dockerfile in tmp/ and use that?
+    # Not if you name the mutated Dockerfile in the [docker build]
+    # command it won't be within the build context.
+    # But you can get the Dockerfile from a stdin-pipe.
+    # See https://github.com/docker/docker.github.io/issues/3538
+    # It's not documented yet. And I can rely on it since this
+    # [docker build] command is itself running inside the
+    # image_builder docker image!
+
+    Dir.mktmpdir('image_builder') do |tmp_dir|
+      filename = "#{dir_name}/Dockerfile"
+      # Logically, here I should be able to run sed directly on
+      # [filename] and then pipe the result into [docker build].
+      # However, sometimes you get an _old_ version of the file.
+      # There appears to be a docker-related caching error on
+      # the src_dir_container. Hence the copy and the uuid.
+
+      content = IO.read(filename)
+      tmp_dockerfile = "#{tmp_dir}/Dockerfile_#{uuid}"
+      IO.write(tmp_dockerfile, content)
+      assert_system [
+        'sed -E',
+        "'s/FROM.*$/FROM #{temp_image_name}/'",
+        tmp_dockerfile,
+        '|',
+        'docker build',
+        '--no-cache',
+        "--tag #{image_name}",
+        '--file -', # Dockerfile from stdin
+        dir_name
+      ].join(space)
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
