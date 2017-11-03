@@ -28,14 +28,15 @@ assertUbuntuImageBuilt()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-assertAlpineAvatarUsersAdded()
+assertAvatarUsersPresent()
 {
-  assertStdoutIncludes "adduser -D -G cyber-dojo -h /home/flamingo -s '/bin/sh' -u 40014 flamingo"
-}
-
-assertUbuntuAvatarUsersAdded()
-{
-  assertStdoutIncludes "adduser --disabled-password --gecos \"\" --ingroup cyber-dojo --home /home/flamingo --uid 40014 flamingo"
+  assertStdoutIncludes '# show_avatar_users'
+  assertStdoutIncludes '# UID(alligator) == 40000'
+  assertStdoutIncludes '# GID(alligator) == 5000'
+  assertStdoutIncludes '# UID(squid) == 40051'
+  assertStdoutIncludes '# GID(squid) == 5000'
+  assertStdoutIncludes '# UID(zebra) == 40063'
+  assertStdoutIncludes '# GID(zebra) == 5000'
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

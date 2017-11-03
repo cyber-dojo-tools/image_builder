@@ -34,6 +34,7 @@ class ImageBuilder
       replace_from(temp_image_name, image_name)
     }
     print_image_OS(image_name)
+    show_avatar_users(image_name)
   end
 
   private
@@ -225,6 +226,38 @@ class ImageBuilder
     if etc_issue.include? 'Ubuntu'
       return :Ubuntu
     end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def show_avatar_users(image_name)
+    banner {
+      %w( alligator squid zebra ).each do |avatar|
+        uid = get_uid(image_name, avatar)
+        gid = get_gid(image_name, avatar)
+        puts "# UID(#{avatar}) == #{uid}"
+        puts "# GID(#{avatar}) == #{gid}"
+      end
+    }
+  end
+
+  def get_uid(image_name, avatar_name)
+    get_id(image_name, avatar_name, 'u')
+  end
+
+  def get_gid(image_name, avatar_name)
+    get_id(image_name, avatar_name, 'g')
+  end
+
+  def get_id(image_name, avatar_name, option)
+    id_cmd = [
+      'docker run',
+      '--rm',
+      '-it',
+      image_name,
+      "id -#{option} #{avatar_name}"
+    ].join(' ')
+    assert_backtick(id_cmd).strip
   end
 
   # - - - - - - - - - - - - - - - - -

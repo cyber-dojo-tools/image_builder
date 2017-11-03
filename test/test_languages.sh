@@ -9,7 +9,7 @@ test_alpine()
   echo '  java'
   assertBuildImage /test/languages/alpine-java
   assertAlpineImageBuilt
-  assertAlpineAvatarUsersAdded
+  assertAvatarUsersPresent
   refuteStartPointCreated
   refuteRedAmberGreen
 }
@@ -19,7 +19,7 @@ test_ubuntu()
   echo '  perl'
   assertBuildImage /test/languages/ubuntu-perl
   assertUbuntuImageBuilt
-  assertUbuntuAvatarUsersAdded
+  assertAvatarUsersPresent
   refuteStartPointCreated
   refuteRedAmberGreen
 }
