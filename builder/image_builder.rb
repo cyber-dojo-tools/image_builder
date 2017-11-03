@@ -90,7 +90,7 @@ class ImageBuilder
       IO.write(tmp_dockerfile, content)
       assert_system [
         'sed -E',
-        "'s/FROM.*$/FROM #{temp_image_name}/'",
+        "'s/^FROM.*$/FROM #{temp_image_name}/'",
         tmp_dockerfile,
         '|',
         'docker build',
