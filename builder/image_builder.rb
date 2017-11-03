@@ -13,65 +13,25 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def build_image(from, image_name)
-    # This adds the cyber-dojo group and the 64 avatar
-    # user to the created docker image.
+    # Attempt to create a docker image named image_name
+    # from the Dockerfile in dir_name, except that it
+    # inserts RUN commands to
+    #   o) adds a group called cyber-dojo
+    #   o) adds a user for each of the 64 avatars
     #
-    # Question: should this extra processing happen
+    # Question: Should these extra RUN commands happen
     #           before or after the commands inside the
-    #           supplied Dockerfile?
-    #
-    # Answer: before.
-    #
+    #           Dockerfile?
+    # Answer: Before.
     # Reason: It allows the supplied Dockerfile to
     #         contain commands related to the users.
     #         For example, javascript-cucumber
     #         creates a node_modules dir symlink
     #         for all 64 avatar users.
-
     banner {
-      uuid = SecureRandom.hex[0..10].downcase
       temp_image_name = "imagebuilder_temp_#{uuid}"
-
-      Dir.mktmpdir('image_builder') do |tmp_dir|
-        docker_filename = "#{tmp_dir}/Dockerfile"
-        File.open(docker_filename, 'w') { |fd|
-          fd.write(add_users_dockerfile(from))
-        }
-        assert_system [
-          'docker build',
-            "--file #{docker_filename}",
-            "--tag #{temp_image_name}",
-            tmp_dir
-        ].join(space)
-      end
-
-      # Need to change FROM in dockerfile to temp_image_name.
-      # An in-place change would alter the original file if
-      # SRC_DIR was a read-write volume-mount.
-      # I'd much prefer to volume-mount SRC_DIR read-only.
-      # Options?
-      #
-      # 1. Can you create a mutated Dockerfile in tmp/ and use that?
-      # No, because a named Dockerfile must be within the build context.
-      #
-      # 2. Can you create a mutated Dockerfile and stdin-pipe it?
-      # Yes, see https://github.com/docker/docker.github.io/issues/3538
-      # It's not documented yet. But it does work and retains
-      # the still specified build-context dir. And I can reply on it
-      # since this [docker build] command is itself running inside
-      # the image_builder docker image!
-
-      assert_system [
-        'sed -E',
-        "'s/FROM.*$/FROM #{temp_image_name}/'",
-        "#{dir_name}/Dockerfile",
-        '|',
-        'docker build',
-        '--no-cache',
-        "--tag #{image_name}",
-        '--file -', # Dockerfile from stdin
-        dir_name
-      ].join(space)
+      add_users(from, temp_image_name)
+      replace_from(temp_image_name, image_name)
     }
     print_image_OS(image_name)
   end
@@ -82,6 +42,54 @@ class ImageBuilder
 
   include AssertSystem
   include Banner
+
+  # - - - - - - - - - - - - - - - - -
+
+  def add_users(from, temp_image_name)
+    Dir.mktmpdir('image_builder') do |tmp_dir|
+      docker_filename = "#{tmp_dir}/Dockerfile"
+      File.open(docker_filename, 'w') { |fd|
+        fd.write(add_users_dockerfile(from))
+      }
+      assert_system [
+        'docker build',
+          "--file #{docker_filename}",
+          "--tag #{temp_image_name}",
+          tmp_dir
+      ].join(space)
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def replace_from(temp_image_name, image_name)
+    # Need to change FROM in dockerfile to temp_image_name.
+    # An in-place change would alter the original file if
+    # SRC_DIR was a read-write volume-mount.
+    # I'd much prefer to volume-mount SRC_DIR read-only.
+    # Options?
+    #
+    # 1. Can you create a mutated Dockerfile in tmp/ and use that?
+    # No, because a named Dockerfile must be within the build context.
+    #
+    # 2. Can you create a mutated Dockerfile and stdin-pipe it?
+    # Yes, see https://github.com/docker/docker.github.io/issues/3538
+    # It's not documented yet. But it does work and retains
+    # the still specified build-context dir. And I can reply on it
+    # since this [docker build] command is itself running inside
+    # the image_builder docker image!
+    assert_system [
+      'sed -E',
+      "'s/FROM.*$/FROM #{temp_image_name}/'",
+      "#{dir_name}/Dockerfile",
+      '|',
+      'docker build',
+      '--no-cache',
+      "--tag #{image_name}",
+      '--file -', # Dockerfile from stdin
+      dir_name
+    ].join(space)
+  end
 
   # - - - - - - - - - - - - - - - - -
 
@@ -206,6 +214,12 @@ class ImageBuilder
     if etc_issue.include? 'Ubuntu'
       return :Ubuntu
     end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def uuid
+    SecureRandom.hex[0..10].downcase
   end
 
   # - - - - - - - - - - - - - - - - -
