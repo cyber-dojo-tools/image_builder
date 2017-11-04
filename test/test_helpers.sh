@@ -80,16 +80,16 @@ readonly greenMessageOK='# green: OK'
 
 assertRedAmberGreen()
 {
-  assertStdoutIncludes ${redMessageOK}
-  assertStdoutIncludes ${amberMessageOK}
-  assertStdoutIncludes ${greenMessageOK}
+  assertStdoutIncludes "${redMessageOK}"
+  assertStdoutIncludes "${amberMessageOK}"
+  assertStdoutIncludes "${greenMessageOK}"
 }
 
 refuteRedAmberGreen()
 {
-  refuteStdoutIncludes ${redMessageOK}
-  refuteStdoutIncludes ${amberMessageOK}
-  refuteStdoutIncludes ${greenMessageOK}
+  refuteStdoutIncludes "${redMessageOK}"
+  refuteStdoutIncludes "${amberMessageOK}"
+  refuteStdoutIncludes "${greenMessageOK}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
