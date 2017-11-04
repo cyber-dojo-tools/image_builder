@@ -105,7 +105,15 @@ class Travis
 
   def trigger(repos)
     print_to STDOUT, "number of dependent repos: #{repos.size}"
-    repos.each do |repo_name|
+    # Travis limits the number of triggers to 10 per hour.
+    # You can see this in the trigger reponse:
+    #   { ... "remaining_requests": 10, ... }
+    # Once you get past 10, the output you get is
+    #   Forbidden
+    # Some repos have more than 10 immediate dependents on their own.
+    # Eg, ubuntu-17.04 currently has 18.
+    # I shuffle the repos so, over time, all dependents are triggered.
+    repos.shuffle.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
       output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
       print_to STDOUT, output
