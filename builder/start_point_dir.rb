@@ -22,7 +22,9 @@ class StartPointDir
   def test_run
     hhg = options? || filename_6_times_9?
     # TODO: If being run on a cyber-dojo-langauges
-    # then repo check it _HAS_ got 6*9 content
+    # repo then check it _HAS_ got 6*9 content
+    # Is it best to do this in Travis run?
+    # Ensure start-point stuff goes into its own org.
     if hhg
       test_6_times_9_red_amber_green
     else

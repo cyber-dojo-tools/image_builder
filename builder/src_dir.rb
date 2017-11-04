@@ -57,6 +57,8 @@ class SourceDir
       end
 
       if on_cdl_travis?
+        # assert docker_dirs.size == 1
+        # assert [0,1].include? start_point_dirs.size
         triple = {
             'from'           => docker_dir.image_FROM,
             'image_name'     => image_name,
@@ -73,8 +75,8 @@ class SourceDir
       # used in at least one start-point-dir's manifest.json file
       # or that there are no start-point-dirs.
       # TODO:
-      # If the start-point-dirs all share the same image-name
-      # then if there is one docker-dir, it uses this image-name
+      # If the start-point-dirs all share the same image-name then if
+      # there is one docker-dir, the docker-dir uses this image-name
     end
   end
 
