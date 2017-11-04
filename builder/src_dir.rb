@@ -2,7 +2,6 @@ require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'docker_dir'
 require_relative 'failed'
-require_relative 'print_to'
 require_relative 'start_point_dir'
 require_relative 'travis'
 
@@ -35,7 +34,7 @@ class SourceDir
       system remove_cmd
       assert_system create_cmd
       assert_system remove_cmd
-      print_to STDOUT, 'start point can be created'
+      puts 'start point can be created'
     }
   end
 
@@ -85,7 +84,6 @@ class SourceDir
 
   include AssertSystem
   include Banner
-  include PrintTo
 
   def get_docker_dirs
     Dir["#{dir_name}/**/Dockerfile"].map { |path|

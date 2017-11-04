@@ -31,9 +31,9 @@ class DockerHub
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def ok(cmd)
-    print_to STDOUT, cmd
+    puts cmd
     assert_system cmd
-    print_to STDOUT, 'OK'
+    puts 'OK'
   end
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -

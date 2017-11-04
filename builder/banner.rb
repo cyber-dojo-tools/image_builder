@@ -4,9 +4,11 @@ module Banner
   def banner
     title = caller_locations(1,1)[0].label
     line = '-' * 42
-    print_to STDOUT, '', line, title
+    puts ''
+    puts line
+    puts title
     yield
-    print_to STDOUT, line
+    puts line
   end
 
 end

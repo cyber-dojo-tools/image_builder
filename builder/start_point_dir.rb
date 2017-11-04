@@ -1,7 +1,6 @@
 require_relative 'banner'
 require_relative 'failed'
 require_relative 'json_parse'
-require_relative 'print_to'
 require_relative 'runner_service_stateless'
 require_relative 'runner_service_stateful'
 require_relative 'runner_service_processful'
@@ -38,11 +37,10 @@ class StartPointDir
   include Banner
   include Failed
   include JsonParse
-  include PrintTo
 
   def test_any_colour
     banner {
-      print_to STDOUT, 'TODO'
+      puts 'TODO'
     }
   end
 
@@ -127,7 +125,7 @@ class StartPointDir
     args << (max_seconds=10)
     took,sss = timed { @runner.run(*args) }
     assert_rag(colour, sss)
-    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
+    puts "#{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -141,7 +139,7 @@ class StartPointDir
     args << (max_seconds=10)
     took,sss = timed { @runner.run(*args) }
     assert_rag(colour, sss)
-    print_to STDOUT, "#{colour}: OK (~#{took} seconds)"
+    puts "#{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
