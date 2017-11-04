@@ -31,12 +31,9 @@ assertUbuntuImageBuilt()
 assertAvatarUsersPresent()
 {
   assertStdoutIncludes '# show_avatar_users'
-  assertStdoutIncludes '# UID(alligator) == 40000'
-  assertStdoutIncludes '# GID(alligator) == 5000'
-  assertStdoutIncludes '# UID(squid) == 40051'
-  assertStdoutIncludes '# GID(squid) == 5000'
-  assertStdoutIncludes '# UID(zebra) == 40063'
-  assertStdoutIncludes '# GID(zebra) == 5000'
+  assertStdoutIncludes '# 40000:5000 == uid:gid(alligator)'
+  assertStdoutIncludes '# 40051:5000 == uid:gid(squid)'
+  assertStdoutIncludes '# 40063:5000 == uid:gid(zebra)'
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

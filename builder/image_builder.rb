@@ -235,8 +235,7 @@ class ImageBuilder
       %w( alligator squid zebra ).each do |avatar|
         uid = get_uid(image_name, avatar)
         gid = get_gid(image_name, avatar)
-        puts "# UID(#{avatar}) == #{uid}"
-        puts "# GID(#{avatar}) == #{gid}"
+        puts "# #{uid}:#{gid} == uid:gid(#{avatar})"
       end
     }
   end
