@@ -18,12 +18,12 @@ build_image()
 
 assertAlpineImageBuilt()
 {
-  assertStdoutIncludes "Alpine image built OK"
+  assertStdoutIncludes "# Alpine image built OK"
 }
 
 assertUbuntuImageBuilt()
 {
-  assertStdoutIncludes 'Ubuntu image built OK'
+  assertStdoutIncludes '# Ubuntu image built OK'
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -74,9 +74,9 @@ assertStartPointRedAmberGreenProcessful()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly redMessageOK='red: OK'
-readonly amberMessageOK='amber: OK'
-readonly greenMessageOK='green: OK'
+readonly redMessageOK='# red: OK'
+readonly amberMessageOK='# amber: OK'
+readonly greenMessageOK='# green: OK'
 
 assertRedAmberGreen()
 {

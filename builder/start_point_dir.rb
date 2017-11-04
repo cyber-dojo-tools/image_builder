@@ -125,7 +125,7 @@ class StartPointDir
     args << (max_seconds=10)
     took,sss = timed { @runner.run(*args) }
     assert_rag(colour, sss)
-    puts "#{colour}: OK (~#{took} seconds)"
+    puts "# #{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -139,7 +139,7 @@ class StartPointDir
     args << (max_seconds=10)
     took,sss = timed { @runner.run(*args) }
     assert_rag(colour, sss)
-    puts "#{colour}: OK (~#{took} seconds)"
+    puts "# #{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
