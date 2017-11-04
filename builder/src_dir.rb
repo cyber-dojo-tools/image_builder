@@ -34,7 +34,7 @@ class SourceDir
       system remove_cmd
       assert_system create_cmd
       assert_system remove_cmd
-      puts 'start point can be created'
+      puts '# start point can be created'
     }
   end
 
