@@ -1,6 +1,7 @@
 require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
+require_relative 'failed'
 require 'securerandom'
 require 'tmpdir'
 
@@ -13,10 +14,6 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def build_image(from, image_name)
-    # TODO: check base image is FROM Alpine/Ubuntu. If its not
-    # (eg Debian) issue a diagnostic since the generated
-    # Dockerfile probably won't work.
-
     # Attempts to create a docker image named image_name
     # from the Dockerfile in dir_name, except that it
     # inserts commands to
@@ -26,13 +23,14 @@ class ImageBuilder
     # Dockerfile so the Dockerfile can contain commands related
     # to the users. For example, javascript-cucumber creates a
     # node_modules dir symlink for all 64 avatar users.
+    os = checked_image_os(image_name)
     banner {
       temp_image_name = "imagebuilder_temp_#{uuid}"
-      add_users(from, temp_image_name)
+      add_users(from, os, temp_image_name)
       replace_from(temp_image_name, image_name)
+      puts "# #{os} based image built OK"
     }
-    print_image_OS(image_name)
-    show_avatar_users(image_name)
+    show_avatar_users_sample(image_name)
   end
 
   private
@@ -41,14 +39,15 @@ class ImageBuilder
 
   include AssertSystem
   include Banner
+  include Failed
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_users(from, temp_image_name)
+  def add_users(from, os, temp_image_name)
     Dir.mktmpdir('image_builder') do |tmp_dir|
       docker_filename = "#{tmp_dir}/Dockerfile"
       File.open(docker_filename, 'w') { |fd|
-        fd.write(add_users_dockerfile(from))
+        fd.write(add_users_dockerfile(from, os))
       }
       assert_system [
         'docker build',
@@ -101,8 +100,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_users_dockerfile(from)
-    os = get_os(from)
+  def add_users_dockerfile(from, os)
     lined "FROM #{from}",
           '',
           add_cyberdojo_group_command(os),
@@ -207,26 +205,27 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def print_image_OS(image_name)
+  def checked_image_os(image_name)
     banner {
-      puts '# ' + get_os(image_name).to_s + " image built OK"
+      cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
+      etc_issue = assert_backtick cmd
+      if etc_issue.include? 'Alpine'
+        puts "# #{image_name} is based on Alpine: OK"
+        return :Alpine
+      end
+      if etc_issue.include? 'Ubuntu'
+        puts "# #{image_name} is based on Ubuntu: OK"
+        return :Ubuntu
+      end
+      failed [
+        "#{image_name} is not based on Alpine/Ubuntu"
+      ]
     }
-  end
-
-  def get_os(image_name)
-    cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
-    etc_issue = assert_backtick cmd
-    if etc_issue.include? 'Alpine'
-      return :Alpine
-    end
-    if etc_issue.include? 'Ubuntu'
-      return :Ubuntu
-    end
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def show_avatar_users(image_name)
+  def show_avatar_users_sample(image_name)
     banner {
       %w( alligator squid zebra ).each do |avatar|
         uid = get_uid(image_name, avatar)

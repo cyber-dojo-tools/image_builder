@@ -18,19 +18,19 @@ build_image()
 
 assertAlpineImageBuilt()
 {
-  assertStdoutIncludes "# Alpine image built OK"
+  assertStdoutIncludes "# Alpine based image built OK"
 }
 
 assertUbuntuImageBuilt()
 {
-  assertStdoutIncludes '# Ubuntu image built OK'
+  assertStdoutIncludes '# Ubuntu based image built OK'
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 assertAvatarUsersPresent()
 {
-  assertStdoutIncludes '# show_avatar_users'
+  assertStdoutIncludes '# show_avatar_users_sample'
   assertStdoutIncludes '# 40000:5000 == uid:gid(alligator)'
   assertStdoutIncludes '# 40051:5000 == uid:gid(squid)'
   assertStdoutIncludes '# 40063:5000 == uid:gid(zebra)'
