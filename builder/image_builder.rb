@@ -23,7 +23,7 @@ class ImageBuilder
     # Dockerfile so the Dockerfile can contain commands related
     # to the users. For example, javascript-cucumber creates a
     # node_modules dir symlink for all 64 avatar users.
-    os = checked_image_os(image_name)
+    os = checked_image_os(from)
     banner {
       temp_image_name = "imagebuilder_temp_#{uuid}"
       add_users(from, os, temp_image_name)
