@@ -13,21 +13,19 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   def build_image(from, image_name)
-    # Attempt to create a docker image named image_name
+    # TODO: check base image is FROM Alpine/Ubuntu. If its not
+    # (eg Debian) issue a diagnostic since the generated
+    # Dockerfile probably won't work.
+
+    # Attempts to create a docker image named image_name
     # from the Dockerfile in dir_name, except that it
-    # inserts RUN commands to
+    # inserts commands to
     #   o) adds a group called cyber-dojo
     #   o) adds a user for each of the 64 avatars
-    #
-    # Question: Should these extra RUN commands happen
-    #           before or after the commands inside the
-    #           Dockerfile?
-    # Answer: Before.
-    # Reason: It allows the supplied Dockerfile to
-    #         contain commands related to the users.
-    #         For example, javascript-cucumber
-    #         creates a node_modules dir symlink
-    #         for all 64 avatar users.
+    # These commands must happen before the commands inside the
+    # Dockerfile so the Dockerfile can contain commands related
+    # to the users. For example, javascript-cucumber creates a
+    # node_modules dir symlink for all 64 avatar users.
     banner {
       temp_image_name = "imagebuilder_temp_#{uuid}"
       add_users(from, temp_image_name)
@@ -71,21 +69,19 @@ class ImageBuilder
     # to volume-mount SRC_DIR read-only. Options?
     # Can you create a mutated Dockerfile in tmp/ and use that?
     # Not if you name the mutated Dockerfile in the [docker build]
-    # command it won't be within the build context.
+    # command since it won't be within the build context.
     # But you can get the Dockerfile from a stdin-pipe.
     # See https://github.com/docker/docker.github.io/issues/3538
     # It's not documented yet. And I can rely on it since this
     # [docker build] command is itself running inside the
     # image_builder docker image!
-
     Dir.mktmpdir('image_builder') do |tmp_dir|
       filename = "#{dir_name}/Dockerfile"
       # Logically, here I should be able to run sed directly on
       # [filename] and then pipe the result into [docker build].
-      # However, sometimes you get an _old_ version of the file.
+      # However, sometimes you get an _old_ version of the file!
       # There appears to be a docker-related caching error on
       # the src_dir_container. Hence the copy and the uuid.
-
       content = IO.read(filename)
       tmp_dockerfile = "#{tmp_dir}/Dockerfile_#{uuid}"
       IO.write(tmp_dockerfile, content)
