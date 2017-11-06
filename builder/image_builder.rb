@@ -119,7 +119,7 @@ class ImageBuilder
     # be executing an incremental make (for example).
     # The coreutils package fixes this.
     if os == :Alpine
-      'RUN apk add --update coreutils'
+      'RUN apk add --update coreutils tar'
     else
       ''
     end
