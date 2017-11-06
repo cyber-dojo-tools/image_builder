@@ -22,6 +22,8 @@ class StartPointDir
   def test_run
     # TODO: check the image_name has the
     # 64 avatars users inside it.
+    # TODO: check the image_name has the
+    # #{rag_filename} inside it.
     hhg = options? || filename_6_times_9?
     # TODO: If being run on a cyber-dojo-langauges
     # repo then check it _HAS_ got 6*9 content
