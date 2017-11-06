@@ -37,3 +37,11 @@ The tests
 - Verify the start_point files tweaked to amber is amber
 
 - - - -
+
+NB: There is a circular dependency which can occasionally bite you.
+When image_builder is running start-point files (to test them against a docker image)
+it uses the three runners. The runners themselves have tests which rely on start-point
+test-data in various language+testFramework combinations (eg gcc-assert).
+These images (eg cyberdojofoundation/gcc_assert) are built by image_builder.
+
+
