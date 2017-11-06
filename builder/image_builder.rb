@@ -103,9 +103,26 @@ class ImageBuilder
   def add_users_dockerfile(from, os)
     lined "FROM #{from}",
           '',
+          add_coreutils_command(os),
           add_cyberdojo_group_command(os),
           remove_alpine_squid_webproxy_user_command(os),
           add_avatar_users_command(os)
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def add_coreutils_command(os)
+    # On default Alpine date-time file-stamps are stored
+    # to a one second granularity. In other words, the
+    # microseconds are always zero. This matters in a
+    # stateful runner since the cyber-dojo.sh file could
+    # be executing an incremental make (for example).
+    # The coreutils package fixes this.
+    if os == :Alpine
+      'RUN apk add --update coreutils'
+    else
+      ''
+    end
   end
 
   # - - - - - - - - - - - - - - - - -
