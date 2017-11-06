@@ -20,7 +20,7 @@ class StartPointDir
   # - - - - - - - - - - - - - - - - -
 
   def test_run
-    # TODO: check that the image_name has the
+    # TODO: check the image_name has the
     # 64 avatars users inside it.
     hhg = options? || filename_6_times_9?
     # TODO: If being run on a cyber-dojo-langauges
@@ -79,10 +79,10 @@ class StartPointDir
   # to second granularity, the microseconds are always zero
   # (because the runners are based on Alpine).
   # This matters in a stateless runner since the cyber-dojo.sh
-  # file could be executing make (for example).
+  # file could be executing an incremental make (for example).
   # This is very unlikely to matter for a browser test-event
   # but it is quite likely to matter here since
-  # we are not doing a full browser round-trip we are calling
+  # we are not doing a full browser round-trip, we are calling
   # directly into the runner service, and this is a stateful
   # runner which is quite likely to be optimized for speed.
   # Hence the sleeps.
