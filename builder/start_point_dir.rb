@@ -97,9 +97,7 @@ class StartPointDir
       in_kata {
         as_avatar {
           assert_timed_run_stateful(:red)
-          sleep(1.5)
           assert_timed_run_stateful(:green)
-          sleep(1.5)
           assert_timed_run_stateful(:amber)
           # do amber last to prevent amber-test-run state
           # changes 'leaking' into green-test run
