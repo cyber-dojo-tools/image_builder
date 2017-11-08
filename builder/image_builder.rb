@@ -51,7 +51,6 @@ class ImageBuilder
       }
       assert_system [
         'docker build',
-          '--no-cache',
           "--file #{docker_filename}",
           "--tag #{temp_image_name}",
           tmp_dir
@@ -90,7 +89,6 @@ class ImageBuilder
         tmp_dockerfile,
         '|',
         'docker build',
-        '--no-cache',
         "--tag #{image_name}",
         '--file -', # Dockerfile from stdin
         dir_name
