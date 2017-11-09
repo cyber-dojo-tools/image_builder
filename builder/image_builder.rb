@@ -101,7 +101,8 @@ class ImageBuilder
   def add_users_dockerfile(from, os)
     lined "FROM #{from}",
           '',
-          add_coreutils_command(os),
+          install_coreutils_command(os),
+          update_tar_command(os),
           add_cyberdojo_group_command(os),
           remove_alpine_squid_webproxy_user_command(os),
           add_avatar_users_command(os)
@@ -109,15 +110,41 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_coreutils_command(os)
+  def install_coreutils_command(os)
     # On default Alpine date-time file-stamps are stored
     # to a one second granularity. In other words, the
-    # microseconds are always zero. This matters in a
-    # stateful runner since the cyber-dojo.sh file could
-    # be executing an incremental make (for example).
-    # The coreutils package fixes this.
+    # microseconds are always zero. Viz
+    #   $ docker run --rm -it alpine:latest sh
+    #   > echo 'hello' > hello.txt
+    #   > stat -c "%y%" hello.txt
+    #     2017-11-09 20:09:22.000000000
+    #
+    # This matters in a stateful runner since the
+    # cyber-dojo.sh file could be executing an incremental
+    # make (for example). Viz
+    #   $ docker run --rm -it alpine:latest sh
+    #   > apk add --update coreutils
+    #   > echo 'hello' > hello.txt
+    #   > stat -c "%y%" hello.txt
+    #     2017-11-09 20:11:09.376824357 +0000
     if os == :Alpine
-      'RUN apk add --update coreutils tar'
+      'RUN apk add --update coreutils'
+    else
+      ''
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def update_tar_command(os)
+    # Each runner docker-tar-pipes files into the test
+    # framework container. I need the tar-pipe to use
+    # the --touch option to set the date-time stamps
+    # on the files once they have been copied _into_ the
+    # test-framework container. On default Alpine tar
+    # does not support the --touch option hennce the update.
+    if os == :Alpine
+      'RUN apk add --update tar'
     else
       ''
     end
