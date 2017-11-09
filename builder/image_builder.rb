@@ -27,9 +27,12 @@ class ImageBuilder
     banner {
       temp_image_name = "imagebuilder_temp_#{uuid}"
       add_users(from, os, temp_image_name)
-      replace_from(temp_image_name, image_name)
-      assert_system "docker rmi #{temp_image_name}"
-      puts "# #{os} based image built OK"
+      begin
+        replace_from(temp_image_name, image_name)
+        puts "# #{os} based image built OK"
+      ensure
+        assert_system "docker rmi #{temp_image_name}"
+      end
     }
     show_avatar_users_sample(image_name)
   end
