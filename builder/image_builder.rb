@@ -28,6 +28,7 @@ class ImageBuilder
       temp_image_name = "imagebuilder_temp_#{uuid}"
       add_users(from, os, temp_image_name)
       replace_from(temp_image_name, image_name)
+      assert_system "docker rmi #{temp_image_name}"
       puts "# #{os} based image built OK"
     }
     show_avatar_users_sample(image_name)
