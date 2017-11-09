@@ -70,9 +70,15 @@ class StartPointDir
 
   def check_red_green_amber_using_runner_stateless
     banner {
-      assert_timed_run_stateless(:red)
-      assert_timed_run_stateless(:green)
-      assert_timed_run_stateless(:amber)
+      in_kata {
+        as_avatar {
+          assert_timed_run_stateless(:red)
+          assert_timed_run_stateless(:green)
+          assert_timed_run_stateless(:amber)
+          # do amber last to prevent amber-test-run state
+          # changes 'leaking' into green-test run
+        }
+      }
     }
   end
 
