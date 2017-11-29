@@ -52,23 +52,26 @@ refuteStartPointCreated()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly startPointRedAmberGreenMessage='check_red_green_amber_using_runner'
+readonly startPointRedAmberGreenMessage='check_red_amber_green'
 
 assertStartPointRedAmberGreenStateless()
 {
-  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateless"
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}"
+  assertStdoutIncludes "# using runner_stateless"
   assertRedAmberGreen
 }
 
 assertStartPointRedAmberGreenStateful()
 {
-  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_stateful"
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}"
+  assertStdoutIncludes "# using runner_stateful"
   assertRedAmberGreen
 }
 
 assertStartPointRedAmberGreenProcessful()
 {
-  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}_processful"
+  assertStdoutIncludes "# ${startPointRedAmberGreenMessage}"
+  assertStdoutIncludes "# using runner_processful"
   assertRedAmberGreen
 }
 
