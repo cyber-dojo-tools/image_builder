@@ -131,10 +131,16 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-docker_compose 'up -d runner_stateful'
 docker_compose 'up -d runner_stateless'
+docker_compose 'up -d runner_stateful'
+docker_compose 'up -d runner_processful'
 
-service_names = %w( cyber-dojo-runner-stateful cyber-dojo-runner-stateless )
+service_names = %w(
+  cyber-dojo-runner-stateless
+  cyber-dojo-runner-stateful
+  cyber-dojo-runner-processful
+)
+
 service_names.each do |name|
   wait_till :up?, name
 end

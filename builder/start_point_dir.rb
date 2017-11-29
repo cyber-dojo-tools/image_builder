@@ -1,9 +1,7 @@
 require_relative 'banner'
 require_relative 'failed'
 require_relative 'json_parse'
-require_relative 'runner_service_stateless'
-require_relative 'runner_service_stateful'
-require_relative 'runner_service_processful'
+require_relative 'runner_service'
 
 class StartPointDir
 
@@ -55,28 +53,25 @@ class StartPointDir
   def test_6_times_9_red_amber_green
     case runner_choice
     when 'stateless'
-      @runner = RunnerServiceStateless.new
-      check_red_green_amber_using_runner_stateless
+      @runner = RunnerService.new('runner_stateless', '4597')
     when 'stateful'
-      @runner = RunnerServiceStateful.new
-      check_red_green_amber_using_runner_stateful
+      @runner = RunnerService.new('runner_stateful', '4557')
     when 'processful'
-      @runner = RunnerServiceProcessful.new
-      check_red_green_amber_using_runner_processful
+      @runner = RunnerService.new('runner_processful', '4547')
     end
+    check_red_amber_green
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_red_green_amber_using_runner_stateless
+  def check_red_amber_green
     banner {
       in_kata {
         as_avatar {
-          assert_timed_run_stateless(:red)
-          assert_timed_run_stateless(:green)
-          assert_timed_run_stateless(:amber)
-          # do amber last to prevent amber-test-run state
-          # changes 'leaking' into green-test run
+          puts "# using #{@runner.hostname}"
+          assert_timed_run(:red)
+          assert_timed_run(:amber)
+          assert_timed_run(:green)
         }
       }
     }
@@ -84,70 +79,18 @@ class StartPointDir
 
   # - - - - - - - - - - - - - - - - -
 
-  def check_red_green_amber_using_runner_stateful
-    banner {
-      in_kata {
-        as_avatar {
-          assert_timed_run_stateful(:red)
-          assert_timed_run_stateful(:green)
-          assert_timed_run_stateful(:amber)
-          # do amber last to prevent amber-test-run state
-          # changes 'leaking' into green-test run
-        }
-      }
-    }
-  end
-
-  def check_red_green_amber_using_runner_processful
-    banner {
-      in_kata {
-        as_avatar {
-          assert_timed_run_stateful(:red)
-          assert_timed_run_stateful(:green)
-          assert_timed_run_stateful(:amber)
-          # do amber last to prevent amber-test-run state
-          # changes 'leaking' into green-test run
-        }
-      }
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def assert_timed_run_stateless(colour)
+  def assert_timed_run(colour)
     args = [image_name]
     args << kata_id
     args << avatar_name
-    args << all_files(colour)
-    args << (max_seconds=10)
-    took,sss = timed { @runner.run(*args) }
-    assert_rag(colour, sss)
-    puts "# #{colour}: OK (~#{took} seconds)"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def assert_timed_run_stateful(colour)
-    args = [image_name]
-    args << kata_id
-    args << avatar_name
-    args << (deleted_filenames=[])
+    args << (new_files = {})
+    args << (deleted_files = {})
+    args << unchanged_files(colour)
     args << changed_files(colour)
     args << (max_seconds=10)
-    took,sss = timed { @runner.run(*args) }
+    took,sss = timed { @runner.run_cyber_dojo_sh(*args) }
     assert_rag(colour, sss)
     puts "# #{colour}: OK (~#{took} seconds)"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def all_files(colour)
-    files = start_files
-    if colour != :red
-      filename,content = edited_file(colour)
-      files[filename] = content
-    end
-    files
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -173,6 +116,15 @@ class StartPointDir
   end
 
   # - - - - - - - - - - - - - - - - -
+
+  def unchanged_files(colour)
+    files = start_files
+    if colour != :red
+      filename,_ = edited_file(colour)
+      files.delete(filename)
+    end
+    files
+  end
 
   def changed_files(colour)
     if colour == :red

@@ -1,6 +1,13 @@
 require_relative 'http_json_service'
 
-class RunnerServiceProcessful
+class RunnerService
+
+  def initialize(hostname, port)
+    @hostname = hostname
+    @port = port
+  end
+
+  attr_reader :hostname, :port
 
   def kata_new(image_name, kata_id)
     args  = [image_name, kata_id]
@@ -13,10 +20,11 @@ class RunnerServiceProcessful
     post(__method__, *args)
   end
 
-  def run(image_name, kata_id, avatar_name, deleted_filenames, changed_files, max_seconds)
-    args  = [image_name, kata_id]
-    args += [avatar_name]
-    args += [deleted_filenames, changed_files]
+  def run_cyber_dojo_sh(image_name, kata_id, avatar_name,
+    new_files, deleted_files, unchanged_files, changed_files,
+    max_seconds)
+    args  = [image_name, kata_id, avatar_name]
+    args += [new_files, deleted_files, unchanged_files, changed_files]
     args += [max_seconds]
     post(__method__, *args)
   end
@@ -35,13 +43,5 @@ class RunnerServiceProcessful
   private
 
   include HttpJsonService
-
-  def hostname
-    'runner_processful'
-  end
-
-  def port
-    '4547'
-  end
 
 end

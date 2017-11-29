@@ -134,7 +134,7 @@ run()
     --env TRAVIS_REPO_SLUG \
     --volume=/var/run/docker.sock:/var/run/docker.sock \
       cyberdojofoundation/image_builder \
-        /app/outer_main.rb
+        /app/outer_main.rb $*
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -150,4 +150,4 @@ trap exit_handler INT EXIT
 show_location
 volume_create
 network_create
-run
+run $*
