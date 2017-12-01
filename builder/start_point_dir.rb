@@ -68,7 +68,7 @@ class StartPointDir
     banner {
       in_kata {
         as_avatar {
-          puts "# using #{@runner.hostname}"
+          puts "# using #{@runner.hostname}, max_seconds=#{max_seconds}"
           assert_timed_run(:red)
           assert_timed_run(:amber)
           assert_timed_run(:green)
@@ -87,7 +87,7 @@ class StartPointDir
     args << (deleted_files = {})
     args << unchanged_files(colour)
     args << changed_files(colour)
-    args << (max_seconds=10)
+    args << max_seconds
     took,sss = timed { @runner.run_cyber_dojo_sh(*args) }
     assert_rag(colour, sss)
     puts "# #{colour}: OK (~#{took} seconds)"
@@ -224,6 +224,10 @@ class StartPointDir
 
   def runner_choice
     manifest['runner_choice']
+  end
+
+  def max_seconds
+    manifest['max_seconds'] || 10
   end
 
   def manifest
