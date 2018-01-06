@@ -5,7 +5,6 @@ assertBuildImage()
 {
   build_image $1
   assertTrue $?
-  assertNoStderr
 }
 
 build_image()
