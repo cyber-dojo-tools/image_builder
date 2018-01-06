@@ -253,7 +253,7 @@ class ImageBuilder
 
   def checked_image_os(image_name)
     banner {
-      cmd = "docker run --rm -it #{image_name} sh -c 'cat /etc/issue'"
+      cmd = "docker run --rm -i #{image_name} sh -c 'cat /etc/issue'"
       etc_issue = assert_backtick cmd
       if etc_issue.include? 'Alpine'
         puts "# #{image_name} is based on Alpine: OK"
@@ -293,7 +293,7 @@ class ImageBuilder
     id_cmd = [
       'docker run',
       '--rm',
-      '-it',
+      '-i',
       image_name,
       "id -#{option} #{avatar_name}"
     ].join(' ')

@@ -53,7 +53,7 @@ class SourceDir
         docker_dir.build_image(image_name)
         start_point_dirs[0].test_run
       else
-        puts "docker_dirs.size == 1 -> else{TODO}"
+        puts "docker_dirs.size == 1, start_point_dirs.size > 1 =={TODO:?custom?}"
       end
 
       if on_cdl_travis?
@@ -70,7 +70,7 @@ class SourceDir
         travis.trigger_dependents
       end
     else
-      puts "docker_dirs.size == #{docker_dirs.size} -> else{TODO}"
+      puts "docker_dirs.size == #{docker_dirs.size} -> else{TODO:?custom?}"
       # TODO: check that a named docker-image is
       # used in at least one start-point-dir's manifest.json file
       # or that there are no start-point-dirs.

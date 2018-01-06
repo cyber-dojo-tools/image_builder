@@ -125,7 +125,6 @@ run()
     --network=${NETWORK} \
     --rm \
     --interactive \
-    --tty \
     --env DOCKER_USERNAME \
     --env DOCKER_PASSWORD \
     --env GITHUB_TOKEN \
