@@ -165,7 +165,7 @@ class ImageBuilder
       sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
                 "      addgroup -g #{group_id} #{group_name};",
                 '    fi'
-    when :Ubuntu
+    when :Ubuntu, :Debian
       sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
                 "      addgroup --gid #{group_id} #{group_name};",
                 '    fi'
@@ -226,7 +226,7 @@ class ImageBuilder
         "-u #{user_id(name)}",
         name,
       ')'
-    when :Ubuntu
+    when :Ubuntu, :Debian
       spaced '(',
         'adduser',
         '--disabled-password',
@@ -263,8 +263,12 @@ class ImageBuilder
         puts "# #{image_name} is based on Ubuntu: OK"
         return :Ubuntu
       end
+      if etc_issue.include? 'Debian'
+        puts "# #{image_name} is based on Debian: OK"
+        return :Debian
+      end
       failed [
-        "#{image_name} is not based on Alpine/Ubuntu"
+        "#{image_name} is not based on Alpine/Ubuntu/Debian"
       ]
     }
   end
