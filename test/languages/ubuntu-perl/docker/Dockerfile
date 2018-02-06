@@ -1,4 +1,4 @@
-FROM  cyberdojofoundation/ubuntu-build-essential:17.04
+FROM  cyberdojofoundation/ubuntu-build-essential:18.04
 LABEL maintainer=jon@jaggersoft.com
 
-RUN perl --version | grep 5.24.1
+RUN perl --version | grep 5.26.1
