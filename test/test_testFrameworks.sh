@@ -24,7 +24,7 @@ test_alpine_stateful()
   assertStartPointRedAmberGreenStateful
 }
 
-test_alpine_processful()
+X_test_alpine_processful()
 {
   echo '  java-junit'
   assertBuildImage /test/test-frameworks/alpine-java-junit/processful
@@ -56,7 +56,7 @@ test_ubuntu_stateful()
   assertStartPointRedAmberGreenStateful
 }
 
-test_ubuntu_processful()
+X_test_ubuntu_processful()
 {
   echo '  perl-testsimple'
   assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/processful
