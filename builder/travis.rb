@@ -92,7 +92,7 @@ class Travis
       triples_url,
       'does not contain an entry for:',
       '',
-      "#{quoted('...dir...')}: {",
+      "#{quoted('REPO')}: {",
       "  #{quoted('from')}: #{quoted(from)},",
       "  #{quoted('image_name')}: #{quoted(image_name)},",
       "  #{quoted('test_framework')}: #{quoted(test_framework?)}",
