@@ -1,4 +1,4 @@
-FROM  cyberdojofoundation/java:1.8
+FROM  cyberdojofoundation/java:image_builder_test
 LABEL maintainer=jon@jaggersoft.com
 
 COPY /jars/* /junit/

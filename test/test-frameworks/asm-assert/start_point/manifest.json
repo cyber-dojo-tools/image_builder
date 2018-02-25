@@ -9,7 +9,7 @@
    "makefile",
    "cyber-dojo.sh"
   ],
-  "image_name": "cyberdojofoundation/nasm_assert",
+  "image_name": "cyberdojofoundation/nasm_assert:image_builder_test",
 
   "filename_extension" : ".asm",
 

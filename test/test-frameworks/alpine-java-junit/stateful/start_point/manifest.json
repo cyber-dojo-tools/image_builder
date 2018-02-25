@@ -8,7 +8,7 @@
     "cyber-dojo.sh"
   ],
 
-  "image_name": "cyberdojofoundation/java_junit",
+  "image_name": "cyberdojofoundation/java_junit:image_builder_test",
 
   "filename_extension": ".java",
 

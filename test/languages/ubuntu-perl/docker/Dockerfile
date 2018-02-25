@@ -1,4 +1,2 @@
-FROM  cyberdojofoundation/ubuntu-build-essential:18.04
+FROM  cyberdojofoundation/perl:latest
 LABEL maintainer=jon@jaggersoft.com
-
-RUN perl --version | grep 5.26.1
