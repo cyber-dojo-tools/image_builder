@@ -131,8 +131,10 @@ class ImageBuilder
     #   > echo 'hello' > hello.txt
     #   > stat -c "%y%" hello.txt
     #     2017-11-09 20:11:09.376824357 +0000
+    #
+    # Also install bash so all containers use the same shell.
     if os == :Alpine
-      'RUN apk add --update coreutils'
+      'RUN apk add --update coreutils bash'
     else
       ''
     end
@@ -172,9 +174,13 @@ class ImageBuilder
     end
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def group_name
     'cyber-dojo'
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def group_id
     5000
@@ -214,6 +220,8 @@ class ImageBuilder
               "    (#{add_avatar_users_command})"
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def add_avatar_user_command(os, name)
     case os
     when :Alpine
@@ -222,7 +230,7 @@ class ImageBuilder
         '-D',               # no password
         "-G #{group_name}",
         "-h #{home_dir(name)}",
-        "-s '/bin/sh'",     # shell
+        "-s '/bin/bash'",
         "-u #{user_id(name)}",
         name,
       ')'
@@ -239,9 +247,13 @@ class ImageBuilder
     end
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def home_dir(avatar_name)
     "/home/#{avatar_name}"
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def user_id(avatar_name)
     40000 + all_avatars_names.index(avatar_name)
@@ -285,13 +297,19 @@ class ImageBuilder
     }
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def get_uid(image_name, avatar_name)
     get_id(image_name, avatar_name, 'u')
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def get_gid(image_name, avatar_name)
     get_id(image_name, avatar_name, 'g')
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def get_id(image_name, avatar_name, option)
     id_cmd = [
