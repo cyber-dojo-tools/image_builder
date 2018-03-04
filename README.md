@@ -31,10 +31,10 @@ dockerhub, and triggers all dependent github repos.
 See [example](https://github.com/cyber-dojo-languages/python-pytest).
 
 The tests
-- Verify the start_point can be created using the command [ [cyber-dojo](https://github.com/cyber-dojo/commander/blob/master/cyber-dojo) start-point create name --dir=REPO_DIR ]
-- Verify the start_point files test-run outcome is red
-- Verify the start_point files tweaked to green is green
-- Verify the start_point files tweaked to amber is amber
+- Verify the start_point can be created using the command `cyber-dojo](https://github.com/cyber-dojo/commander/blob/master/cyber-dojo) start-point create name --dir=REPO_DIR`
+- Verify the start_point files untweaked test-run traffic-light is red
+- Verify the start_point files tweaked to green test-run traffic-light is green
+- Verify the start_point files tweaked to amber test-run traffic-light is amber
 
 - - - -
 
