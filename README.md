@@ -31,8 +31,8 @@ dockerhub, and triggers all dependent github repos.
 See [example](https://github.com/cyber-dojo-languages/python-pytest).
 
 The tests
-- Verify the start_point files using the command [ [cyber-dojo](https://github.com/cyber-dojo/commander/blob/master/cyber-dojo) start-point create name --dir=REPO_DIR ]
-- Verify the start_point files run outcome is red
+- Verify the start_point can be created using the command [ [cyber-dojo](https://github.com/cyber-dojo/commander/blob/master/cyber-dojo) start-point create name --dir=REPO_DIR ]
+- Verify the start_point files test-run outcome is red
 - Verify the start_point files tweaked to green is green
 - Verify the start_point files tweaked to amber is amber
 
@@ -44,7 +44,8 @@ The Dockerfiles **cannot** be used to build a (working) docker image with a
 raw `docker build` command. This is because image_builder augments the
 Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner_stateless)
 requirements:
-- it adds Linux users for the 64 avatars (eg lion)
+- it adds Linux users for the 64 avatars (eg lion, parrot, salmon, etc)
+- it adds a Linux group called cyber-dojo
 - on Alpine it removes the squid webroxy user
 - on Alpine it installs bash so every cyber-dojo.sh runs in the same shell
 - on Alpine it installs coreutils so file stamp granularity is in microseconds
