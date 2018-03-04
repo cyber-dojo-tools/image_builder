@@ -19,6 +19,7 @@ class ImageBuilder
     # inserts commands to
     #   o) adds a group called cyber-dojo
     #   o) adds a user for each of the 64 avatars
+    #   o) on Alpine installs coreutils, bash, tar
     # These commands must happen before the commands inside the
     # Dockerfile so the Dockerfile can contain commands related
     # to the users. For example, javascript-cucumber creates a
