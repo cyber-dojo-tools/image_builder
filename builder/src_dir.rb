@@ -11,9 +11,9 @@ class SourceDir
     unless Dir.exist? dir_name
       failed "#{dir_name} does not exist"
     end
-    @dir_name = dir_name
-    @docker_dirs = get_docker_dirs
-    @start_point_dirs = get_start_point_dirs
+    set_dir_name(dir_name)
+    set_docker_dirs
+    set_start_point_dirs
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -82,24 +82,34 @@ class SourceDir
 
   private
 
-  attr_reader :dir_name, :docker_dirs, :start_point_dirs
-
   include AssertSystem
   include Banner
 
-  def get_docker_dirs
-    Dir["#{dir_name}/**/Dockerfile"].map { |path|
+  def set_dir_name(dir_name)
+    @dir_name = dir_name
+  end
+
+  attr_reader :dir_name
+
+  # - - - - - - - - - - - - - - - - -
+
+  def set_docker_dirs
+    @docker_dirs = Dir["#{dir_name}/**/Dockerfile"].map { |path|
       DockerDir.new(File.dirname(path))
     }
   end
 
+  attr_reader :docker_dirs
+
   # - - - - - - - - - - - - - - - - -
 
-  def get_start_point_dirs
-    Dir["#{dir_name}/**/manifest.json"].map { |path|
+  def set_start_point_dirs
+    @start_point_dirs = Dir["#{dir_name}/**/manifest.json"].map { |path|
       StartPointDir.new(File.dirname(path))
     }
   end
+
+  attr_reader :start_point_dirs
 
   # - - - - - - - - - - - - - - - - -
 
