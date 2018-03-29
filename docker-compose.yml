@@ -1,5 +1,5 @@
 
-version: '2'
+version: '2.2'
 
 networks:
   src_dir_network:
@@ -10,6 +10,7 @@ services:
   image_builder_inner:
     image: cyberdojofoundation/image_builder_inner
     container_name: cyber-dojo-image-builder-inner
+    init: true
     tmpfs: /tmp
     mem_limit: 2G
     memswap_limit: 2G

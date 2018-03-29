@@ -10,12 +10,6 @@ RUN apk --update --no-cache add \
     ruby ruby-io-console ruby-dev ruby-irb ruby-bundler ruby-bigdecimal \
     bash tzdata
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# install tini (for pid 1 zombie reaping)
-# https://github.com/krallin/tini
-
-RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ tini
-
 # - - - - - - - - - - - - - - - - - - - - - -
 # install docker-compose
 # - - - - - - - - - - - - - - - - - - - - - -

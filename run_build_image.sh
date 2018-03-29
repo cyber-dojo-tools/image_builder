@@ -124,6 +124,7 @@ run()
     --user=root \
     --network=${NETWORK} \
     --rm \
+    --init \
     --interactive \
     --env DOCKER_USERNAME \
     --env DOCKER_PASSWORD \
