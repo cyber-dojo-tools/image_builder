@@ -142,10 +142,20 @@ class StartPointDir
     from = args['from']
     to = args['to']
     filename = args['filename'] || filename_6_times_9(from)
-    # the .sub() call must be on the start_file and not the
+
+    src = start_files[filename]
+    if src.nil?
+      failed [ "'#{filename}' is not a visible file" ]
+    end
+
+    unless src.include?(from)
+      failed [ "'#{filename}' does not include '#{from}'"]
+    end
+
+    # the .sub() call must be on the start_files and not the
     # current file (in the container) because a previous
     # stateful test-run could have edited the file.
-    return filename, start_files[filename].sub(from, to)
+    return filename, src.sub(from, to)
   end
 
   # - - - - - - - - - - - - - - - - -
