@@ -164,7 +164,7 @@ class ImageBuilder
     # $ file --mime-encoding ${filename}
     case os
     when :Alpine; 'RUN apk add --update file'
-    when :Ubuntu; 'RUN apt-get install --yes file'
+    when :Ubuntu; 'RUN apt-get update && apt-get install --yes file'
     else ''
     end
   end
