@@ -106,16 +106,18 @@ class ImageBuilder
   def add_users_dockerfile(from, os)
     lined "FROM #{from}",
           '',
-          install_coreutils_command(os),
-          update_tar_command(os),
-          add_cyberdojo_group_command(os),
-          remove_alpine_squid_webproxy_user_command(os),
-          add_avatar_users_command(os)
+          RUN_install_coreutils(os),
+          RUN_install_bash(os),
+          RUN_install_tar(os),
+          RUN_install_file(os),
+          RUN_add_cyberdojo_group_command(os),
+          RUN_remove_alpine_squid_webproxy_user_command(os),
+          RUN_add_avatar_users_command(os)
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def install_coreutils_command(os)
+  def RUN_install_coreutils(os)
     # On default Alpine date-time file-stamps are stored
     # to a one second granularity. In other words, the
     # microseconds are always zero. Viz
@@ -132,34 +134,50 @@ class ImageBuilder
     #   > echo 'hello' > hello.txt
     #   > stat -c "%y%" hello.txt
     #     2017-11-09 20:11:09.376824357 +0000
-    #
-    # Also install bash so all containers use the same shell.
-    if os == :Alpine
-      'RUN apk add --update coreutils bash file'
-    else
-      ''
-    end
+    apk_install(os, 'coreutils')
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def update_tar_command(os)
-    # Each runner docker-tar-pipes files into the test
-    # framework container. I need the tar-pipe to use
+  def RUN_install_bash(os)
+    # install bash so all containers use the same shell.
+    apk_install(os, 'bash')
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def RUN_install_tar(os)
+    # Each runner docker-tar-pipes text files into the
+    # test-framework container. I need the tar-pipe to use
     # the --touch option to set the date-time stamps
     # on the files once they have been copied _into_ the
-    # test-framework container. On default Alpine tar
-    # does not support the --touch option hennce the update.
-    if os == :Alpine
-      'RUN apk add --update tar'
-    else
-      ''
+    # test-framework container. The default Alpine tar
+    # does not support the --touch option hence the update.
+    apk_install(os, 'tar')
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def RUN_install_file(os)
+    # Each runner docker-tar-pipes text files out of the
+    # test-framework container. It does this using
+    # $ file --mime-encoding ${filename}
+    case os
+    when :Alpine; 'RUN apk add --update file'
+    when :Ubuntu; 'RUN apt-get install --yes file'
+    else ''
     end
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_cyberdojo_group_command(os)
+  def apk_install(os, package)
+    os == :Alpine ? "RUN apk add --update #{package}" : ''
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def RUN_add_cyberdojo_group_command(os)
     # Must be idempotent because Dockerfile could be
     # based on a docker-image which already has been
     # through image-builder processing
@@ -189,7 +207,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def remove_alpine_squid_webproxy_user_command(os)
+  def RUN_remove_alpine_squid_webproxy_user_command(os)
     # Alpine linux has an (unneeded by me) existing web-proxy
     # user called squid which is one of the avatars!
     # Being very careful about removing this squid user because
@@ -207,7 +225,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_avatar_users_command(os)
+  def RUN_add_avatar_users_command(os)
     # Must be idempotent because Dockerfile could be
     # based on a docker-image which already has been
     # through image-builder processing
