@@ -135,7 +135,7 @@ class ImageBuilder
     #
     # Also install bash so all containers use the same shell.
     if os == :Alpine
-      'RUN apk add --update coreutils bash'
+      'RUN apk add --update coreutils bash file'
     else
       ''
     end
