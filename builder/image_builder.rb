@@ -140,7 +140,7 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def RUN_install_bash(os)
-    # install bash so all containers use the same shell.
+    # On Alpine install bash so all containers use the same shell.
     apk_install(os, 'bash')
   end
 
@@ -163,7 +163,7 @@ class ImageBuilder
     # test-framework container. It does this using
     # $ file --mime-encoding ${filename}
     case os
-    when :Alpine; 'RUN apk add --update file'
+    when :Alpine; apk_install(os, 'file')
     when :Ubuntu; 'RUN apt-get update && apt-get install --yes file'
     else ''
     end
@@ -211,7 +211,7 @@ class ImageBuilder
     # Alpine linux has an (unneeded by me) existing web-proxy
     # user called squid which is one of the avatars!
     # Being very careful about removing this squid user because
-    # we could be running FROM a docker-image which has already
+    # we could be running FROM a docker-image which has _already_
     # been through the image-builder processing, in which case
     # it will already have _our_ squid user.
     grep_passwd = 'cat /etc/passwd | grep -q'
@@ -227,7 +227,7 @@ class ImageBuilder
 
   def RUN_add_avatar_users_command(os)
     # Must be idempotent because Dockerfile could be
-    # based on a docker-image which already has been
+    # based on a docker-image which has _already_ been
     # through image-builder processing
     add_avatar_users_command =
       all_avatars_names.collect { |name|
