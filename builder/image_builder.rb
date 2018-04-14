@@ -56,18 +56,16 @@ class ImageBuilder
     end
   end
 
+  # - - - - - - - - - - - - - - - - -
+
   def intermediate_dockerfile(from, os)
-    # o) adds a group called cyber-dojo
-    # o) adds a user for each of the 64 avatars
-    # o) adds packages/scripts required by the runner service.
-    #
     # These commands must happen before the commands inside the
     # real Dockerfile so the real Dockerfile can contain commands
     # related to the users. For example, javascript-cucumber creates a
     # node_modules dir symlink for all 64 avatar users.
     "FROM #{from}" + "\n" +
-    add_users_dockerfile(os) + "\n" +
-    install_runner_dependencies(os)
+    RUN_add_users(os) + "\n" +
+    RUN_install_runner_dependencies(os)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -110,15 +108,18 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_users_dockerfile(os)
-    lined RUN_add_cyberdojo_group_command(os),
-          RUN_remove_alpine_squid_webproxy_user_command(os),
-          RUN_add_avatar_users_command(os)
+  def RUN_add_users(os)
+    # Adds a group called cyber-dojo.
+    # Adds a user for each of the 64 avatars.
+    lined RUN_add_cyberdojo_group(os),
+          RUN_remove_alpine_squid_webproxy_user(os),
+          RUN_add_avatar_users(os)
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def install_runner_dependencies(os)
+  def RUN_install_runner_dependencies(os)
+    # Adds packages/scripts required by the runner service.
     lined RUN_install_coreutils(os),
           RUN_install_bash(os),
           RUN_install_tar(os),
@@ -188,7 +189,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def RUN_add_cyberdojo_group_command(os)
+  def RUN_add_cyberdojo_group(os)
     # Must be idempotent because Dockerfile could be
     # based on a docker-image which _already_ has been
     # through image-builder processing
@@ -218,7 +219,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def RUN_remove_alpine_squid_webproxy_user_command(os)
+  def RUN_remove_alpine_squid_webproxy_user(os)
     # Alpine linux has an (unneeded by me) existing web-proxy
     # user called squid which is one of the avatars!
     # Being very careful about removing this squid user because
@@ -236,13 +237,13 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def RUN_add_avatar_users_command(os)
+  def RUN_add_avatar_users(os)
     # Must be idempotent because Dockerfile could be
     # based on a docker-image which has _already_ been
     # through image-builder processing
     add_avatar_users_command =
       all_avatars_names.collect { |name|
-        add_avatar_user_command(os, name)
+        add_avatar_user(os, name)
       }.join(' && ')
     # Fail fast if avatar users have already been added
     zebra_uid = user_id('zebra')
@@ -252,7 +253,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_avatar_user_command(os, name)
+  def add_avatar_user(os, name)
     case os
     when :Alpine
       spaced '(',
