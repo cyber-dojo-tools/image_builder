@@ -16,20 +16,13 @@ class ImageBuilder
   def build_image(from, image_name)
     # Attempts to create a docker image named image_name
     # from the Dockerfile in dir_name, except that it
-    # inserts commands to
-    #   o) adds a group called cyber-dojo
-    #   o) adds a user for each of the 64 avatars
-    #   o) on Alpine installs coreutils, bash, tar
-    # These commands must happen before the commands inside the
-    # Dockerfile so the Dockerfile can contain commands related
-    # to the users. For example, javascript-cucumber creates a
-    # node_modules dir symlink for all 64 avatar users.
+    # top-inserts commands to fulfil runner requirements.
     os = checked_image_os(from)
     banner {
       temp_image_name = "imagebuilder_temp_#{uuid}"
-      add_users(from, os, temp_image_name)
+      build_intermediate_image(from, os, temp_image_name)
       begin
-        replace_from(temp_image_name, image_name)
+        build_final_image(temp_image_name, image_name)
         puts "# #{os} based image built OK"
       ensure
         assert_system "docker rmi #{temp_image_name}"
@@ -48,11 +41,11 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_users(from, os, temp_image_name)
+  def build_intermediate_image(from, os, temp_image_name)
     Dir.mktmpdir('image_builder') do |tmp_dir|
       docker_filename = "#{tmp_dir}/Dockerfile"
       File.open(docker_filename, 'w') { |fd|
-        fd.write(add_users_dockerfile(from, os))
+        fd.write(intermediate_dockerfile(from, os))
       }
       assert_system [
         'docker build',
@@ -63,9 +56,23 @@ class ImageBuilder
     end
   end
 
+  def intermediate_dockerfile(from, os)
+    # o) adds a group called cyber-dojo
+    # o) adds a user for each of the 64 avatars
+    # o) adds packages/scripts required by the runner service.
+    #
+    # These commands must happen before the commands inside the
+    # real Dockerfile so the real Dockerfile can contain commands
+    # related to the users. For example, javascript-cucumber creates a
+    # node_modules dir symlink for all 64 avatar users.
+    "FROM #{from}" + "\n" +
+    add_users_dockerfile(os) + "\n" +
+    install_runner_dependencies(os)
+  end
+
   # - - - - - - - - - - - - - - - - -
 
-  def replace_from(temp_image_name, image_name)
+  def build_final_image(temp_image_name, image_name)
     # Need to change FROM in Dockerfile to temp_image_name.
     # An in-place change would alter the original file if
     # SRC_DIR was a read-write volume-mount. I'd much prefer
@@ -103,16 +110,19 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def add_users_dockerfile(from, os)
-    lined "FROM #{from}",
-          '',
-          RUN_install_coreutils(os),
-          RUN_install_bash(os),
-          RUN_install_tar(os),
-          RUN_install_file(os),
-          RUN_add_cyberdojo_group_command(os),
+  def add_users_dockerfile(os)
+    lined RUN_add_cyberdojo_group_command(os),
           RUN_remove_alpine_squid_webproxy_user_command(os),
           RUN_add_avatar_users_command(os)
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def install_runner_dependencies(os)
+    lined RUN_install_coreutils(os),
+          RUN_install_bash(os),
+          RUN_install_tar(os),
+          RUN_install_file(os)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -140,7 +150,8 @@ class ImageBuilder
   # - - - - - - - - - - - - - - - - -
 
   def RUN_install_bash(os)
-    # On Alpine install bash so all containers use the same shell.
+    # On Alpine install bash so runners can reply on
+    # all containers having bash.
     apk_install(os, 'bash')
   end
 
@@ -148,7 +159,7 @@ class ImageBuilder
 
   def RUN_install_tar(os)
     # Each runner docker-tar-pipes text files into the
-    # test-framework container. I need the tar-pipe to use
+    # test-framework container. The runner's tar-pipe uses
     # the --touch option to set the date-time stamps
     # on the files once they have been copied _into_ the
     # test-framework container. The default Alpine tar
@@ -179,7 +190,7 @@ class ImageBuilder
 
   def RUN_add_cyberdojo_group_command(os)
     # Must be idempotent because Dockerfile could be
-    # based on a docker-image which already has been
+    # based on a docker-image which _already_ has been
     # through image-builder processing
     case os
     when :Alpine
