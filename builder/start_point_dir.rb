@@ -55,9 +55,9 @@ class StartPointDir
     when 'stateless'
       @runner = RunnerService.new('runner-stateless', '4597')
     when 'stateful'
-      @runner = RunnerService.new('runner_stateful', '4557')
+      @runner = RunnerService.new('runner-stateful', '4557')
     #when 'processful'
-      #@runner = RunnerService.new('runner_processful', '4547')
+      #@runner = RunnerService.new('runner-processful', '4547')
     end
     check_red_amber_green
   end

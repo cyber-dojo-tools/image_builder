@@ -49,6 +49,7 @@ requirements:
 - on Alpine it removes the squid webroxy user
 - on Alpine it installs bash so every cyber-dojo.sh runs in the same shell
 - on Alpine it installs coreutils so file stamp granularity is in microseconds
+- on Alpine it instll file to allow (file --mime-encoding ${filename})
 - on Alpine it updates tar to support the --touch option
 
 - - - -

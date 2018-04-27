@@ -132,7 +132,7 @@ end
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 docker_compose 'up -d runner-stateless'
-docker_compose 'up -d runner_stateful'
+docker_compose 'up -d runner-stateful'
 #docker_compose 'up -d runner_processful'
 
 service_names = %w(

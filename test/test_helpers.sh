@@ -63,14 +63,14 @@ assertStartPointRedAmberGreenStateless()
 assertStartPointRedAmberGreenStateful()
 {
   assertStdoutIncludes "# ${startPointRedAmberGreenMessage}"
-  assertStdoutIncludes "# using runner_stateful"
+  assertStdoutIncludes "# using runner-stateful"
   assertRedAmberGreen
 }
 
 assertStartPointRedAmberGreenProcessful()
 {
   assertStdoutIncludes "# ${startPointRedAmberGreenMessage}"
-  assertStdoutIncludes "# using runner_processful"
+  assertStdoutIncludes "# using runner-processful"
   assertRedAmberGreen
 }
 
