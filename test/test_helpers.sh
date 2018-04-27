@@ -56,7 +56,7 @@ readonly startPointRedAmberGreenMessage='check_red_amber_green'
 assertStartPointRedAmberGreenStateless()
 {
   assertStdoutIncludes "# ${startPointRedAmberGreenMessage}"
-  assertStdoutIncludes "# using runner_stateless"
+  assertStdoutIncludes "# using runner-stateless"
   assertRedAmberGreen
 }
 

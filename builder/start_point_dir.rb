@@ -53,7 +53,7 @@ class StartPointDir
   def test_6_times_9_red_amber_green
     case runner_choice
     when 'stateless'
-      @runner = RunnerService.new('runner_stateless', '4597')
+      @runner = RunnerService.new('runner-stateless', '4597')
     when 'stateful'
       @runner = RunnerService.new('runner_stateful', '4557')
     #when 'processful'

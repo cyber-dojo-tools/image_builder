@@ -42,7 +42,7 @@ The tests
 You must use image_builder to create images from the Dockerfiles.
 The Dockerfiles **cannot** be used to build a (working) docker image with a
 raw `docker build` command. This is because image_builder augments the
-Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner_stateless)
+Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner-stateless)
 requirements:
 - it adds Linux users for the 64 avatars (eg lion, parrot, salmon, etc)
 - it adds a Linux group called cyber-dojo

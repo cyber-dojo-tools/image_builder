@@ -131,7 +131,7 @@ end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-docker_compose 'up -d runner_stateless'
+docker_compose 'up -d runner-stateless'
 docker_compose 'up -d runner_stateful'
 #docker_compose 'up -d runner_processful'
 
