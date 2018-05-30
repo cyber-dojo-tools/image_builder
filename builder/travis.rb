@@ -95,7 +95,7 @@ class Travis
       "#{quoted('REPO')}: {",
       "  #{quoted('from')}: #{quoted(from)},",
       "  #{quoted('image_name')}: #{quoted(image_name)},",
-      "  #{quoted('test_framework')}: #{quoted(test_framework?)}",
+      "  #{quoted('test_framework')}: #{test_framework?}",
       '},',
       ''
     ]
