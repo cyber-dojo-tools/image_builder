@@ -70,7 +70,7 @@ class ImageBuilder
   def create_tar_list_script
     # runner's rely on this script being inside the
     # test-framework image at /usr/local/bin/create_tar_list.sh
-    # which they call to tar-piping files out of the container
+    # which they call to tar-pipe files out of the container
     <<~SHELL.strip
       # o) ensure there is no tar-list file at the start
       # o) for all files in avatars sandbox dir (recursively)
@@ -80,6 +80,10 @@ class ImageBuilder
       find ${CYBER_DOJO_SANDBOX} -type f -exec sh -c '
         for filename do
           if file --mime-encoding ${filename} | grep -qv "${filename}:\\sbinary"; then
+            echo ${filename} >> ${TAR_LIST}
+          fi
+          if [ ! -s ${filename} ]; then
+            # handle empty files which file reports are binary
             echo ${filename} >> ${TAR_LIST}
           fi
         done' sh {} +
