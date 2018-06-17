@@ -151,8 +151,8 @@ class ImageBuilder
     # Adds a sandbox dir for all 64 avatars.
     lined RUN_add_cyberdojo_group(os),
           RUN_remove_alpine_squid_webproxy_user(os),
-          RUN_add_avatar_users(os),
-          RUN_add_sandbox_dirs(os)
+          RUN_add_avatar_users(os)
+          #RUN_add_sandbox_dirs(os)
   end
 
   # - - - - - - - - - - - - - - - - -
