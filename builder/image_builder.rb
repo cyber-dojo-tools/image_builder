@@ -162,7 +162,8 @@ class ImageBuilder
     lined RUN_install_coreutils(os),
           RUN_install_bash(os),
           RUN_install_tar(os),
-          RUN_install_file(os)
+          RUN_install_file(os),
+          RUN_install_sudo(os)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -217,6 +218,16 @@ class ImageBuilder
     when :Alpine; apk_install(os, 'file')
     when :Ubuntu; 'RUN apt-get update && apt-get install --yes file'
     else ''
+    end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def RUN_install_sudo(os)
+    case  os
+    when :Alpine; apk_install(os, 'sudo')
+    when :Debian; 'RUN apt-get update && apt-get install --yes sudo'
+    when :Ubuntu; 'RUN apt-get update && apt-get install --yes sudo'
     end
   end
 
