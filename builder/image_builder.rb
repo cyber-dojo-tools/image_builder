@@ -147,16 +147,18 @@ class ImageBuilder
 
   def RUN_add_users(os)
     # Adds a group called cyber-dojo.
-    # Adds a user for each of the 64 avatars.
+    # Adds a user for all 64 avatars.
+    # Adds a sandbox dir for all 64 avatars.
     lined RUN_add_cyberdojo_group(os),
           RUN_remove_alpine_squid_webproxy_user(os),
-          RUN_add_avatar_users(os)
+          RUN_add_avatar_users(os),
+          RUN_add_sandbox_dirs(os)
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def RUN_install_runner_dependencies(os)
-    # Adds packages/scripts required by the runner service.
+    # Adds packages/dirs required by the runner service.
     lined RUN_install_coreutils(os),
           RUN_install_bash(os),
           RUN_install_tar(os),
@@ -317,6 +319,38 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
+  def RUN_add_sandbox_dirs(os)
+    # Note: This method does not require the (os) parameter
+    # but if I remove it I get
+    # uninitialized constant ImageBuilder::RUN_add_sandbox_dirs (NameError)
+    # when trying to run ./pipe_build_up_test.sh
+    # for a language-test-framework (eg gcc-assert)
+    #
+    # Must be idempotent because Dockerfile could be
+    # based on a docker-image which has _already_ been
+    # through image-builder processing
+    add_all_sandbox_dirs_command =
+      all_avatars_names.collect { |avatar_name|
+        add_one_sandbox_dir_command(avatar_name)
+      }.join(' && ')
+    # Fail fast if sandbox dirs have already been created
+    sh_splice "RUN [ -d  #{sandbox_dir('zebra')} ] ||",
+              "    (#{add_all_sandbox_dirs_command})"
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def add_one_sandbox_dir_command(avatar_name)
+    dir = sandbox_dir(avatar_name)
+    '(' +
+    [ "mkdir -p #{dir}",
+      "chown #{avatar_name}:#{group_name} #{dir}"
+    ].join(' && ') +
+    ')'
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
   def home_dir(avatar_name)
     "/home/#{avatar_name}"
   end
@@ -328,6 +362,12 @@ class ImageBuilder
   end
 
   include AllAvatarsNames
+
+  # - - - - - - - - - - - - - - - - -
+
+  def sandbox_dir(avatar_name)
+    "/sandboxes/#{avatar_name}"
+  end
 
   # - - - - - - - - - - - - - - - - -
 
