@@ -215,9 +215,10 @@ class ImageBuilder
     # test-framework container. It does this using
     # $ file --mime-encoding ${filename}
     case os
-    when :Alpine; apk_install(os, 'file')
-    when :Ubuntu; 'RUN apt-get update && apt-get install --yes file'
-    else ''
+    when :Alpine
+      apk_install(os, 'file')
+    when :Debian,:Ubuntu
+      apt_get_install(os, 'file')
     end
   end
 
@@ -225,16 +226,25 @@ class ImageBuilder
 
   def RUN_install_sudo(os)
     case  os
-    when :Alpine; apk_install(os, 'sudo')
-    when :Debian; 'RUN apt-get update && apt-get install --yes sudo'
-    when :Ubuntu; 'RUN apt-get update && apt-get install --yes sudo'
+    when :Alpine
+      apk_install(os, 'sudo')
+    when :Debian,:Ubuntu
+      apt_get_install(os, 'sudo')
     end
   end
 
   # - - - - - - - - - - - - - - - - -
 
   def apk_install(os, package)
-    os == :Alpine ? "RUN apk add --update #{package}" : ''
+    command = "RUN apk add --update #{package}"
+    os == :Alpine ? command : ''
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def apt_get_install(os, package)
+    command = "RUN apt-get update && apt-get install --yes #{package}"
+    os != :Alpine ? command : ''
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -248,7 +258,7 @@ class ImageBuilder
       sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
                 "      addgroup -g #{group_id} #{group_name};",
                 '    fi'
-    when :Ubuntu, :Debian
+    when :Debian,:Ubuntu
       sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
                 "      addgroup --gid #{group_id} #{group_name};",
                 '    fi'
