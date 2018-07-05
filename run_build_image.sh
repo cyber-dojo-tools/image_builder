@@ -65,8 +65,10 @@ show_location()
 {
   if [ ! -z "${TRAVIS}" ]; then
     echo 'Running on TRAVIS'
+    export RETRY=travis_retry
   else
     echo 'Running locally'
+    export RETRY=
   fi
 }
 
@@ -150,4 +152,4 @@ trap exit_handler INT EXIT
 show_location
 volume_create
 network_create
-run $*
+${RETRY} run $*
