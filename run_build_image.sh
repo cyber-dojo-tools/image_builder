@@ -126,6 +126,8 @@ run()
     --rm \
     --init \
     --interactive \
+    --env RUNNER_STATEFUL_SERVICE_PORT=4557 \
+    --env RUNNER_STATELESS_SERVICE_PORT=4597 \
     --env DOCKER_USERNAME \
     --env DOCKER_PASSWORD \
     --env GITHUB_TOKEN \

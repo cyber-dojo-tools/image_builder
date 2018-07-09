@@ -149,6 +149,8 @@ begin
     'docker-compose',
       "--file #{my_dir}/docker-compose.yml",
       'run',
+        env_var('RUNNER_STATEFUL_SERVICE_PORT'),
+        env_var('RUNNER_STATELESS_SERVICE_PORT'),
         env_var('DOCKER_USERNAME'),
         env_var('DOCKER_PASSWORD'),
         env_var('GITHUB_TOKEN'),

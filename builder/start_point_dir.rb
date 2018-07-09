@@ -53,11 +53,13 @@ class StartPointDir
   def test_6_times_9_red_amber_green
     case runner_choice
     when 'stateless'
-      @runner = RunnerService.new('runner-stateless', '4597')
+      hostname = ENV['RUNNER_STATELESS_SERVICE_NAME']
+      port = ENV['RUNNER_STATELESS_SERVICE_PORT'].to_i
+      @runner = RunnerService.new(hostname, port)
     when 'stateful'
-      @runner = RunnerService.new('runner-stateful', '4557')
-    #when 'processful'
-      #@runner = RunnerService.new('runner-processful', '4547')
+      hostname = ENV['RUNNER_STATEFUL_SERVICE_NAME']
+      port = ENV['RUNNER_STATEFUL_SERVICE_PORT'].to_i
+      @runner = RunnerService.new(hostname, port)
     end
     check_red_amber_green
   end
