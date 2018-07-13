@@ -82,8 +82,12 @@ class ImageBuilder
           if file --mime-encoding ${filename} | grep -qv "${filename}:\\sbinary"; then
             echo ${filename} >> ${TAR_LIST}
           fi
-          if [ ! -s ${filename} ]; then
+          if [ $(stat -c%s "${filename}") -eq 0 ]; then
             # handle empty files which file reports are binary
+            echo ${filename} >> ${TAR_LIST}
+          fi
+          if [ $(stat -c%s "${filename}") -eq 1 ]; then
+            # handle file with one char which file reports are binary!
             echo ${filename} >> ${TAR_LIST}
           fi
         done' sh {} +
