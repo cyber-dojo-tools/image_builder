@@ -7,7 +7,7 @@ set -e
 readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 
 docker build \
-  --build-arg DOCKER_COMPOSE_VERSION=1.16.1 \
+  --build-arg DOCKER_COMPOSE_VERSION=1.22.0 \
   --tag cyberdojofoundation/image_builder \
     ${ROOT_DIR}
 
