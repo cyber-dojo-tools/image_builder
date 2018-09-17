@@ -155,7 +155,9 @@ class ImageBuilder
     # Adds a sandbox dir for all 64 avatars.
     lined RUN_add_cyberdojo_group(os),
           RUN_remove_alpine_squid_webproxy_user(os),
-          RUN_add_avatar_users(os)
+          RUN_add_avatar_users(os),
+          RUN_add_sandbox_group(os),
+          RUN_add_sandbox_user(os)
           #RUN_add_sandbox_dirs(os)
   end
 
@@ -340,6 +342,56 @@ class ImageBuilder
         name,
       ')'
     end
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def RUN_add_sandbox_user(os)
+    # Must be idempotent because Dockerfile could be
+    # based on a docker-image which _already_ has been
+    # through image-builder processing
+    home_dir = '/home/sandbox'
+    name = 'sandbox'
+    shell = '/bin/bash'
+    uid = '41966'
+    options = case os
+    when :Alpine then [
+        '-D',                # --disabled-password
+        '-g ""',             # --gecos
+        "-h #{home_dir}",    # --home
+        "-G #{name}",        # --ingroup
+        "-s #{shell}",       # --shell
+        "-u #{uid}"          # --uid
+      ].join(' ')
+    when :Ubuntu, :Debian then [
+        '--disabled-password',
+        '--gecos ""',
+        "--home #{home_dir}",
+        "--ingroup #{name}",
+        "--shell #{shell}",
+        "--uid #{uid}"
+      ].join(' ')
+    end
+    user_exists = "grep -q #{name}:x:#{uid} /etc/passwd"
+    add_user = "adduser #{options} #{name}"
+    "RUN (#{user_exists}) || (#{add_user})"
+  end
+
+  # - - - - - - - - - - - - - - - - -
+
+  def RUN_add_sandbox_group(os)
+    # Must be idempotent because Dockerfile could be
+    # based on a docker-image which _already_ has been
+    # through image-builder processing
+    name = 'sandbox'
+    gid = '51966'
+    option = case os
+    when :Alpine         then '-g'
+    when :Debian,:Ubuntu then '--gid'
+    end
+    group_exists = "getent group #{name}"
+    add_group = "addgroup #{option} #{gid} #{name}"
+    "RUN (#{group_exists}) || (#{add_group})"
   end
 
   # - - - - - - - - - - - - - - - - -

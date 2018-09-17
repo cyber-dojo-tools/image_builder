@@ -3,8 +3,8 @@ set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Runs image-builder on source living in SRC_DIR to
-#   o) build zero or more docker-images
-#   o) test zero or more start-point directories.
+#   o) build a docker-image
+#   o) possibly test a start_point/ source files.
 #
 # This script is curl'd and run in the .travis.yml script
 # of each cyber-dojo-language (github org) repo.
