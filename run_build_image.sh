@@ -124,6 +124,7 @@ run()
     --user=root \
     --network=${NETWORK} \
     --rm \
+    --tty \
     --init \
     --interactive \
     --env RUNNER_STATEFUL_SERVICE_PORT=4557 \
