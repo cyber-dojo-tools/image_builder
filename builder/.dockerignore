@@ -2,8 +2,6 @@
 
 *
 
-#-----!Except these dirs
-
 #-----!Except these files
 
 !inner_main.rb

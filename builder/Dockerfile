@@ -13,7 +13,7 @@ RUN apk update \
 # installed as part of the travis gem
 RUN apk --update add --virtual build-dependencies build-base \
   && bundle config --global silence_root_warning 1 \
-  && gem install travis -v 1.8.8 --no-rdoc --no-ri \
+  && gem install travis --no-rdoc --no-ri \
   && apk del build-dependencies \
   && rm -vrf /var/cache/apk/*
 

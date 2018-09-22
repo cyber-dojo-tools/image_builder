@@ -25,13 +25,12 @@ RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/s
  && apk add glibc.apk glibc-bin.apk \
  && rm -rf /var/cache/apk/* \
  && rm glibc.apk glibc-bin.apk
-#RUN apk del .deps
 
 # - - - - - - - - - - - - - - - - - - - - - -
 # install docker-compose
 # - - - - - - - - - - - - - - - - - - - - - -
 
-ARG DOCKER_COMPOSE_VERSION
+ARG DOCKER_COMPOSE_VERSION=1.22.0
 ARG DOCKER_COMPOSE_BINARY=/usr/bin/docker-compose
 RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > ${DOCKER_COMPOSE_BINARY}
 RUN chmod +x ${DOCKER_COMPOSE_BINARY}
