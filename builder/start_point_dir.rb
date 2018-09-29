@@ -69,12 +69,10 @@ class StartPointDir
   def check_red_amber_green
     banner {
       in_kata {
-        as_avatar {
-          puts "# using #{@runner.hostname}, max_seconds=#{max_seconds}"
-          assert_timed_run(:red)
-          assert_timed_run(:amber)
-          assert_timed_run(:green)
-        }
+        puts "# using #{@runner.hostname}, max_seconds=#{max_seconds}"
+        assert_timed_run(:red)
+        assert_timed_run(:amber)
+        assert_timed_run(:green)
       }
     }
   end
@@ -84,7 +82,6 @@ class StartPointDir
   def assert_timed_run(colour)
     args = [image_name]
     args << kata_id
-    args << avatar_name
     args << (new_files = {})
     args << (deleted_files = {})
     args << unchanged_files(colour)
@@ -98,22 +95,11 @@ class StartPointDir
   # - - - - - - - - - - - - - - - - -
 
   def in_kata
-    @runner.kata_new(image_name, kata_id)
+    @runner.kata_new(image_name, kata_id, start_files)
     begin
       yield
     ensure
       @runner.kata_old(image_name, kata_id)
-    end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def as_avatar
-    @runner.avatar_new(image_name, kata_id, avatar_name, start_files)
-    begin
-      yield
-    ensure
-      @runner.avatar_old(image_name, kata_id, avatar_name)
     end
   end
 
@@ -260,10 +246,6 @@ class StartPointDir
 
   def kata_id
     '6F4F4E4759'
-  end
-
-  def avatar_name
-    'squid'
   end
 
 end

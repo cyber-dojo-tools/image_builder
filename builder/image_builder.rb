@@ -1,4 +1,3 @@
-require_relative 'all_avatars_names'
 require_relative 'assert_system'
 require_relative 'banner'
 require_relative 'failed'
@@ -28,7 +27,7 @@ class ImageBuilder
         assert_system "docker rmi #{temp_image_name}"
       end
     }
-    show_avatar_users_sample(image_name)
+    show_sandbox_user(image_name)
   end
 
   private
@@ -103,7 +102,8 @@ class ImageBuilder
     # related to the users. For example, javascript-cucumber creates a
     # node_modules dir symlink for all 64 avatar users.
     "FROM #{from}" + "\n" +
-    RUN_add_users(os) + "\n" +
+    RUN_add_sandbox_group(os) + "\n" +
+    RUN_add_sandbox_user(os) + "\n" +
     RUN_install_runner_dependencies(os) + "\n" +
     "COPY #{filename} /usr/local/bin" + "\n" +
     "RUN chmod +x /usr/local/bin/#{filename}"
@@ -145,20 +145,6 @@ class ImageBuilder
         dir_name
       ].join(space)
     end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def RUN_add_users(os)
-    # Adds a group called cyber-dojo.
-    # Adds a user for all 64 avatars.
-    # Adds a sandbox dir for all 64 avatars.
-    lined RUN_add_cyberdojo_group(os),
-          RUN_remove_alpine_squid_webproxy_user(os),
-          RUN_add_avatar_users(os),
-          RUN_add_sandbox_group(os),
-          RUN_add_sandbox_user(os)
-          #RUN_add_sandbox_dirs(os)
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -255,93 +241,19 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def RUN_add_cyberdojo_group(os)
+  def RUN_add_sandbox_group(os)
     # Must be idempotent because Dockerfile could be
     # based on a docker-image which _already_ has been
     # through image-builder processing
-    case os
-    when :Alpine
-      sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
-                "      addgroup -g #{group_id} #{group_name};",
-                '    fi'
-    when :Debian,:Ubuntu
-      sh_splice "RUN if [ ! $(getent group #{group_name}) ]; then",
-                "      addgroup --gid #{group_id} #{group_name};",
-                '    fi'
+    name = 'sandbox'
+    gid = '51966'
+    option = case os
+    when :Alpine         then '-g'
+    when :Debian,:Ubuntu then '--gid'
     end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def group_name
-    'cyber-dojo'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def group_id
-    5000
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def RUN_remove_alpine_squid_webproxy_user(os)
-    # Alpine linux has an (unneeded by me) existing web-proxy
-    # user called squid which is one of the avatars!
-    # Being very careful about removing this squid user because
-    # we could be running FROM a docker-image which has _already_
-    # been through the image-builder processing, in which case
-    # it will already have _our_ squid user.
-    grep_passwd = 'cat /etc/passwd | grep -q'
-    squid_id = user_id('squid')
-    squid_exists = "(#{grep_passwd} squid:x:)"
-    not_our_squid = "!(#{grep_passwd} squid:x:#{squid_id}:#{group_id})"
-    os == :Alpine ?
-      "RUN (#{squid_exists} && #{not_our_squid} && (deluser squid)) || true" :
-      ''
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def RUN_add_avatar_users(os)
-    # Must be idempotent because Dockerfile could be
-    # based on a docker-image which has _already_ been
-    # through image-builder processing
-    add_avatar_users_command =
-      all_avatars_names.collect { |name|
-        add_avatar_user(os, name)
-      }.join(' && ')
-    # Fail fast if avatar users have already been added
-    zebra_uid = user_id('zebra')
-    sh_splice "RUN (cat /etc/passwd | grep -q zebra:x:#{zebra_uid}) ||",
-              "    (#{add_avatar_users_command})"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def add_avatar_user(os, name)
-    case os
-    when :Alpine
-      spaced '(',
-        'adduser',
-        '-D',               # no password
-        "-G #{group_name}",
-        "-h #{home_dir(name)}",
-        "-s '/bin/bash'",
-        "-u #{user_id(name)}",
-        name,
-      ')'
-    when :Ubuntu, :Debian
-      spaced '(',
-        'adduser',
-        '--disabled-password',
-        '--gecos ""', # don't ask for details
-        "--ingroup #{group_name}",
-        "--home #{home_dir(name)}",
-        "--uid #{user_id(name)}",
-        name,
-      ')'
-    end
+    group_exists = "getent group #{name}"
+    add_group = "addgroup #{option} #{gid} #{name}"
+    "RUN (#{group_exists}) || (#{add_group})"
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -379,75 +291,6 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def RUN_add_sandbox_group(os)
-    # Must be idempotent because Dockerfile could be
-    # based on a docker-image which _already_ has been
-    # through image-builder processing
-    name = 'sandbox'
-    gid = '51966'
-    option = case os
-    when :Alpine         then '-g'
-    when :Debian,:Ubuntu then '--gid'
-    end
-    group_exists = "getent group #{name}"
-    add_group = "addgroup #{option} #{gid} #{name}"
-    "RUN (#{group_exists}) || (#{add_group})"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def RUN_add_sandbox_dirs(os)
-    # Note: This method does not require the (os) parameter
-    # but if I remove it I get
-    # uninitialized constant ImageBuilder::RUN_add_sandbox_dirs (NameError)
-    # when trying to run ./pipe_build_up_test.sh
-    # for a language-test-framework (eg gcc-assert)
-    #
-    # Must be idempotent because Dockerfile could be
-    # based on a docker-image which has _already_ been
-    # through image-builder processing
-    add_all_sandbox_dirs_command =
-      all_avatars_names.collect { |avatar_name|
-        add_one_sandbox_dir_command(avatar_name)
-      }.join(' && ')
-    # Fail fast if sandbox dirs have already been created
-    sh_splice "RUN [ -d  #{sandbox_dir('zebra')} ] ||",
-              "    (#{add_all_sandbox_dirs_command})"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def add_one_sandbox_dir_command(avatar_name)
-    dir = sandbox_dir(avatar_name)
-    '(' +
-    [ "mkdir -p #{dir}",
-      "chown #{avatar_name}:#{group_name} #{dir}"
-    ].join(' && ') +
-    ')'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def home_dir(avatar_name)
-    "/home/#{avatar_name}"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def user_id(avatar_name)
-    40000 + all_avatars_names.index(avatar_name)
-  end
-
-  include AllAvatarsNames
-
-  # - - - - - - - - - - - - - - - - -
-
-  def sandbox_dir(avatar_name)
-    "/sandboxes/#{avatar_name}"
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def checked_image_os(image_name)
     banner {
       cmd = "docker run --rm -i #{image_name} sh -c 'cat /etc/issue'"
@@ -472,13 +315,11 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def show_avatar_users_sample(image_name)
+  def show_sandbox_user(image_name)
     banner {
-      %w( alligator squid zebra ).each do |avatar|
-        uid = get_uid(image_name, avatar)
-        gid = get_gid(image_name, avatar)
-        puts "# #{uid}:#{gid} == uid:gid(#{avatar})"
-      end
+      uid = get_uid(image_name, 'sandbox')
+      gid = get_gid(image_name, 'sandbox')
+      puts "# #{uid}:#{gid} == uid:gid(sandbox)"
     }
   end
 
