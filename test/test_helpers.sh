@@ -27,12 +27,10 @@ assertUbuntuImageBuilt()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-assertAvatarUsersPresent()
+assertSandboxUserPresent()
 {
-  assertStdoutIncludes '# show_avatar_users_sample'
-  assertStdoutIncludes '# 40000:5000 == uid:gid(alligator)'
-  assertStdoutIncludes '# 40051:5000 == uid:gid(squid)'
-  assertStdoutIncludes '# 40063:5000 == uid:gid(zebra)'
+  assertStdoutIncludes '# show_sandbox_user'
+  assertStdoutIncludes '# 41966:51966 == uid:gid(sandbox)'
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
