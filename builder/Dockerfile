@@ -1,4 +1,4 @@
-FROM  docker:latest
+FROM  cyberdojo/docker-base
 LABEL maintainer=jon@jaggersoft.com
 
 # image_builder is written in ruby
@@ -7,7 +7,9 @@ LABEL maintainer=jon@jaggersoft.com
 RUN apk update \
  && apk upgrade \
  && apk add \
-      ruby-dev ruby libffi-dev ruby-bundler curl bash
+      ruby \
+      libffi-dev \
+      curl
 
 # travis.rb uses the travis CLI which is
 # installed as part of the travis gem

@@ -1,4 +1,4 @@
-FROM  docker:latest
+FROM  cyberdojo/docker-base
 LABEL maintainer=jon@jaggersoft.com
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7,8 +7,8 @@ LABEL maintainer=jon@jaggersoft.com
 
 RUN apk --update --no-cache add \
     openssl ca-certificates \
-    ruby ruby-io-console ruby-dev ruby-irb ruby-bundler ruby-bigdecimal \
-    bash tzdata
+    ruby ruby-io-console ruby-irb ruby-bigdecimal \
+    tzdata
 
 # - - - - - - - - - - - - - - - - - - - - - -
 # install glibc on Alpine
