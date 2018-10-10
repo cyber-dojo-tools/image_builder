@@ -81,7 +81,7 @@ class StartPointDir
 
   def assert_timed_run(colour)
     args = [image_name]
-    args << kata_id
+    args << id
     args << (new_files = {})
     args << (deleted_files = {})
     args << unchanged_files(colour)
@@ -95,11 +95,11 @@ class StartPointDir
   # - - - - - - - - - - - - - - - - -
 
   def in_kata
-    @runner.kata_new(image_name, kata_id, start_files)
+    @runner.kata_new(image_name, id, start_files)
     begin
       yield
     ensure
-      @runner.kata_old(image_name, kata_id)
+      @runner.kata_old(image_name, id)
     end
   end
 
@@ -244,8 +244,8 @@ class StartPointDir
 
   # - - - - - - - - - - - - - - - - -
 
-  def kata_id
-    '6F4F4E4759'
+  def id
+    '6F4F4E'
   end
 
 end
