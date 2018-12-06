@@ -18,20 +18,15 @@ class StartPointDir
   # - - - - - - - - - - - - - - - - -
 
   def test_run
-    # TODO: check the image_name has the
-    # 64 avatars users inside it.
-    # TODO: check the image_name has the
-    # #{rag_filename} inside it.
-    hhg = options? || filename_6_times_9?
-    # TODO: If being run on a cyber-dojo-langauges
-    # repo then check it _HAS_ got 6*9 content
-    # Is it best to do this in Travis run?
-    # Ensure start-point stuff goes into its own org.
-    if hhg
-      test_6_times_9_red_amber_green
-    else
-      test_any_colour
+    if !filename_6_times_9? && !options?
+      failed [ '!filename_6_times_9? && !options?' ]
     end
+    banner {
+      puts "# max_seconds=#{max_seconds}"
+      assert_timed_run(:red)
+      assert_timed_run(:amber)
+      assert_timed_run(:green)
+    }
   end
 
   private
@@ -42,85 +37,23 @@ class StartPointDir
   include Failed
   include JsonParse
 
-  def test_any_colour
-    banner {
-      puts 'TODO'
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def test_6_times_9_red_amber_green
-    case runner_choice
-    when 'stateless'
-      hostname = ENV['RUNNER_STATELESS_SERVICE_NAME']
-      port = ENV['RUNNER_STATELESS_SERVICE_PORT'].to_i
-      @runner = RunnerService.new(hostname, port)
-    when 'stateful'
-      hostname = ENV['RUNNER_STATEFUL_SERVICE_NAME']
-      port = ENV['RUNNER_STATEFUL_SERVICE_PORT'].to_i
-      @runner = RunnerService.new(hostname, port)
-    end
-    check_red_amber_green
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def check_red_amber_green
-    banner {
-      in_kata {
-        puts "# using #{@runner.hostname}, max_seconds=#{max_seconds}"
-        assert_timed_run(:red)
-        assert_timed_run(:amber)
-        assert_timed_run(:green)
-      }
-    }
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def assert_timed_run(colour)
-    args = [image_name]
-    args << id
-    args << (new_files = {})
-    args << (deleted_files = {})
-    args << unchanged_files(colour)
-    args << changed_files(colour)
-    args << max_seconds
-    took,sss = timed { @runner.run_cyber_dojo_sh(*args) }
+    runner = RunnerService.new
+    args = [image_name, id, files(colour), max_seconds]
+    took,sss = timed { runner.run_cyber_dojo_sh(*args) }
     assert_rag(colour, sss)
     puts "# #{colour}: OK (~#{took} seconds)"
   end
 
   # - - - - - - - - - - - - - - - - -
 
-  def in_kata
-    @runner.kata_new(image_name, id, start_files)
-    begin
-      yield
-    ensure
-      @runner.kata_old(image_name, id)
-    end
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def unchanged_files(colour)
-    files = start_files
-    if colour != :red
-      filename,_ = edited_file(colour)
-      files.delete(filename)
-    end
-    files
-  end
-
-  def changed_files(colour)
-    if colour == :red
-      {}
-    else
-      filename,content = edited_file(colour)
-      { filename => content }
-    end
+  def files(colour)
+    all = start_files
+    filename,content = edited_file(colour)
+    all[filename] = content
+    all.map{ |filename,content|
+      [filename, { 'content' => content }]
+    }.to_h
   end
 
   # - - - - - - - - - - - - - - - - -
@@ -140,9 +73,6 @@ class StartPointDir
       failed [ "'#{filename}' does not include '#{from}'"]
     end
 
-    # the .sub() call must be on the start_files and not the
-    # current file (in the container) because a previous
-    # stateful test-run could have edited the file.
     return filename, src.sub(from, to)
   end
 
@@ -154,6 +84,7 @@ class StartPointDir
 
   def options
     options? ? json_parse(options_filename) : {
+      'red'   => from_to('6 * 9', '6 * 99'),
       'amber' => from_to('6 * 9', '6 * 9sdsd'),
       'green' => from_to('6 * 9', '6 * 7')
     }
@@ -166,6 +97,8 @@ class StartPointDir
   def from_to(from, to)
     { 'from' => from, 'to' => to }
   end
+
+  # - - - - - - - - - - - - - - - - -
 
   def filename_6_times_9?
     filenames = start_files.select { |_,content| content.include? '6 * 9' }
@@ -218,10 +151,6 @@ class StartPointDir
       files[filename] = IO.read(dir_name + '/' + filename)
     end
     files
-  end
-
-  def runner_choice
-    manifest['runner_choice']
   end
 
   def max_seconds

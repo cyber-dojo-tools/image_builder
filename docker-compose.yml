@@ -15,14 +15,8 @@ services:
     mem_limit: 2G
     memswap_limit: 2G
     restart: "no"
-    environment:
-      - RUNNER_STATEFUL_SERVICE_NAME=runner-stateful
-      - RUNNER_STATEFUL_SERVICE_PORT
-      - RUNNER_STATELESS_SERVICE_NAME=runner-stateless
-      - RUNNER_STATELESS_SERVICE_PORT
     depends_on:
-      - runner-stateless
-      - runner-stateful
+      - runner
     networks:
       - default
       - src_dir_network
@@ -31,32 +25,15 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  runner-stateless:
+  runner:
     user: root
     image: cyberdojo/runner-stateless
-    container_name: cyber-dojo-runner-stateless
-    expose: [ "${RUNNER_STATELESS_SERVICE_PORT}" ]
+    container_name: cyber-dojo-runner
+    expose: [ "4597" ]
     read_only: true
     tmpfs: /tmp
     mem_limit: 2G
     memswap_limit: 2G
     restart: "no"
-    environment:
-      - RUNNER_STATELESS_SERVICE_PORT
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  runner-stateful:
-    user: root
-    image: cyberdojo/runner-stateful
-    container_name: cyber-dojo-runner-stateful
-    expose: [ "${RUNNER_STATEFUL_SERVICE_PORT}" ]
-    read_only: true
-    tmpfs: /tmp
-    mem_limit: 2G
-    memswap_limit: 2G
-    restart: "no"
-    environment:
-      - RUNNER_STATEFUL_SERVICE_PORT
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

@@ -41,6 +41,8 @@ class SourceDir
   # - - - - - - - - - - - - - - - - -
 
   def check_all
+    # TODO: I ONLY needed to build and test the base language
+    # images and their children. Not custom.
     if docker_dirs.size == 1
       docker_dir = docker_dirs[0]
       case start_point_dirs.size

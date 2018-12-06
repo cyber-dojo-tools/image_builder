@@ -18,4 +18,3 @@ inserted and to save that to a new Dockerfile and then use that
 modified Dockerfile. I prefer this. It makes the modified Dockerfile
 visible, part of git history, and it contain a big banner at the top
 saying it is a generated file.
-

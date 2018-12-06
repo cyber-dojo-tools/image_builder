@@ -72,7 +72,7 @@ class ImageBuilder
     # which they call to tar-pipe files out of the container
     <<~SHELL.strip
       # o) ensure there is no tar-list file at the start
-      # o) for all files in avatars sandbox dir (recursively)
+      # o) for all files in sandbox dir (recursively)
       #    if the file is not a binary file
       #    then append the filename to the tar-list
       rm -f ${TAR_LIST} | true
@@ -100,7 +100,7 @@ class ImageBuilder
     # These commands must happen before the commands inside the
     # real Dockerfile so the real Dockerfile can contain commands
     # related to the users. For example, javascript-cucumber creates a
-    # node_modules dir symlink for all 64 avatar users.
+    # node_modules dir symlink for the sandbox user.
     "FROM #{from}" + "\n" +
     RUN_add_sandbox_group(os) + "\n" +
     RUN_add_sandbox_user(os) + "\n" +
