@@ -134,7 +134,7 @@ end
 docker_compose 'up -d runner'
 
 service_names = %w(
-  cyber-dojo-runner
+  image-builder-runner
 )
 
 service_names.each do |name|
