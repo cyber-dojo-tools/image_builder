@@ -1,5 +1,12 @@
 
 {
+  "red":
+    {
+      "filename":"hiker.asm",
+      "from":"mov ebx, 9",
+      "to":"mov ebx, 99"
+    }
+  ,
   "green":
     {
       "filename":"hiker.asm",

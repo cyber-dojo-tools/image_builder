@@ -4,46 +4,26 @@ echo '-----------------------------------------'
 echo 'testing test-frameworks'
 echo 'success cases...'
 
-test_alpine_stateless()
+test_alpine()
 {
   echo '  java-junit'
-  assertBuildImage /test/test-frameworks/alpine-java-junit/stateless
+  assertBuildImage /test/test-frameworks/alpine-java-junit
   assertAlpineImageBuilt
   assertSandboxUserPresent
   assertStartPointCreated
-  assertStartPointRedAmberGreenStateless
-}
-
-test_alpine_stateful()
-{
-  echo '  java-junit'
-  assertBuildImage /test/test-frameworks/alpine-java-junit/stateful
-  assertAlpineImageBuilt
-  assertSandboxUserPresent
-  assertStartPointCreated
-  assertStartPointRedAmberGreenStateful
+  assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-test_ubuntu_stateless()
+test_ubuntu()
 {
   echo '  perl-testsimple'
-  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/stateless
+  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple
   assertUbuntuImageBuilt
   assertSandboxUserPresent
   assertStartPointCreated
-  assertStartPointRedAmberGreenStateless
-}
-
-test_ubuntu_stateful()
-{
-  echo '  perl-testsimple'
-  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple/stateful
-  assertUbuntuImageBuilt
-  assertSandboxUserPresent
-  assertStartPointCreated
-  assertStartPointRedAmberGreenStateful
+  assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -55,7 +35,7 @@ test_6_times_9_options()
   assertUbuntuImageBuilt
   assertSandboxUserPresent
   assertStartPointCreated
-  assertStartPointRedAmberGreenStateless
+  assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
