@@ -29,7 +29,6 @@ services:
     user: root
     image: cyberdojo/runner-stateless
     container_name: image-builder-runner
-    expose: [ "4597" ]
     read_only: true
     tmpfs: /tmp
     mem_limit: 2G
