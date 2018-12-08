@@ -79,11 +79,11 @@ set_host_dir_permissions()
   # so ownership of host dirs have to be set as they are
   # checked in the cyber-dojo script.
   if [ ! -z "${TRAVIS}" ]; then
-    mkdir /cyber-dojo/id-map
+    mkdir -p /cyber-dojo/id-map
     chown -R 19664 /cyber-dojo/id-map
-    mkdir /cyber-dojo/groups
+    mkdir -p /cyber-dojo/groups
     chown -R 19663 /cyber-dojo/groups
-    mkdir /cyber-dojo/katas
+    mkdir -p /cyber-dojo/katas
     chown -R 19663 /cyber-dojo/katas
   fi
 }
