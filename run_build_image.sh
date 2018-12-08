@@ -72,6 +72,24 @@ show_location()
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
+set_host_dir_permissions()
+{
+  # the image-builder runs a command
+  # $ cyber-dojo start-point create ...
+  # so ownership of host dirs have to be set as they are
+  # checked in the cyber-dojo script.
+  if [ ! -z "${TRAVIS}" ]; then
+    mkdir /cyber-dojo/id-map
+    chown -R 19664 /cyber-dojo/id-map
+    mkdir /cyber-dojo/groups
+    chown -R 19663 /cyber-dojo/groups
+    mkdir /cyber-dojo/katas
+    chown -R 19663 /cyber-dojo/katas
+  fi
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
 network_create()
 {
   NETWORK_CREATED=false
@@ -149,6 +167,7 @@ exit_handler()
 check_use $*
 trap exit_handler INT EXIT
 show_location
+set_host_dir_permissions
 volume_create
 network_create
 run $*
