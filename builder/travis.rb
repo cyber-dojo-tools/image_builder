@@ -115,7 +115,7 @@ class Travis
     # I shuffle the repos so, over time, all dependents are triggered.
     repos.shuffle.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
-      output = assert_backtick "./app/trigger.sh #{token} #{cdl} #{repo_name}"
+      output = assert_backtick "/app/trigger.sh #{token} #{cdl} #{repo_name}"
       print_to STDOUT, output
       print_to STDOUT, "\n", '- - - - - - - - -'
     end
