@@ -147,6 +147,7 @@ run()
     --env SRC_DIR=${SRC_DIR} \
     --env TRAVIS \
     --env TRAVIS_REPO_SLUG \
+    --env TRAVIS_EVENT_TYPE \
     --volume=/var/run/docker.sock:/var/run/docker.sock \
       cyberdojofoundation/image_builder \
         /app/outer_main.rb $*

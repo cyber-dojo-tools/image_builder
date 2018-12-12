@@ -152,6 +152,7 @@ begin
         env_var('SRC_DIR'),
         env_var('TRAVIS'),
         env_var('TRAVIS_REPO_SLUG'),
+        env_var('TRAVIS_EVENT_TYPE'),
           'image_builder_inner',
             '/app/inner_main.rb',
     ].join(space)

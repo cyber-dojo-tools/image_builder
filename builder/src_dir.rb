@@ -58,7 +58,27 @@ class SourceDir
         puts "docker_dirs.size == 1, start_point_dirs.size > 1 =={TODO:?custom?}"
       end
 
-      if on_cdl_travis?
+      # Plan is to re-architect starter so its image contains
+      # the start-points. When bringing up a site (or rolling update)
+      # the starter's API will offer the list of all the start-points'
+      # manifest.json image_name entries.
+      # Other services (eg runner) will then get this list
+      # of image_names and docker pull the images.
+      # Also, the starter will run a cron-job every 24 hours
+      # which will do a [docker pull] of all the images, and for
+      # any newly pulled image it will extract the start-points
+      # (which will be embedded inside the image). We want genuinely
+      # new images to be pulled, but not images which were
+      # 'recreated' in a Travis cron-job, simply to verify they
+      # still pass their tests.
+      # However, a CDL could also be running Travis because
+      # its base language ran on Travis. And the base language
+      # Travis run could also be running for both reasons...
+      # an actual git change or a cron-run.
+
+      puts "ENV['TRAVIS_EVENT_TYPE']==:#{ENV['TRAVIS_EVENT_TYPE']}:"
+
+      if on_cdl_travis? && !travis_cron_job?
         # assert docker_dirs.size == 1
         # assert [0,1].include? start_point_dirs.size
         triple = {
@@ -125,17 +145,21 @@ class SourceDir
     ENV['TRAVIS'] == 'true'
   end
 
+  def travis_cron_job?
+    ENV['TRAVIS_EVENT_TYPE'] == 'cron'
+  end
+
+  def repo_slug
+    # org-name/repo-name
+    ENV['TRAVIS_REPO_SLUG']
+  end
+
   def github_org
     repo_slug.split('/')[0]
   end
 
   def repo_name
     repo_slug.split('/')[1]
-  end
-
-  def repo_slug
-    # org-name/repo-name
-    ENV['TRAVIS_REPO_SLUG']
   end
 
 end
