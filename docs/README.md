@@ -48,9 +48,8 @@ The Dockerfiles **cannot** be used to build a (working) docker image with a
 raw `docker build` command. This is because image_builder augments the
 Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner-stateless)
 requirements:
-- it adds Linux users for the 64 avatars (eg lion, parrot, salmon, etc)
-- it adds a Linux group called cyber-dojo
-- on Alpine it removes the squid webroxy user
+- it adds Linux user called sandbox
+- it adds a Linux group called sandbox
 - on Alpine it installs bash so every cyber-dojo.sh runs in the same shell
 - on Alpine it installs coreutils so file stamp granularity is in microseconds
 - on Alpine it installs file to allow (file --mime-encoding ${filename})
@@ -58,11 +57,13 @@ requirements:
 
 - - - -
 
-NB: There is a circular dependency which can occasionally bite you.
-When image_builder is running start-point files (to test them against a docker image)
-it uses runners. The runners themselves have tests which rely on start-point
-test-data in various language+testFramework combinations (eg gcc-assert).
-These images (eg cyberdojofoundation/gcc_assert) are built by image_builder.
+Note: There is a circular dependency which can occasionally bite you.
+Suppose image_builder is building the cyberdojofoundation/gcc-assert image.
+It will generate traffic-lights by running start-point files against
+that a container run from that image using the cyberdojo/runner service.
+Now, cyberdojo/runner has its own tests which rely on start-point test-data
+from a few language+testFrameworks, one of which is gcc-assert, which is,
+of course, built by umage_builder.
 
 - - - -
 
