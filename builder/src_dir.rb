@@ -71,10 +71,12 @@ class SourceDir
       # new images to be pulled, but not images which were
       # 'recreated' in a Travis cron-job, simply to verify they
       # still pass their tests.
-      # However, a CDL could also be running Travis because
-      # its base language ran on Travis. And the base language
-      # Travis run could also be running for both reasons...
-      # an actual git change or a cron-run.
+      # Also, java-junit (for example) could be running on Travis because
+      # its base language (java) ran on Travis. And the java Travis run could
+      # also be running for both reasons... an actual git change or a cron-run.
+      # I'm assuming that TRAVIS_EVENT_TYPE==api for a triggered Travis run.
+      # So, a base language Travis run must only trigger its dependent repos
+      # if it is being run as a NON-cron-job.
 
       puts "ENV['TRAVIS_EVENT_TYPE']==:#{ENV['TRAVIS_EVENT_TYPE']}:"
 
