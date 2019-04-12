@@ -1,4 +1,109 @@
 
+cyber-dojo starter create S --git_url URL
+  # url can be local git repo
+cyber-dojo starter create S --git_urls_file FILENAME
+  # default list lives inside base-image?
+cyber-dojo up S
+cyber-dojo ls
+
+for each url
+1. get branch names
+     $ git ls-remote --heads URL
+2. branch called start_point? if so...
+     $ git clone --branch start_point --single-branch
+     # this is assumed to be a LANGUAGES start-point url
+3. otherwise...
+     $ git clone URL
+   if start_point/ and docker/ --> LANGUAGES
+   if start_point/ only        --> CUSTOM
+   else                        --> EXERCISES
+
+For CFL repos that contain large docker/ dirs...
+put the start_point/ into a branch called start_point
+The intention is for this to happen only a few repos
+and to fix them by doing proper installed, eg apk add package
+
+ASIDE: Will be easy to silently copy the red_amber_green.rb files
+from docker/ into start_point/ dir and thus make them available
+for new ragger service.
+
+clean. KEEP
+down. KEEP
+logs. KEEP
+sh. KEEP
+up. KEEP (modified)
+update
+>>>start-point DROP
+>>>starter     ADD
+
+
+#---------------------------------------------------------------------
+
+.travis.yml
+./pipe_build_test.sh
+  >>>>>>
+  >>>>>> check for docker/ start_point/ dir here? <<<<<<<<
+    PROBLEM IS...current setup is dir based not URL based... See below ########
+    otherwise...
+    if [ ! -d ./docker ]; then
+      git clone <url> --branch docker --single-branch ???docker???.???
+    fi
+    if [ ! -d ./start_point ]; then
+      git clone <url> --branch start_point --single-branch ???docker???.???
+    fi
+  >>>>>>
+${SH_DIR}/build_image_builder.sh
+  docker build...
+${SH_DIR}/test_image_builder.sh
+  ${ROOT_DIR}/test/run.sh
+  ${ROOT_DIR}/test/test_languages.sh
+  ${ROOT_DIR}/test/test_testFrameworks.sh
+    test_alpine()
+      assertBuildImage /test/test-frameworks/alpine-java-junit
+        build_image $1
+          local src_dir=${ROOT_DIR}$1
+          ${ROOT_DIR}/run_build_image.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
+
+${ROOT_DIR}/run_build_image.sh ${src_dir}
+  set_host_dir_permissions()
+    sudo mkdir -p /cyber-dojo
+    sudo chown -R 19663 /cyber-dojo
+  volume_create
+    create a data-volume-container holding src_dir
+  network_create
+  run $*
+    docker run \
+      --volume=/var/run/docker.sock:/var/run/docker.sock \
+        cyberdojofoundation/image_builder \
+          /app/outer_main.rb $*
+
+    outer_main.rb
+      'docker-compose',
+        "--file #{my_dir}/docker-compose.yml",
+        'run',
+        'image_builder_inner',
+          '/app/inner_main.rb',
+
+    inner_main.rb
+      src_dir = SourceDir.new(ENV['SRC_DIR'])
+      src_dir.assert_create_start_point
+         ###############################
+         # runs commander's cyber-dojo start-point create ...
+         #   create_cmd = "./#{script} start-point create #{name} --dir=#{dir_name}"
+         #   assert_system create_cmd
+         ###############################
+      src_dir.check_all
+         DockerDir.new(...).build_image(image_name)
+           ImageBuilder.new(dir_name).build_image(image_FROM, name)
+         StartPointDir.new(...).test_run
+           assert_timed_run(:red)
+           assert_timed_run(:amber)
+           assert_timed_run(:green)
+
+
+
+
+
 Adding the avatar users to an image.
 This could be done on the base images (eg Alpine) rather than
 on each of the test-framework images. This would obviously save
