@@ -42,9 +42,6 @@ class ImageBuilder
 
   def build_intermediate_image(from, os, temp_image_name)
     Dir.mktmpdir('image_builder') do |tmp_dir|
-      File.open("#{tmp_dir}/#{create_text_file_tar_list_filename}", 'w') { |fd|
-        fd.write(create_tar_list_script)
-      }
       docker_filename = "#{tmp_dir}/Dockerfile"
       File.open(docker_filename, 'w') { |fd|
         fd.write(intermediate_dockerfile(from, os))
@@ -60,43 +57,7 @@ class ImageBuilder
 
   # - - - - - - - - - - - - - - - - -
 
-  def create_text_file_tar_list_filename
-    'create_text_file_tar_list.sh'
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
-  def create_tar_list_script
-    # runner's rely on this script being inside the
-    # test-framework image at /usr/local/bin/create_tar_list.sh
-    # which they call to tar-pipe files out of the container
-    <<~SHELL.strip
-      # o) ensure there is no tar-list file at the start
-      # o) for all files in sandbox dir (recursively)
-      #    if the file is not a binary file
-      #    then append the filename to the tar-list
-      rm -f ${TAR_LIST} | true
-      find ${CYBER_DOJO_SANDBOX} -type f -exec sh -c '
-        for filename do
-          if file --mime-encoding ${filename} | grep -qv "${filename}:\\sbinary"; then
-            echo ${filename} >> ${TAR_LIST}
-          fi
-          if [ $(stat -c%s "${filename}") -eq 0 ]; then
-            # handle empty files which file reports are binary
-            echo ${filename} >> ${TAR_LIST}
-          fi
-          if [ $(stat -c%s "${filename}") -eq 1 ]; then
-            # handle file with one char which file reports are binary!
-            echo ${filename} >> ${TAR_LIST}
-          fi
-        done' sh {} +
-    SHELL
-  end
-
-  # - - - - - - - - - - - - - - - - -
-
   def intermediate_dockerfile(from, os)
-    filename = create_text_file_tar_list_filename
     # These commands must happen before the commands inside the
     # real Dockerfile so the real Dockerfile can contain commands
     # related to the users. For example, javascript-cucumber creates a
@@ -104,9 +65,7 @@ class ImageBuilder
     "FROM #{from}" + "\n" +
     RUN_add_sandbox_group(os) + "\n" +
     RUN_add_sandbox_user(os) + "\n" +
-    RUN_install_runner_dependencies(os) + "\n" +
-    "COPY #{filename} /usr/local/bin" + "\n" +
-    "RUN chmod +x /usr/local/bin/#{filename}"
+    RUN_install_runner_dependencies(os)
   end
 
   # - - - - - - - - - - - - - - - - -

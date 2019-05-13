@@ -15,7 +15,5 @@
   "progress_regexs": [
     "Tests run\\: (\\d)+,(\\s)+Failures\\: (\\d)+",
     "OK \\((\\d)+ test(s)?\\)"
-  ],
-
-  "runner_choice": "stateless"
+  ]
 }

@@ -11,7 +11,5 @@
   ],
   "image_name": "cyberdojofoundation/nasm_assert:image_builder_test",
 
-  "filename_extension" : ".asm",
-
-  "runner_choice": "stateless"
+  "filename_extension" : ".asm"
 }

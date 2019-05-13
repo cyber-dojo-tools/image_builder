@@ -10,7 +10,7 @@ test_alpine()
   assertBuildImage /test/test-frameworks/alpine-java-junit
   assertAlpineImageBuilt
   assertSandboxUserPresent
-  assertStartPointCreated
+  #assertStartPointCreated
   assertStartPointRedAmberGreen
 }
 
@@ -22,7 +22,7 @@ test_ubuntu()
   assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple
   assertUbuntuImageBuilt
   assertSandboxUserPresent
-  assertStartPointCreated
+  #assertStartPointCreated
   assertStartPointRedAmberGreen
 }
 
@@ -34,7 +34,7 @@ test_6_times_9_options()
   assertBuildImage /test/test-frameworks/asm-assert
   assertUbuntuImageBuilt
   assertSandboxUserPresent
-  assertStartPointCreated
+  #assertStartPointCreated
   assertStartPointRedAmberGreen
 }
 

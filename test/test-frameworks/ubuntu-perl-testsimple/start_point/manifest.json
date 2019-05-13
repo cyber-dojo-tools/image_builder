@@ -10,8 +10,6 @@
 
   "image_name": "cyberdojofoundation/perl_test_simple:image_builder_test",
 
-  "runner_choice": "stateless",
-
   "filename_extension" : ".pl",
 
   "tab_size": 4
