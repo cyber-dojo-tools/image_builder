@@ -53,7 +53,10 @@ class SourceDir
         # test-framework
         image_name = start_point_dirs[0].image_name
         docker_dir.build_image(image_name)
-        start_point_dirs[0].test_run
+
+        #TURNED OFF. runner no longer does colour determination
+        # Its done by ragger instead
+        #start_point_dirs[0].test_run
       else
         puts "docker_dirs.size == 1, start_point_dirs.size > 1 =={TODO:?custom?}"
       end

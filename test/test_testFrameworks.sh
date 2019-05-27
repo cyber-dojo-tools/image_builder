@@ -11,7 +11,7 @@ test_alpine()
   assertAlpineImageBuilt
   assertSandboxUserPresent
   #assertStartPointCreated
-  assertStartPointRedAmberGreen
+  #assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -23,7 +23,7 @@ test_ubuntu()
   assertUbuntuImageBuilt
   assertSandboxUserPresent
   #assertStartPointCreated
-  assertStartPointRedAmberGreen
+  #assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -35,7 +35,7 @@ test_6_times_9_options()
   assertUbuntuImageBuilt
   assertSandboxUserPresent
   #assertStartPointCreated
-  assertStartPointRedAmberGreen
+  #assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
