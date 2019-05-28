@@ -22,8 +22,11 @@ end
 
 def added
   if alpine?
+    # Tried adding a comment line here
+    # # Augmented commands to satify runner's requirements
+    # It gets dropped :-|
     [
-      'RUN echo "Hello from Alpine" > alpine.txt'
+      'RUN echo "Hello from AUGMENTED Alpine" > alpine.txt'
     ]
   end
 end
