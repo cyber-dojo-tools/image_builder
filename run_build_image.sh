@@ -2,17 +2,34 @@
 set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Runs image-builder on source living in SRC_DIR to
-#   o) build a docker-image
-#   o) possibly test a start_point/ source files.
+# Checks cyber-dojo start-point source living in SRC_DIR
 #
-# This script is curl'd and run in the .travis.yml script
-# of each cyber-dojo-language (github org) repo.
+#  o) build a docker-image satisfying runner's requirements
+#     /docker
+#  o) check start-point files are valid
+#     /start_point
+#  o) check red-amber-green progression of starting files
+#     /docker and /start_point
+#
+# This script is curl'd and run in the Travis/CircleCI scripts
+# of all cyber-dojo-language (github org) repos.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# assumes following dir layout if running locally and offline.
+# .../cyber-dojo/commander
+# .../cyber-dojo-languages/image_builder
+# .../cyber-dojo-languages/gcc-assert
 
+readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
+
+# I think TMP_DIR will not be visible on the default VM
+# used by Docker-Toolbox for Mac. This means that repos
+# git-cloned into TMP_DIR will be not be visible there.
+readonly TMP_DIR=$(mktemp -d /tmp/cyber-dojo-custom.XXXXXXXXX)
+
 readonly NETWORK=src_dir_network
 readonly NAME=src_dir_container
+readonly SCRIPT_NAME=cyber-dojo
 
 check_use()
 {
@@ -27,6 +44,8 @@ check_use()
   fi
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 show_use_short()
 {
   echo "Use: $(basename $0) [SRC_DIR|--help]"
@@ -37,51 +56,94 @@ show_use_short()
   # TODO?: SRC_DIR must be absolute because you cant create
   #        a docker-volume from a relative path.
   #        Check if $SRC_DIR is relative and if it is
-  #       expand it based on PWD ?
+  #        expand it based on PWD ?
 }
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 show_use_long()
 {
   show_use_short
-  echo 'If SRC_DIR/start_point_type.json exists this script will'
-  echo 'verify that a cyber-dojo start-point can be created from SRC_DIR, viz'
-  echo '  $ cyber-dojo start-point create ... --dir=${SRC_DIR}'
+  echo 'Create the docker-image'
+  echo '-----------------------'
+  echo 'If SRC_DIR/docker/ exists this script will verify a docker-image'
+  echo 'can be created from its Dockerfile, with suitable adjustments to'
+  echo "adhere to the runner's requirements. The name of the docker-image"
+  echo 'If SRC_DIR/start_point/manifest.json exists the name of the'
+  echo 'docker-image will be taken from it, otherwise from'
+  echo 'SRC_DIR/docker/image_name.json'
+  echo
+  echo 'Create the start-point image'
+  echo '----------------------------'
+  echo 'If SRC_DIR/start_point/ exists this script will verify a cyber-dojo'
+  echo 'start-point image can be created from SRC_DIR, which must be a git-repo,'
+  echo 'viz'
+  echo '  $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
   echo ''
-  echo 'If SRC_DIR (or any sub-dir) contains a Dockerfile this script will,'
-  echo 'for each dir, verify a docker-image can be created from it.'
-  echo ''
-  echo 'If SRC_DIR (or any sub-dir) contains a manifest.json this script will,'
-  echo 'for each dir, verify a start-point entry can be created from it.'
-  echo ''
-  echo 'In each Dockerfile dir there must be an image_name.json specifying'
-  echo 'the name of docker image to create from the Dockerfile. However,'
-  echo 'if there is a single Dockerfile and a single manifest.json then the'
-  echo 'name of the docker image will be taken from the manifest.json file.'
+  echo 'Check the red->amber->green start files progression'
+  echo '---------------------------------------------------'
+  echo 'If SRC_DIR/docker/ and SRC_DIR/start_point/ exist this script will verify'
+  echo 'o) the starting-files give a red traffic-light'
+  echo 'o) with an introduced syntax error, give an amber traffic-light'
+  echo "o) with '9 * 6' replaced by '9 * 7', give a green traffic-light"
+  echo
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
+docker_dir()
+{
+  echo "${SRC_DIR}/docker"
+}
+
+docker_dir_exists()
+{
+  [ -d "$(docker_dir)" ]
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
+start_point_dir()
+{
+  echo "${SRC_DIR}/start_point"
+}
+
+start_point_dir_exists()
+{
+  [ -d "$(start_point_dir)" ]
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
+script_path()
+{
+  local STRAIGHT_PATH="${MY_DIR}/../../cyber-dojo/commander/${SCRIPT_NAME}"
+  local CURLED_PATH="${TMP_DIR}/${SCRIPT_NAME}"
+
+  if [ -f "${STRAIGHT_PATH}" ]; then
+    echo "${STRAIGHT_PATH}"
+  elif [ ! -f "${CURLED_PATH}" ]; then
+    local GITHUB_ORG=https://raw.githubusercontent.com/cyber-dojo
+    local REPO_NAME=commander
+    local URL="${GITHUB_ORG}/${REPO_NAME}/master/${SCRIPT_NAME}"
+    curl --silent --fail "${URL}" > "${CURLED_PATH}"
+    chmod 700 "${CURLED_PATH}"
+    echo "${CURLED_PATH}"
+  else
+    echo "${CURLED_PATH}"
+  fi
+}
+
+tmp_dir_remove()
+{
+  rm -rf ${TMP_DIR} > /dev/null;
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
 show_location()
 {
-  if [ ! -z "${TRAVIS}" ]; then
-    echo 'Running on TRAVIS'
-  else
-    echo 'Running locally'
-  fi
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
-set_host_dir_permissions()
-{
-  # the image-builder runs a command
-  # $ cyber-dojo start-point create ...
-  # so ownership of host dirs have to be set as they are
-  # checked in the cyber-dojo script.
-  if [ ! -z "${TRAVIS}" ]; then
-    sudo mkdir -p /cyber-dojo
-    sudo chown -R 19663 /cyber-dojo
-  fi
+  echo "Running with $(script_path)"
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
@@ -132,7 +194,7 @@ volume_remove()
 
 # - - - - - - - - - - - - - - - - - -
 
-run()
+build_image()
 {
   docker run \
     --user=root \
@@ -157,14 +219,35 @@ run()
 
 exit_handler()
 {
+  tmp_dir_remove
   volume_remove
   network_remove
 }
 
+# - - - - - - - - - - - - - - - - - -
+
 check_use $*
-trap exit_handler INT EXIT
 show_location
-set_host_dir_permissions
-volume_create
-network_create
-run $*
+
+if docker_dir_exists; then
+  echo "Creating image..."
+  trap exit_handler INT EXIT
+  volume_create
+  network_create
+  build_image $*
+fi
+
+if start_point_dir_exists; then
+  echo "Checking start_point..."
+  
+  # turned off because tests currently pass a SRC_DIR which is
+  # not a git-cloneable git-repo
+
+  # $(script_path) start-point create jj1 --languages "${SRC_DIR}"
+  # $(script_path) start-point rm jj1
+fi
+
+if docker_dir_exists && start_point_dir_exists; then
+  echo "Checking red->amber->green progression..."
+  #...TODO (will use cyber-dojo/hiker service)
+fi
