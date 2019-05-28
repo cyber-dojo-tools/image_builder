@@ -2,18 +2,14 @@
 
 echo '-----------------------------------------'
 echo 'testing test-frameworks'
-echo 'success cases...'
-
-# [1] no longer work because [cyber-dojo start-point create]
-# requires a git-cloneable URL. Work in progress...
 
 test_alpine()
 {
   echo '  java-junit'
-  assertBuildImage /test/test-frameworks/alpine-java-junit
+  assertBuildImage $(repo_url java-junit)
   assertAlpineImageBuilt
   assertSandboxUserPresent
-  #assertStartPointCreated [1]
+  assertStartPointCreated [1]
   #assertStartPointRedAmberGreen
 }
 
@@ -22,22 +18,22 @@ test_alpine()
 test_ubuntu()
 {
   echo '  perl-testsimple'
-  assertBuildImage /test/test-frameworks/ubuntu-perl-testsimple
+  assertBuildImage $(repo_url perl-testsimple)
   assertUbuntuImageBuilt
   assertSandboxUserPresent
-  #assertStartPointCreated [1]
+  assertStartPointCreated
   #assertStartPointRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-test_6_times_9_options()
+XX_test_6_times_9_options()
 {
   echo '  asm-assert'
-  assertBuildImage /test/test-frameworks/asm-assert
+  assertBuildImage $(repo_url asm-assert)
   assertUbuntuImageBuilt
   assertSandboxUserPresent
-  #assertStartPointCreated [1]
+  assertStartPointCreated
   #assertStartPointRedAmberGreen
 }
 

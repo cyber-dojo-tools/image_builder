@@ -115,9 +115,17 @@ start_point_dir_exists()
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
+absPath()
+{
+  cd "$(dirname "$1")"
+  printf "%s/%s\n" "$(pwd)" "$(basename "$1")"
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
 script_path()
 {
-  local STRAIGHT_PATH="${MY_DIR}/../../cyber-dojo/commander/${SCRIPT_NAME}"
+  local STRAIGHT_PATH=`absPath "${MY_DIR}/../../cyber-dojo/commander/${SCRIPT_NAME}"`
   local CURLED_PATH="${TMP_DIR}/${SCRIPT_NAME}"
 
   if [ -f "${STRAIGHT_PATH}" ]; then
@@ -230,24 +238,26 @@ check_use $*
 show_location
 
 if docker_dir_exists; then
-  echo "Creating image..."
+  echo "# trying to create docker-image..."
   trap exit_handler INT EXIT
   volume_create
   network_create
   build_image $*
+  echo '# docker-image can be created'
 fi
 
 if start_point_dir_exists; then
-  echo "Checking start_point..."
-  
-  # turned off because tests currently pass a SRC_DIR which is
-  # not a git-cloneable git-repo
-
-  # $(script_path) start-point create jj1 --languages "${SRC_DIR}"
-  # $(script_path) start-point rm jj1
+  echo "# trying to create a start-point image..."
+  $(script_path) start-point create jj1 --languages "${SRC_DIR}"
+  $(script_path) start-point rm jj1
+  echo '# start-point image can be created'
 fi
 
 if docker_dir_exists && start_point_dir_exists; then
   echo "Checking red->amber->green progression..."
   #...TODO (will use cyber-dojo/hiker service)
 fi
+
+#if on_CI; then
+#  push image to Dockerhub
+#fi
