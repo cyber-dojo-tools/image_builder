@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: check $1 == "" is false
+# TODO: check [ -d $1 ] is true
+
 absPath()
 {
   cd "$(dirname "$1")"
@@ -7,11 +10,11 @@ absPath()
 }
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
-readonly SP_DIR=`absPath "${1}"`
-readonly IMAGE_NAME=${2} # will be via another script run on SP_DIR
+readonly START_POINT_DIR=`absPath "${1}"`
+readonly IMAGE_NAME=$("${MY_DIR}/name_image.sh" "${START_POINT_DIR}") #${2} # TODO: will be via another script run on SP_DIR
 
-cd "${SP_DIR}/docker" \
+cd "${START_POINT_DIR}/docker" \
 && \
-"${MY_DIR}/augmented_Dockerfile.sh" "${SP_DIR}/docker" \
+"${MY_DIR}/augmented_Dockerfile.sh" "${START_POINT_DIR}/docker" \
 | \
 docker build --tag "${IMAGE_NAME}" -
