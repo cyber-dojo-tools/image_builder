@@ -1,9 +1,5 @@
-# WIP
 require_relative 'assert_system'
-require_relative 'banner'
 require_relative 'docker_hub'
-require_relative 'json_parse'
-require_relative 'print_to'
 
 class Travis
 
@@ -12,26 +8,20 @@ class Travis
   end
 
   def validate_triple
-    banner {
-      if validated?
-        print_to STDOUT, triple.inspect
-      else
-        print_to STDERR, *triple_diagnostic
-        exit false
-      end
-    }
+    if validated?
+      print_to STDOUT, triple.inspect
+    else
+      print_to STDERR, *triple_diagnostic
+      exit false
+    end
   end
 
   def push_image_to_dockerhub
-    banner {
-      DockerHub.new.push(image_name)
-    }
+    DockerHub.new.push(image_name)
   end
 
   def trigger_dependents
-    banner {
-      trigger(dependent_repos)
-    }
+    trigger(dependent_repos)
   end
 
   private
@@ -39,9 +29,6 @@ class Travis
   attr_reader :triple
 
   include AssertSystem
-  include Banner
-  include JsonParse
-  include PrintTo
 
   # - - - - - - - - - - - - - - - - - - - - -
 
@@ -81,7 +68,10 @@ class Travis
   end
 
   def triples_url
-    "https://raw.githubusercontent.com/cyber-dojo-languages/images_info/master/#{triples_filename}"
+    github_org = 'https://raw.githubusercontent.com/cyber-dojo-languages'
+    repo = 'images_info'
+    branch = 'master'
+    "#{github_org}/#{repo}/#{branch}/#{triples_filename}"
   end
 
   def triples_filename
@@ -164,6 +154,30 @@ class Travis
 
   def cdl
     'cyber-dojo-languages'
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
+
+  def print_to(stream, *lines)
+    lines.each { |line| stream.puts '# ' + line }
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
+
+  def failed(*lines)
+    print_to STDERR, *(['FAILED'] + lines.flatten)
+    exit 1
+  end
+
+  # - - - - - - - - - - - - - - - - - - - - -
+
+  def json_parse(filename)
+    begin
+      content = IO.read(filename)
+      JSON.parse(content)
+    rescue JSON::ParserError
+      failed "error parsing JSON file:#{filename}"
+    end
   end
 
 end

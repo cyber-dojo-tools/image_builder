@@ -2,7 +2,8 @@
 # Main entry point for cyberdojo/dependents_notifier docker image.
 # The start-point dir has been volume mounted to /data
 
-# require_relative 'travis'
+require_relative 'travis'
+require 'json'
 
 def on_cdl_travis?
   on_travis? &&
@@ -33,19 +34,53 @@ end
 
 # - - - - - - - - - - - - - - - - - - -
 
-if false && on_cdl_travis? && !travis_cron_job?
-  # assert docker_dirs.size == 1
-  # assert [0,1].include? start_point_dirs.size
+def dockerfile
+  $dockerfile ||= IO.read('/data/docker/Dockerfile')
+end
+
+# - - - - - - - - - - - - - - - - -
+
+def from
+  from_line = dockerfile.lines.find { |line| line.start_with?('FROM') }
+  from_line.split[1]
+end
+
+# - - - - - - - - - - - - - - - - - - -
+
+def test_framework?
+  File.exist?(test_framework_filename)
+end
+
+def test_framework_filename
+  '/data/start_point/manifest.json'
+end
+
+def base_language_filename
+  '/data/docker/image_name.json'
+end
+
+def image_name
+  if test_framework?
+    filename = test_framework_filename
+  else
+    filename = base_language_filename
+  end
+  content = IO.read(filename)
+  JSON.parse(content)['image_name']
+end
+
+# - - - - - - - - - - - - - - - - - - -
+
+if on_cdl_travis? && !travis_cron_job?
   triple = {
-      'from'           => docker_dir.image_FROM,     # <<< TODO
-      'image_name'     => image_name,                # <<< TODO
-      'test_framework' => !start_point_dirs[0].nil?  # <<< TODO
-    }
+    'from'           => from,
+    'image_name'     => image_name,
+    'test_framework' => test_framework?.to_s
+  }
   travis = Travis.new(triple)
   travis.validate_triple
   travis.push_image_to_dockerhub
   travis.trigger_dependents
 end
-
 
 puts "Hello from notify.rb"
