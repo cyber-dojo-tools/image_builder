@@ -1,5 +1,5 @@
 *
+!docker_hub.rb
 !notify.rb
-!src_dir.rb
-!travis.rb
 !post_trigger.sh
+!travis.rb

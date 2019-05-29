@@ -239,7 +239,7 @@ show_location
 
 if docker_dir_exists; then
   echo "# trying to create docker-image..."
-  # embed and use build_image() from ./src/build_image.sh
+  # Embed and use build_image() from ./src/build_image.sh
   trap exit_handler INT EXIT
   volume_create
   network_create
@@ -260,5 +260,5 @@ if docker_dir_exists && start_point_dir_exists; then
 fi
 
 #if on_CI && !cron_job; then
-#  ./src/notify_dependents.sh
+#  ./src/notify_dependents.sh "${SRC_DIR}"
 #fi
