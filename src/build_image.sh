@@ -3,7 +3,7 @@ set -e
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
-build_tools() # here for now
+build_tools()
 {
   "${MY_DIR}/dockerfile_augmenter/build_image.sh"
   "${MY_DIR}/image_namer/build_image.sh"
@@ -81,5 +81,5 @@ if [ ! -d "${1}" ]; then
   exit 1
 fi
 
-build_tools
+build_tools # here for now
 build_image "${1}"
