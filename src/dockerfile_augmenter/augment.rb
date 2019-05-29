@@ -92,7 +92,7 @@ end
 def install_runner_dependencies
   [ add_sandbox_group,
     add_sandbox_user,
-    install(coreutils,bash,tar,file,'sudo')
+    install(coreutils,bash,tar,file)
   ]
 end
 
@@ -124,25 +124,22 @@ def coreutils
   # to a one second granularity. In other words, the
   # microseconds are always zero. Viz
   #   $ docker run --rm -it alpine:latest sh
-  #   > echo 'hello' > hello.txt
-  #   > stat -c "%y%" hello.txt
-  #     2017-11-09 20:09:22.000000000
-  #
-  # This matters in a stateful runner since the
-  # cyber-dojo.sh file could be executing an incremental
-  # make (for example). Viz
+  #   / # echo 'hello' > hello.txt
+  #   / # stat -c "%y%" hello.txt
+  #   2017-11-09 20:09:22.000000000
+  # So:
   #   $ docker run --rm -it alpine:latest sh
-  #   > apk add --update coreutils
-  #   > echo 'hello' > hello.txt
-  #   > stat -c "%y%" hello.txt
-  #     2017-11-09 20:11:09.376824357 +0000
+  #   / # apk add --update coreutils
+  #   / # echo 'hello' > hello.txt
+  #   / # stat -c "%y%" hello.txt
+  #   2017-11-09 20:11:09.376824357 +0000
   'coreutils'
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def bash
-  # On Alpine install bash so runners can reply on
+  # On Alpine install bash so runner can reply on
   # all containers having bash.
   'bash'
 end
@@ -150,11 +147,9 @@ end
 # - - - - - - - - - - - - - - - - -
 
 def tar
-  # Each runner docker-tar-pipes text files into the
-  # test-framework container. The runner's tar-pipe uses
-  # the --touch option to set the date-time stamps
-  # on the files once they have been copied _into_ the
-  # test-framework container. The default Alpine tar
+  # The runner docker-tar-pipes text files into the
+  # test-framework container using the --touch option
+  # to set their date-time stamps. The default Alpine tar
   # does not support the --touch option hence the update.
   'tar'
 end
