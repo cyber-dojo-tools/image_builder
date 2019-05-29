@@ -4,4 +4,5 @@
 !failed.rb
 !notify.rb
 !post_trigger.sh
+!print_to.rb
 !travis.rb

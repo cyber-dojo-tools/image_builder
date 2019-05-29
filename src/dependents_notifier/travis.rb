@@ -1,6 +1,7 @@
 require_relative 'assert_system'
 require_relative 'docker_hub'
 require_relative 'failed'
+require_relative 'print_to'
 require 'json'
 
 class Travis
@@ -32,7 +33,8 @@ class Travis
 
   include AssertSystem
   include Failed
-  
+  include PrintTo
+
   # - - - - - - - - - - - - - - - - - - - - -
 
   def image_name
@@ -157,12 +159,6 @@ class Travis
 
   def cdl
     'cyber-dojo-languages'
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - -
-
-  def print_to(stream, *lines)
-    lines.each { |line| stream.puts '# ' + line }
   end
 
   # - - - - - - - - - - - - - - - - - - - - -
