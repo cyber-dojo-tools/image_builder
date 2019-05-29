@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Used by build_image.sh, writes an augmented Dockerfile to stdout
+# Writes an augmented Dockerfile to stdout.
 
 cat "${1}/Dockerfile" \
   | \

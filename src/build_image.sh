@@ -28,6 +28,11 @@ readonly IMAGE_NAME=$("${MY_DIR}/name_image.sh" "${START_POINT_DIR}")
 
 cd "${START_POINT_DIR}/docker" \
 && \
-"${MY_DIR}/augmented_Dockerfile.sh" "${START_POINT_DIR}/docker" \
+cat "./Dockerfile" \
+  | \
+    docker run --rm \
+      --interactive \
+      --volume /var/run/docker.sock:/var/run/docker.sock \
+      cyberdojotools/dockerfile_augmenter \
 | \
 docker build --tag "${IMAGE_NAME}" -
