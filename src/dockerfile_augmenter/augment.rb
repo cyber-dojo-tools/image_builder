@@ -12,7 +12,7 @@ end
 # - - - - - - - - - - - - - - - - -
 
 def from_image_name
-  from_line = dockerfile.lines.find{ |line| line.start_with?('FROM') }
+  from_line = dockerfile.lines.find { |line| line.start_with?('FROM') }
   from_line.split[1]
 end
 
@@ -92,17 +92,34 @@ end
 def install_runner_dependencies
   [ add_sandbox_group,
     add_sandbox_user,
-    install_coreutils,
-    install_bash,
-    install_tar,
-    install_file,
-    install_sudo
+    install(coreutils,bash,tar,file,'sudo')
   ]
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def install_coreutils
+def install(*packages)
+  case os
+  when :Alpine
+    apk_install(packages)
+  when :Debian,:Ubuntu
+    apt_get_install(packages)
+  end
+end
+
+def apk_install(packages)
+  "RUN apk add --update #{packages.join(' ')}"
+end
+
+# - - - - - - - - - - - - - - - - -
+
+def apt_get_install(packages)
+  "RUN apt-get update && apt-get install --yes #{packages.join(' ')}"
+end
+
+# - - - - - - - - - - - - - - - - -
+
+def coreutils
   # On default Alpine date-time file-stamps are stored
   # to a one second granularity. In other words, the
   # microseconds are always zero. Viz
@@ -119,66 +136,36 @@ def install_coreutils
   #   > echo 'hello' > hello.txt
   #   > stat -c "%y%" hello.txt
   #     2017-11-09 20:11:09.376824357 +0000
-  apk_install('coreutils')
+  'coreutils'
 end
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def install_bash
+def bash
   # On Alpine install bash so runners can reply on
   # all containers having bash.
-  apk_install('bash')
+  'bash'
 end
 
 # - - - - - - - - - - - - - - - - -
 
-def install_tar
+def tar
   # Each runner docker-tar-pipes text files into the
   # test-framework container. The runner's tar-pipe uses
   # the --touch option to set the date-time stamps
   # on the files once they have been copied _into_ the
   # test-framework container. The default Alpine tar
   # does not support the --touch option hence the update.
-  apk_install('tar')
+  'tar'
 end
 
 # - - - - - - - - - - - - - - - - -
 
-def install_file
+def file
   # Each runner docker-tar-pipes text files out of the
   # test-framework container. It does this using
   # $ file --mime-encoding ${filename}
-  case os
-  when :Alpine
-    apk_install('file')
-  when :Debian,:Ubuntu
-    apt_get_install('file')
-  end
-end
-
-# - - - - - - - - - - - - - - - - -
-
-def install_sudo
-  case  os
-  when :Alpine
-    apk_install('sudo')
-  when :Debian,:Ubuntu
-    apt_get_install('sudo')
-  end
-end
-
-# - - - - - - - - - - - - - - - - -
-
-def apk_install(package)
-  command = "RUN apk add --update #{package}"
-  os == :Alpine ? command : ''
-end
-
-# - - - - - - - - - - - - - - - - -
-
-def apt_get_install(package)
-  command = "RUN apt-get update && apt-get install --yes #{package}"
-  os != :Alpine ? command : ''
+  'file'
 end
 
 # - - - - - - - - - - - - - - - - -
