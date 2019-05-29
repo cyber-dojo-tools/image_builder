@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # TODO: check $1 == "" is false
 # TODO: check [ -d $1 ] is true
@@ -22,6 +23,14 @@ readonly START_POINT_DIR=`absPath "${1}"`
 
 # - - - - - - - - - - - - - - - - - - - -
 # Find out the name of the docker-image.
+
+docker run \
+  --rm \
+  --interactive \
+  --volume "${START_POINT_DIR}:/data:ro" \
+  cyberdojo/image_namer
+
+exit 1
 
 readonly IMAGE_NAME=$(docker run \
   --rm \
