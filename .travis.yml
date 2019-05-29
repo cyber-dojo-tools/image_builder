@@ -3,9 +3,7 @@ language: generic
 
 script:
     - set -e
-    - ./src/dockerfile_augmenter/build_image.sh
-    - ./src/image_namer/build_image.sh
-    - ./src/dependents_notifier/build_image.sh
+    - ./src/build_tools.sh
     - echo ${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
     - docker push cyberdojo/dockerfile_augmenter
     - docker push cyberdojo/image_namer

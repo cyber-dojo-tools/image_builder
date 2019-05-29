@@ -122,7 +122,7 @@ script_path()
 
 build_image()
 {
-  local START_POINT_DIR=`absPath "${1}"`
+  local START_POINT_DIR=`absPath "${SRC_DIR}"`
 
   # Find the name of the docker-image.
   local IMAGE_NAME=$(docker run \
@@ -171,6 +171,7 @@ CI_cron_job()
 
 notify_dependents()
 {
+  local START_POINT_DIR=`absPath "${SRC_DIR}"`  
   docker run \
     --env DOCKER_USERNAME \
     --env DOCKER_PASSWORD \
@@ -207,7 +208,7 @@ if [ ! -d "$(docker_dir)" ]; then
 fi
 
 echo "# trying to create docker-image..."
-build_image "${1}"
+build_image
 echo '# docker-image can be created'
 
 if [ -d "$(start_point_dir)" ]; then
