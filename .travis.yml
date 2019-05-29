@@ -2,4 +2,11 @@ services: docker
 language: generic
 
 script:
+    - set -e
+    - ./src/dockerfile_augmenter/build_docker_image.sh
+    - ./src/image_namer/build_docker_image.sh
+    - echo "${DOCKER_PASSWORD}" \
+      | docker login --username "${DOCKER_USERNAME}" --password-stdin
+    - docker push cyberdojo/dockerfile_augmenter
+    - docker push cyberdojo/image_namer
     - ./pipe_build_test.sh && ./sh/push_image_builder.sh

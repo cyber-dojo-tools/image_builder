@@ -3,5 +3,5 @@
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
 docker build \
-  --tag cyberdojotools/image_namer \
+  --tag cyberdojo/image_namer \
   "${MY_DIR}" > /dev/null

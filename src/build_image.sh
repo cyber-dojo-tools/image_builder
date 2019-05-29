@@ -28,7 +28,7 @@ readonly IMAGE_NAME=$(docker run \
   --rm \
   --interactive \
   --volume "${START_POINT_DIR}:/start_point:ro" \
-  cyberdojotools/image_namer)
+  cyberdojo/image_namer)
 
 # - - - - - - - - - - - - - - - - - - - -
 # move the docker/ dir into a new temporary context-dir
@@ -54,7 +54,7 @@ cat "${START_POINT_DIR}/docker/Dockerfile" \
     docker run --rm \
       --interactive \
       --volume /var/run/docker.sock:/var/run/docker.sock \
-      cyberdojotools/dockerfile_augmenter \
+      cyberdojo/dockerfile_augmenter \
   > \
     "${CONTEXT_DIR}/Dockerfile"
 
