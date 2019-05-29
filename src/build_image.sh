@@ -55,7 +55,7 @@ build_image()
   # Build the augmented docker-image.
   docker build \
     --tag "${IMAGE_NAME}" \
-    "${CONTEXT_DIR}"
+    "${CONTEXT_DIR}/docker"
 }
 
 # - - - - - - - - - - - - - - - - - -

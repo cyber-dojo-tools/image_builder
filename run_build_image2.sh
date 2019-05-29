@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Checks cyber-dojo start-point source living in SRC_DIR
@@ -133,11 +133,7 @@ build_image()
 
   # Copy the docker/ dir into a new temporary context-dir
   # so we can overwrite its Dockerfile.
-  cp -R "${START_POINT_DIR}/docker/" "${CONTEXT_DIR}"
-
-  ls -al "${CONTEXT_DIR}"
-  ls -al "${CONTEXT_DIR}/docker"
-  ls -al "${CONTEXT_DIR}/docker/jars"
+  cp -R "${START_POINT_DIR}/docker" "${CONTEXT_DIR}"
 
   # Overwrite the Dockerfile with one containing
   # extra commands to fulfil the runner's requirements.
@@ -158,7 +154,7 @@ build_image()
   # Build the augmented docker-image.
   docker build \
     --tag "${IMAGE_NAME}" \
-    "${CONTEXT_DIR}"
+    "${CONTEXT_DIR}/docker"
 }
 
 # - - - - - - - - - - - - - - - - - -
