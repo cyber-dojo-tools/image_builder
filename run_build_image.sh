@@ -261,3 +261,7 @@ fi
 #if on_CI; then
 #  push image to Dockerhub
 #fi
+
+#if on_CI && !cron_job; then
+#  notify dependent repos
+#fi
