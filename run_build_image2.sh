@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Checks cyber-dojo start-point source living in SRC_DIR
@@ -135,6 +135,10 @@ build_image()
   # so we can overwrite its Dockerfile.
   cp -R "${START_POINT_DIR}/docker/" "${CONTEXT_DIR}"
 
+  ls -al "${CONTEXT_DIR}"
+  ls -al "${CONTEXT_DIR}/docker"
+  ls -al "${CONTEXT_DIR}/docker/jars"
+
   # Overwrite the Dockerfile with one containing
   # extra commands to fulfil the runner's requirements.
   cat "${START_POINT_DIR}/docker/Dockerfile" \
@@ -171,7 +175,7 @@ CI_cron_job()
 
 notify_dependents()
 {
-  local START_POINT_DIR=`absPath "${SRC_DIR}"`  
+  local START_POINT_DIR=`absPath "${SRC_DIR}"`
   docker run \
     --env DOCKER_USERNAME \
     --env DOCKER_PASSWORD \
