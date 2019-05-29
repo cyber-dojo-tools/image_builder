@@ -1,6 +1,6 @@
 FROM cyberdojo/docker-base
 LABEL maintainer=jon@jaggersoft.com
 
-COPY augment.rb /app
+COPY . /app
 
 ENTRYPOINT [ "ruby", "/app/augment.rb" ]

@@ -6,10 +6,9 @@
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
 # TODO: build images here for now.
-# Will need to be pushed to dockerhub in CI pipe.
-# Put them into their own repos?
 "${MY_DIR}/dockerfile_augmenter/build_image.sh"
 "${MY_DIR}/image_namer/build_image.sh"
+"${MY_DIR}/dependents_notifier/build_image.sh"
 
 # - - - - - - - - - - - - - - - - - - - -
 
