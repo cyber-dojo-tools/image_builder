@@ -11,13 +11,11 @@ def base_language_filename
   '/data/docker/image_name.json'
 end
 
-def name_from(filename)
-  content = IO.read(filename)
-  JSON.parse(content)['image_name']
+if File.exist?(test_framework_filename)
+  filename = test_framework_filename
+else
+  filename = base_language_filename
 end
 
-if File.exist?(test_framework_filename)
-  puts name_from(test_framework_filename)
-else
-  puts name_from(base_language_filename)
-end
+content = IO.read(filename)
+puts JSON.parse(content)['image_name']
