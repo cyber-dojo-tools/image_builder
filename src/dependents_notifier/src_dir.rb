@@ -1,6 +1,5 @@
 # WIP
 require_relative 'assert_system'
-require_relative 'banner'
 require_relative 'docker_dir'
 require_relative 'failed'
 require_relative 'start_point_dir'
@@ -18,10 +17,6 @@ class SourceDir
   end
 
   # - - - - - - - - - - - - - - - - -
-
-  def start_point?
-    File.exist? dir_name + '/start_point_type.json'
-  end
 
   def check_all
     # Also, the starter will run a cron-job every 24 hours
@@ -58,7 +53,6 @@ class SourceDir
   private
 
   include AssertSystem
-  include Banner
 
   def set_dir_name(dir_name)
     @dir_name = dir_name

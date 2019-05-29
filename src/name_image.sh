@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Used by build_image.sh, writes the name of the docker-image to stdout
+# Writes the name of the docker-image to stdout.
 # Folded into main script.
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"

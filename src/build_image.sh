@@ -35,15 +35,15 @@ build_image()
 {
   local START_POINT_DIR=`absPath "${1}"`
 
-  # Find out the name of the docker-image.
+  # Find the name of the docker-image.
   local IMAGE_NAME=$(docker run \
     --rm \
     --interactive \
     --volume "${START_POINT_DIR}:/data:ro" \
     cyberdojo/image_namer)
 
-  # move the docker/ dir into a new temporary context-dir
-  # so we can overwrite its Dockerfile
+  # Copy the docker/ dir into a new temporary context-dir
+  # so we can overwrite its Dockerfile.
   cp -R "${START_POINT_DIR}/docker/" "${CONTEXT_DIR}"
 
   # Overwrite the Dockerfile with one containing
@@ -62,7 +62,7 @@ build_image()
   cat "${CONTEXT_DIR}/Dockerfile"
   echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-  # Build the docker-image
+  # Build the augmented docker-image.
   docker build \
     --tag "${IMAGE_NAME}" \
     "${CONTEXT_DIR}"

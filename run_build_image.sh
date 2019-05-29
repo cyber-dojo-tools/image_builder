@@ -64,7 +64,7 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Create the docker-image'
+  echo 'Creates the docker-image'
   echo '-----------------------'
   echo 'If SRC_DIR/docker/ exists this script will verify a docker-image'
   echo 'can be created from its Dockerfile, with suitable adjustments to'
@@ -73,14 +73,14 @@ show_use_long()
   echo 'docker-image will be taken from it, otherwise from'
   echo 'SRC_DIR/docker/image_name.json'
   echo
-  echo 'Create the start-point image'
+  echo 'Creates the start-point image'
   echo '----------------------------'
   echo 'If SRC_DIR/start_point/ exists this script will verify a cyber-dojo'
   echo 'start-point image can be created from SRC_DIR, which must be a git-repo,'
   echo 'viz'
   echo '  $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
   echo
-  echo 'Check the red->amber->green start files progression'
+  echo 'Checks the red->amber->green start files progression'
   echo '---------------------------------------------------'
   echo 'If SRC_DIR/docker/ and SRC_DIR/start_point/ exist this script will verify'
   echo 'o) the starting-files give a red traffic-light'
@@ -239,6 +239,7 @@ show_location
 
 if docker_dir_exists; then
   echo "# trying to create docker-image..."
+  # embed and use build_image() from ./src/build_image.sh
   trap exit_handler INT EXIT
   volume_create
   network_create
@@ -258,10 +259,6 @@ if docker_dir_exists && start_point_dir_exists; then
   #...TODO (will use cyber-dojo/hiker service)
 fi
 
-#if on_CI; then
-#  push image to Dockerhub
-#fi
-
 #if on_CI && !cron_job; then
-#  notify dependent repos
+#  ./src/notify_dependents.sh
 #fi

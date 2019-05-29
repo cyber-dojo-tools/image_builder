@@ -76,7 +76,7 @@ class Travis
   end
 
   def curled_triples
-    assert_system "curl --silent -O #{triples_url}"
+    assert_system "curl -O --silent --fail #{triples_url}"
     json_parse('./' + triples_filename)
   end
 
