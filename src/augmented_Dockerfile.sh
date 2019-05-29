@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Writes an augmented Dockerfile to stdout.
+# Folded into main script.
 
 cat "${1}/Dockerfile" \
   | \

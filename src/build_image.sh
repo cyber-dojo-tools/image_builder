@@ -21,6 +21,8 @@ absPath()
 
 readonly START_POINT_DIR=`absPath "${1}"`
 
+# - - - - - - - - - - - - - - - - - - - -
+
 readonly IMAGE_NAME=$(docker run \
   --rm \
   --interactive \
@@ -29,13 +31,30 @@ readonly IMAGE_NAME=$(docker run \
 
 # - - - - - - - - - - - - - - - - - - - -
 
-cd "${START_POINT_DIR}/docker" \
-&& \
-cat "./Dockerfile" \
+readonly CONTEXT_DIR=$(mktemp -d)
+
+remove_context_dir()
+{
+  rm -rf "${CONTEXT_DIR}" > /dev/null
+}
+
+trap remove_context_dir EXIT
+
+cp -R "${START_POINT_DIR}/docker/" "${CONTEXT_DIR}"
+
+cat "${START_POINT_DIR}/docker/Dockerfile" \
   | \
     docker run --rm \
       --interactive \
       --volume /var/run/docker.sock:/var/run/docker.sock \
       cyberdojotools/dockerfile_augmenter \
-| \
-docker build --tag "${IMAGE_NAME}" -
+  > \
+    "${CONTEXT_DIR}/Dockerfile"
+
+echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
+cat "${CONTEXT_DIR}/Dockerfile"
+echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+docker build \
+  --tag "${IMAGE_NAME}" \
+  "${CONTEXT_DIR}"

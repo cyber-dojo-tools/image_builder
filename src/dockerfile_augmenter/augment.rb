@@ -23,8 +23,16 @@ end
 def added
   if alpine?
     [
-      "# Augmented commands to satify runner's requirements",
-      'RUN echo "Hello from AUGMENTED Alpine" > alpine.txt'
+      '',
+      '# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
+      "# START OF Augmented commands to fulfil runner's requirements",
+      '',
+      'RUN echo "AUGMENTED Alpine" > alpine.txt',
+      'RUN cat alpine.txt',
+      '',
+      "# END OF Augmented commands to fulfil runner's requirements",
+      '# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',      
+      ''
     ]
   end
 end
