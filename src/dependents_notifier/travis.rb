@@ -1,5 +1,6 @@
 require_relative 'assert_system'
 require_relative 'docker_hub'
+require 'json'
 
 class Travis
 

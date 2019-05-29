@@ -21,14 +21,10 @@ set -e
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
-
-# I think TMP_DIR will not be visible on the default VM
-# used by Docker-Toolbox for Mac. This means that repos
-# git-cloned into TMP_DIR will be not be visible there.
 readonly TMP_DIR=$(mktemp -d /tmp/cyber-dojo-custom.XXXXXXXXX)
 
-readonly NETWORK=src_dir_network
-readonly NAME=src_dir_container
+readonly NETWORK=src_dir_network  # will die
+readonly NAME=src_dir_container   # will die
 readonly SCRIPT_NAME=cyber-dojo
 
 check_use()
@@ -156,14 +152,14 @@ show_location()
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
-network_create()
+network_create() # will die
 {
   NETWORK_CREATED=false
   docker network create ${NETWORK} > /dev/null
   NETWORK_CREATED=true
 }
 
-network_remove()
+network_remove() # will die
 {
   if "${NETWORK_CREATED}" == "true"; then
     echo 'clean-up: [docker network rm]'
@@ -173,7 +169,7 @@ network_remove()
 
 # - - - - - - - - - - - - - - - - - -
 
-volume_create()
+volume_create() # will die
 {
   # I create a data-volume-container which holds src-dir
   # By default this lives on one network and the containers
@@ -191,7 +187,7 @@ volume_create()
   VOLUME_CREATED=true
 }
 
-volume_remove()
+volume_remove() # will die
 {
   if "${VOLUME_CREATED}" == "true"; then
     echo 'clean-up: [docker volume rm]'
@@ -202,7 +198,7 @@ volume_remove()
 
 # - - - - - - - - - - - - - - - - - -
 
-build_image()
+build_image() # will die
 {
   docker run \
     --user=root \
@@ -228,8 +224,8 @@ build_image()
 exit_handler()
 {
   tmp_dir_remove
-  volume_remove
-  network_remove
+  volume_remove  # will die
+  network_remove # will die
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -237,10 +233,11 @@ exit_handler()
 check_use $*
 show_location
 
+# TODO: I think a docker/ dir HAS to exist...
 if docker_dir_exists; then
   echo "# trying to create docker-image..."
-  # Embed and use build_image() from ./src/build_image.sh
-  trap exit_handler INT EXIT
+  # TODO: Embed and use build_image() from ./src/build_image.sh
+  trap exit_handler INT EXIT # TODO: move outside of if
   volume_create
   network_create
   build_image $*
@@ -259,6 +256,7 @@ if docker_dir_exists && start_point_dir_exists; then
   #...TODO (will use cyber-dojo/hiker service)
 fi
 
+#TODO
 #if on_CI && !cron_job; then
 #  ./src/notify_dependents.sh "${SRC_DIR}"
 #fi

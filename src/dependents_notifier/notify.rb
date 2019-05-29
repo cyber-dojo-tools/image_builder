@@ -75,7 +75,7 @@ if on_cdl_travis? && !travis_cron_job?
   triple = {
     'from'           => from,
     'image_name'     => image_name,
-    'test_framework' => test_framework?.to_s
+    'test_framework' => test_framework?
   }
   travis = Travis.new(triple)
   travis.validate_triple
