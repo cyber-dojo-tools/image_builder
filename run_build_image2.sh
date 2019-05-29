@@ -181,6 +181,7 @@ notify_dependents()
     --env TRAVIS_REPO_SLUG \
     --interactive \
     --rm \
+    --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "${START_POINT_DIR}:/data:ro" \
       cyberdojo/dependents_notifier
 }

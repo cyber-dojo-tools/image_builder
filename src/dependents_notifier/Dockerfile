@@ -1,4 +1,4 @@
-FROM cyberdojo/ruby-base
+FROM cyberdojo/docker-base
 LABEL maintainer=jon@jaggersoft.com
 
 RUN apk update \
