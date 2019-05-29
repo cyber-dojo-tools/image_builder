@@ -5,8 +5,8 @@ script:
     - set -e
     - ./src/dockerfile_augmenter/build_image.sh
     - ./src/image_namer/build_image.sh
-    - echo "${DOCKER_PASSWORD}" \
-      | docker login --username "${DOCKER_USERNAME}" --password-stdin
+    - echo ${DOCKER_PASSWORD} \
+      | docker login --username ${DOCKER_USERNAME} --password-stdin
     - docker push cyberdojo/dockerfile_augmenter
     - docker push cyberdojo/image_namer
     - ./pipe_build_test.sh && ./sh/push_image_builder.sh
