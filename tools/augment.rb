@@ -1,7 +1,7 @@
 
-# reads a Dockerfile on stdin and
-# writes a Dockerfile on stdout
-# augmented to fulful runner's requirements.
+# Program to read Dockerfile on stdin
+# and print augmented Dockerfile on stdout
+# so it satisfies runner's requirements.
 
 def dockerfile
   $dockerfile ||= STDIN.read
