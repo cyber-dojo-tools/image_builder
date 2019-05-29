@@ -60,7 +60,7 @@ requirements:
 Note: There is a circular dependency which can occasionally bite you.
 Suppose image_builder is building the cyberdojofoundation/gcc-assert image.
 It will generate traffic-lights by running start-point files against
-that a container run from that image using the cyberdojo/runner service.
+a container run from that image using the cyberdojo/runner service.
 Now, cyberdojo/runner has its own tests which rely on start-point test-data
 from a few language+testFrameworks, one of which is gcc-assert, which is,
 of course, built by image_builder.
