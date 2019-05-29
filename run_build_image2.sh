@@ -91,30 +91,6 @@ show_use_long()
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
-docker_dir()
-{
-  echo "${SRC_DIR}/docker"
-}
-
-docker_dir_exists()
-{
-  [ -d "$(docker_dir)" ]
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
-start_point_dir()
-{
-  echo "${SRC_DIR}/start_point"
-}
-
-start_point_dir_exists()
-{
-  [ -d "$(start_point_dir)" ]
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
 absPath()
 {
   cd "$(dirname "$1")"
@@ -140,13 +116,6 @@ script_path()
   else
     echo "${CURLED_PATH}"
   fi
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
-show_location()
-{
-  echo "Running with $(script_path)"
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
@@ -190,29 +159,67 @@ build_image()
 
 # - - - - - - - - - - - - - - - - - -
 
-check_use $*
-show_location
+on_CI()
+{
+  [ "${TRAVIS}" = 'true' ]
+}
 
-# TODO: I think a docker/ dir HAS to exist...
-if docker_dir_exists; then
-  echo "# trying to create docker-image..."
-  build_image "${1}"
-  echo '# docker-image can be created'
+CI_cron_job()
+{
+  [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
+}
+
+notify_dependents()
+{
+  docker run \
+    --env DOCKER_USERNAME \
+    --env DOCKER_PASSWORD \
+    --env GITHUB_TOKEN \
+    --env TRAVIS \
+    --env TRAVIS_EVENT_TYPE \
+    --env TRAVIS_REPO_SLUG \
+    --interactive \
+    --rm \
+    --volume "${START_POINT_DIR}:/data:ro" \
+      cyberdojo/dependents_notifier
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+docker_dir()
+{
+  echo "${SRC_DIR}/docker"
+}
+
+start_point_dir()
+{
+  echo "${SRC_DIR}/start_point"
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+check_use $*
+echo "Running with $(script_path)"
+
+if [ ! -d "$(docker_dir)" ]; then
+  echo "error: $(docker_dir)/ does not exist"
+  exit 1
 fi
 
-if start_point_dir_exists; then
+echo "# trying to create docker-image..."
+build_image "${1}"
+echo '# docker-image can be created'
+
+if [ -d "$(start_point_dir)" ]; then
   echo "# trying to create a start-point image..."
   $(script_path) start-point create jj1 --languages "${SRC_DIR}"
   $(script_path) start-point rm jj1
   echo '# start-point image can be created'
-fi
 
-if docker_dir_exists && start_point_dir_exists; then
   echo "Checking red->amber->green progression..."
   #...TODO (will use cyber-dojo/hiker service)
 fi
 
-#TODO
-#if on_CI && !cron_job; then
-#  ./src/notify_dependents.sh "${SRC_DIR}"
-#fi
+if on_CI && !CI_cron_job; then
+  notify_dependents
+fi

@@ -20,6 +20,7 @@ docker run \
   --env TRAVIS \
   --env TRAVIS_EVENT_TYPE \
   --env TRAVIS_REPO_SLUG \
+  --interactive \
   --rm \
   --volume "${START_POINT_DIR}:/data:ro" \
     cyberdojo/dependents_notifier
