@@ -19,12 +19,15 @@ absPath()
   printf "%s/%s\n" "$(pwd)" "$(basename "$1")"
 }
 
-# TODO: 2 helper scripts will need to folded into
-# the main run_build_image.sh script which is curl'd
-# by each cyber-dojo-languages repo's CI script.
-
 readonly START_POINT_DIR=`absPath "${1}"`
-readonly IMAGE_NAME=$("${MY_DIR}/name_image.sh" "${START_POINT_DIR}")
+
+readonly IMAGE_NAME=$(docker run \
+  --rm \
+  --interactive \
+  --volume "${START_POINT_DIR}:/start_point:ro" \
+  cyberdojotools/image_namer)
+
+# - - - - - - - - - - - - - - - - - - - -
 
 cd "${START_POINT_DIR}/docker" \
 && \
