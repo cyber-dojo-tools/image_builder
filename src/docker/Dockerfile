@@ -7,6 +7,6 @@ FROM alpine:latest
 
 LABEL maintainer=jon@jaggersoft.com
 
-RUN echo 'demo with context' > demo.txt
+RUN echo 'Augmented demo with context' > demo.txt
 COPY image_name.json .
 RUN cat image_name.json
