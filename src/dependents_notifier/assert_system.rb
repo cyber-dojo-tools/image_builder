@@ -1,3 +1,4 @@
+require_relative 'failed'
 
 module AssertSystem
 
@@ -22,4 +23,5 @@ module AssertSystem
     0
   end
 
+  include Failed
 end

@@ -1,5 +1,6 @@
 require_relative 'assert_system'
 require_relative 'docker_hub'
+require_relative 'failed'
 require 'json'
 
 class Travis
@@ -30,7 +31,8 @@ class Travis
   attr_reader :triple
 
   include AssertSystem
-
+  include Failed
+  
   # - - - - - - - - - - - - - - - - - - - - -
 
   def image_name
@@ -161,13 +163,6 @@ class Travis
 
   def print_to(stream, *lines)
     lines.each { |line| stream.puts '# ' + line }
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - -
-
-  def failed(*lines)
-    print_to STDERR, *(['FAILED'] + lines.flatten)
-    exit 1
   end
 
   # - - - - - - - - - - - - - - - - - - - - -

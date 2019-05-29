@@ -1,6 +1,7 @@
 *
 !assert_system.rb
 !docker_hub.rb
+!failed.rb
 !notify.rb
 !post_trigger.sh
 !travis.rb
