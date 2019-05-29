@@ -4,6 +4,9 @@
 
 require 'json'
 
-content = IO.read('/start_point/docker/image_name.json')
+# TODO: if /start_point/docker/start_point/manifest.json
+# exists then use that.
+
+content = IO.read('/data/docker/image_name.json')
 json = JSON.parse(content)
 puts json['image_name']
