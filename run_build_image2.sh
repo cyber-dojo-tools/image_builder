@@ -221,6 +221,6 @@ if [ -d "$(start_point_dir)" ]; then
   #...TODO (will use cyber-dojo/hiker service)
 fi
 
-if on_CI && !CI_cron_job; then
+if on_CI && ! CI_cron_job; then
   notify_dependents
 fi
