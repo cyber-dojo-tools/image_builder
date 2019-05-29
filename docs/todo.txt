@@ -1,0 +1,9 @@
+
+src/augment.rb does ...
+
+  o) install_coreutils
+     I think I can drop this as I no longer have a stateful runner
+     
+  o) install_sudo
+     I want to drop this. What needs this?
+     Grep of cyber-dojo-languages dir revealed nothing...

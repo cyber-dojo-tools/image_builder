@@ -68,7 +68,7 @@ show_use_long()
   echo '-----------------------'
   echo 'If SRC_DIR/docker/ exists this script will verify a docker-image'
   echo 'can be created from its Dockerfile, with suitable adjustments to'
-  echo "adhere to the runner's requirements. The name of the docker-image"
+  echo "fulfil to the runner's requirements."
   echo 'If SRC_DIR/start_point/manifest.json exists the name of the'
   echo 'docker-image will be taken from it, otherwise from'
   echo 'SRC_DIR/docker/image_name.json'
@@ -79,7 +79,7 @@ show_use_long()
   echo 'start-point image can be created from SRC_DIR, which must be a git-repo,'
   echo 'viz'
   echo '  $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
-  echo ''
+  echo
   echo 'Check the red->amber->green start files progression'
   echo '---------------------------------------------------'
   echo 'If SRC_DIR/docker/ and SRC_DIR/start_point/ exist this script will verify'
