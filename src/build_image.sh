@@ -11,7 +11,7 @@ absPath()
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly START_POINT_DIR=`absPath "${1}"`
-readonly IMAGE_NAME=$("${MY_DIR}/name_image.sh" "${START_POINT_DIR}") #${2} # TODO: will be via another script run on SP_DIR
+readonly IMAGE_NAME=$("${MY_DIR}/name_image.sh" "${START_POINT_DIR}")
 
 cd "${START_POINT_DIR}/docker" \
 && \
