@@ -9,12 +9,11 @@ set -e
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
 readonly TMP_DIR=$(mktemp -d)
-readonly CONTEXT_DIR=$(mktemp -d)
-readonly SCRIPT_NAME=cyber-dojo # TODO: used?
+readonly TMP_CONTEXT_DIR=$(mktemp -d)
 
 remove_tmp_dirs()
 {
-  rm -rf "${CONTEXT_DIR}" > /dev/null
+  rm -rf "${TMP_CONTEXT_DIR}" > /dev/null
   rm -rf "${TMP_DIR}" > /dev/null;
 }
 
@@ -82,6 +81,7 @@ show_use_long()
 
 script_path()
 {
+  local SCRIPT_NAME=cyber-dojo
   local STRAIGHT_PATH="${MY_DIR}/../../cyber-dojo/commander/${SCRIPT_NAME}"
   local CURLED_PATH="${TMP_DIR}/${SCRIPT_NAME}"
 
@@ -121,7 +121,7 @@ build_image()
 
   # Copy the docker/ dir into a new temporary context-dir
   # so we can overwrite its Dockerfile.
-  cp -R "$(src_dir_abs)/docker" "${CONTEXT_DIR}"
+  cp -R "$(src_dir_abs)/docker" "${TMP_CONTEXT_DIR}"
 
   # Overwrite the Dockerfile with one containing
   # extra commands to fulfil the runner's requirements.
@@ -132,17 +132,17 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojo/dockerfile_augmenter \
     > \
-      "${CONTEXT_DIR}/Dockerfile"
+      "${TMP_CONTEXT_DIR}/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
   echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
-  cat "${CONTEXT_DIR}/Dockerfile"
+  cat "${TMP_CONTEXT_DIR}/Dockerfile"
   echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
 
   # Build the augmented docker-image.
   docker build \
     --tag "${IMAGE_NAME}" \
-    "${CONTEXT_DIR}/docker"
+    "${TMP_CONTEXT_DIR}/docker"
 }
 
 # - - - - - - - - - - - - - - - - - -
