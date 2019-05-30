@@ -204,7 +204,7 @@ notify_dependent_repos()
 # - - - - - - - - - - - - - - - - - -
 
 check_use $*
-
+echo
 banner "Trying to create docker-image $(image_name)"
 build_image
 banner "Successfully created docker-image $(image_name)"
@@ -218,7 +218,6 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
   gap
   banner 'Checking red->amber->green progression'
   #...TODO (will use cyber-dojo/hiker service)
-  gap
 fi
 #else
 #  ./check_version.sh
@@ -236,3 +235,5 @@ if on_CI && ! CI_cron_job && ! testing_myself; then
   notify_dependent_repos
   banner 'Successfully notified dependent repos'
 fi
+
+echo
