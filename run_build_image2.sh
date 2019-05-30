@@ -162,10 +162,10 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojo/dockerfile_augmenter \
     > \
-      "${TMP_CONTEXT_DIR}/Dockerfile"
+      "${TMP_CONTEXT_DIR}/docker/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "${TMP_CONTEXT_DIR}/Dockerfile"
+  cat "${TMP_CONTEXT_DIR}/docker/Dockerfile"
   echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
   # Build the augmented docker-image.
