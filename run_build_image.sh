@@ -218,10 +218,9 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
   gap
   banner 'Checking red->amber->green progression'
   #...TODO (will use cyber-dojo/hiker service)
+else
+  "${SRC_DIR}/check_version.sh"
 fi
-#else
-#  ./check_version.sh
-#fi
 
 if on_CI && ! CI_cron_job && ! testing_myself; then
   gap
