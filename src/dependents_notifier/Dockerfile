@@ -18,5 +18,4 @@ RUN apk --update add --virtual build-dependencies build-base \
 
 COPY .  /app
 
-ENTRYPOINT [ "ruby", "--verbose", "/app/notify.rb" ]
-# ENTRYPOINT [ "ruby", "/app/notify.rb" ]
+ENTRYPOINT [ "ruby", "/app/notify.rb" ]
