@@ -110,15 +110,19 @@ src_dir_abs()
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
+image_name()
+{
+  docker run \
+    --interactive \
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+    cyberdojo/image_namer
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
 build_image()
 {
-  # Find the name of the docker-image.
-  local IMAGE_NAME=$(docker run \
-    --rm \
-    --interactive \
-    --volume "$(src_dir_abs):/data:ro" \
-    cyberdojo/image_namer)
-
   # Copy the docker/ dir into a new temporary context-dir
   # so we can overwrite its Dockerfile.
   cp -R "$(src_dir_abs)/docker" "${TMP_CONTEXT_DIR}"
@@ -127,8 +131,9 @@ build_image()
   # extra commands to fulfil the runner's requirements.
   cat "$(src_dir_abs)/docker/Dockerfile" \
     | \
-      docker run --rm \
+      docker run \
         --interactive \
+        --rm \
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojo/dockerfile_augmenter \
     > \
@@ -141,7 +146,7 @@ build_image()
 
   # Build the augmented docker-image.
   docker build \
-    --tag "${IMAGE_NAME}" \
+    --tag "$(image_name)" \
     "${TMP_CONTEXT_DIR}/docker"
 }
 
@@ -159,6 +164,8 @@ CI_cron_job()
 
 notify_dependents()
 {
+  # TODO: drop need for volume-mount of docker.sock
+  # TODO: change to FROM cyberdojo/ruby-base
   docker run \
     --env DOCKER_USERNAME \
     --env DOCKER_PASSWORD \
@@ -191,6 +198,6 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
 fi
 
 if on_CI && ! CI_cron_job; then
-  #TODO: docker login, docker push IMAGE_NAME, docker logout HERE
+  #TODO: docker login, docker push $(image_name), docker logout HERE
   notify_dependents
 fi
