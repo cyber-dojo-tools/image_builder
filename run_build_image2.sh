@@ -7,7 +7,7 @@ set -e
 #   o) builds their image
 #   o) tests it
 #   o) pushes it to dockerhub
-#   o) notifies any dependent repos 
+#   o) notifies any dependent repos
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
@@ -167,13 +167,15 @@ CI_cron_job()
   [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
 }
 
+testing_myself()
+{
+  [ "${TRAVIS_REPO_SLUG}" = 'cyber-dojo-languages/image_builder' ]
+}
+
 notify_dependent_repos()
 {
   docker run \
     --env GITHUB_TOKEN \
-    --env TRAVIS \
-    --env TRAVIS_EVENT_TYPE \
-    --env TRAVIS_REPO_SLUG \
     --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
@@ -197,9 +199,7 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
   #...TODO (will use cyber-dojo/hiker service)
 fi
 
-echo "TRAVIS_REPO_SLUG=:${TRAVIS_REPO_SLUG}:"
-
-if on_CI && ! CI_cron_job; then
+if on_CI && ! CI_cron_job && ! testing_myself; then
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
   docker push $(image_name)
   docker logout

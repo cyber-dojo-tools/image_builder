@@ -3,6 +3,11 @@ require_relative 'failed'
 require_relative 'print_to'
 require 'json'
 
+# The Dockerfile installs
+#   o) curl
+#   o) the Travis gem
+#   o) the /app/post_trigger.sh script
+
 class Travis
 
   def initialize(triple)
