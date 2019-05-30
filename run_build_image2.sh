@@ -2,8 +2,12 @@
 set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This script is curl'd and run in the Travis/CircleCI scripts
-# of all cyber-dojo-language (github org) repos.
+# This script is curl'd and run in the Travis/CircleCI
+# scripts of all cyber-dojo-language repos. It
+#   o) builds their image
+#   o) tests it
+#   o) pushes it to dockerhub
+#   o) notifies any dependent repos 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
@@ -81,21 +85,22 @@ show_use_long()
 
 script_path()
 {
-  local SCRIPT_NAME=cyber-dojo
-  local STRAIGHT_PATH="${MY_DIR}/../../cyber-dojo/commander/${SCRIPT_NAME}"
-  local CURLED_PATH="${TMP_DIR}/${SCRIPT_NAME}"
+  local script_name=cyber-dojo
+  # Using local script is handy when offline
+  local straight_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
+  local curled_path="${TMP_DIR}/${script_name}"
 
-  if [ -f "${STRAIGHT_PATH}" ]; then
-    echo "${STRAIGHT_PATH}"
-  elif [ ! -f "${CURLED_PATH}" ]; then
-    local GITHUB_ORG=https://raw.githubusercontent.com/cyber-dojo
-    local REPO_NAME=commander
-    local URL="${GITHUB_ORG}/${REPO_NAME}/master/${SCRIPT_NAME}"
-    curl --silent --fail "${URL}" > "${CURLED_PATH}"
-    chmod 700 "${CURLED_PATH}"
-    echo "${CURLED_PATH}"
+  if [ -f "${straight_path}" ]; then
+    echo "${straight_path}"
+  elif [ ! -f "${curled_path}" ]; then
+    local github_org=https://raw.githubusercontent.com/cyber-dojo
+    local repo_name=commander
+    local url="${github_org}/${repo_name}/master/${script_name}"
+    curl --silent --fail "${url}" > "${curled_path}"
+    chmod 700 "${curled_path}"
+    echo "${curled_path}"
   else
-    echo "${CURLED_PATH}"
+    echo "${curled_path}"
   fi
 }
 
@@ -191,6 +196,8 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
   echo 'checking red->amber->green progression...'
   #...TODO (will use cyber-dojo/hiker service)
 fi
+
+echo "TRAVIS_REPO_SLUG=:${TRAVIS_REPO_SLUG}:"
 
 if on_CI && ! CI_cron_job; then
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
