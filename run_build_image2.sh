@@ -30,6 +30,26 @@ trap exit_handler INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
+gap()
+{
+  for i in {1..5}; do echo '.'; done
+}
+
+line()
+{
+  for i in {1..80}; do echo -n '='; done
+  echo
+}
+
+banner()
+{
+  line
+  echo "${1}"
+  line
+}
+
+# - - - - - - - - - - - - - - - - - -
+
 check_use()
 {
   if [ "${1}" == '--help' ]; then
@@ -86,7 +106,7 @@ show_use_long()
 script_path()
 {
   local script_name=cyber-dojo
-  # Using local script is handy when offline
+  # Running locally when offline is handy sometimes
   local straight_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
   local curled_path="${TMP_DIR}/${script_name}"
 
@@ -145,9 +165,8 @@ build_image()
       "${TMP_CONTEXT_DIR}/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
   cat "${TMP_CONTEXT_DIR}/Dockerfile"
-  echo '# ~~~~~~~~~~~~~~~~~~~~~~~~~'
+  echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
   # Build the augmented docker-image.
   docker build \
@@ -185,23 +204,35 @@ notify_dependent_repos()
 # - - - - - - - - - - - - - - - - - -
 
 check_use $*
-echo "# trying to create docker-image..."
+
+banner "Trying to create docker-image $(image_name)"
 build_image
-echo '# docker-image can be created'
+banner "Successfully created docker-image $(image_name)"
+gap
 
 if [ -d "$(src_dir_abs)/start_point" ]; then
-  echo "# trying to create a start-point image..."
+  banner "Trying to create a start-point image..."
   $(script_path) start-point create jj1 --languages "$(src_dir_abs)"
   $(script_path) start-point rm jj1
-  echo '# start-point image can be created'
-
-  echo 'checking red->amber->green progression...'
+  banner 'Successfully created start-point image'
+  gap
+  banner 'Checking red->amber->green progression'
   #...TODO (will use cyber-dojo/hiker service)
+  gap
 fi
+#else
+#  ./check_version.sh
+#fi
 
 if on_CI && ! CI_cron_job && ! testing_myself; then
+  gap
+  banner "Trying to push $(image_name) to dockerhub"
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
   docker push $(image_name)
   docker logout
+  banner "Successfully pushed $(image_name) to dockerhub"
+  gap
+  banner 'Trying to notify dependent repos'
   notify_dependent_repos
+  banner 'Successfully notified dependent repos'
 fi
