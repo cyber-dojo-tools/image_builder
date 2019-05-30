@@ -162,20 +162,20 @@ CI_cron_job()
   [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
 }
 
-notify_dependents()
+notify_dependent_repos()
 {
   # TODO: drop need for volume-mount of docker.sock
   # TODO: change to FROM cyberdojo/ruby-base
+  # --volume /var/run/docker.sock:/var/run/docker.sock \
+  #--env DOCKER_USERNAME \
+  #--env DOCKER_PASSWORD \
   docker run \
-    --env DOCKER_USERNAME \
-    --env DOCKER_PASSWORD \
     --env GITHUB_TOKEN \
     --env TRAVIS \
     --env TRAVIS_EVENT_TYPE \
     --env TRAVIS_REPO_SLUG \
     --interactive \
     --rm \
-    --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$(src_dir_abs):/data:ro" \
       cyberdojo/dependents_notifier
 }
@@ -198,6 +198,8 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
 fi
 
 if on_CI && ! CI_cron_job; then
-  #TODO: docker login, docker push $(image_name), docker logout HERE
-  notify_dependents
+  echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+  docker push $(image_name)
+  docker logout
+  notify_dependent_repos
 fi

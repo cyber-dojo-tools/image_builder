@@ -1,5 +1,5 @@
 require_relative 'assert_system'
-require_relative 'docker_hub'
+#require_relative 'docker_hub'
 require_relative 'failed'
 require_relative 'print_to'
 require 'json'
@@ -19,7 +19,7 @@ class Travis
     end
   end
 
-  def push_image_to_dockerhub
+  def XX_push_image_to_dockerhub
     DockerHub.new.push(image_name)
   end
 
