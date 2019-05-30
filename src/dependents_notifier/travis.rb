@@ -125,7 +125,7 @@ class Travis
   def get_token
     login
     begin
-      token = assert_backtick('travis token --org').strip
+      assert_backtick('travis token --org').strip # prints the token
     ensure
       logout
     end
