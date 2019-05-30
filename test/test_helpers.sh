@@ -21,7 +21,7 @@ repo_url()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-assertBuildImage()
+assert_build_image()
 {
   build_image $1
   local ok=$?
@@ -40,36 +40,55 @@ build_image()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-assertAlpineImageBuilt()
+image_name_from_stdout()
 {
-  assertStdoutIncludes "# Alpine based image built OK"
+  local stdout=$(cat "${stdoutF}")
+  [[ "${stdout}" =~ Successfully[[:space:]]created[[:space:]]docker-image[[:space:]]([^[:space:]]+) ]] && echo ${BASH_REMATCH[1]}
 }
 
-assertUbuntuImageBuilt()
+assert_image_OS()
 {
-  assertStdoutIncludes '# Ubuntu based image built OK'
+  local image_name="${1}"
+  local os="${2}"
+  local etc_issue=$(docker run --rm -i "${image_name}" bash -c 'cat /etc/issue')
+  local diagnostic="${image_name} is NOT based on ${os}...(${etc_issue})"
+  grep --silent "${os}" <<< "${etc_issue}"
+  assertTrue "${diagnostic}" $?
+  echo -e "\t- image-name is ${image_name}"
+  echo -e "\t- the OS is ${os}"
+}
+
+assert_sandbox_user_in()
+{
+  local image_name="${1}"
+  local sandbox_user='sandbox:x:41966:51966:'
+  local etc_passwd=$(docker run --rm -i "${image_name}" bash -c 'cat /etc/passwd')
+  local diagnostic="${image_name} does NOT have a sandbox user...${etc_passwd}"
+  grep --silent "${sandbox_user}" <<< "${etc_passwd}"
+  assertTrue "${diagnostic}" $?
+  echo -e "\t- it has a sandbox user"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-assertSandboxUserPresent()
+assert_start_point_created()
 {
-  assertStdoutIncludes '# show_sandbox_user'
-  assertStdoutIncludes '# 41966:51966 == uid:gid(sandbox)'
+  local stdout=$(cat "${stdoutF}")
+  local message='Successfully created start-point image'
+  local diagnostic="start-point NOT created...${stdout}"
+  grep --silent "${message}" <<< "${stdout}"
+  assertTrue "${diagnostic}" $?
+  echo -e "\t- start-point created ok"
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-readonly startPointCreatedMessage='start-point image can be created'
-
-assertStartPointCreated()
+refute_start_point_created()
 {
-  assertStdoutIncludes "# ${startPointCreatedMessage}"
-}
-
-refuteStartPointCreated()
-{
-  refuteStdoutIncludes "# ${startPointCreatedMessage}"
+  local stdout=$(cat "${stdoutF}")
+  local message='Successfully created start-point image'
+  local diagnostic="start-point NOT created...${stdout}"
+  grep --silent "${message}" <<< "${stdout}"
+  assertFalse "${diagnostic}" $?
+  echo -e "\t- start-point not created as expected"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -98,5 +117,3 @@ refuteRedAmberGreen()
   refuteStdoutIncludes "${amberMessageOK}"
   refuteStdoutIncludes "${greenMessageOK}"
 }
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
