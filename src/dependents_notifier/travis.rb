@@ -19,9 +19,9 @@ class Travis
     end
   end
 
-  def XX_push_image_to_dockerhub
-    DockerHub.new.push(image_name)
-  end
+  #def XX_push_image_to_dockerhub
+  #  DockerHub.new.push(image_name)
+  #end
 
   def trigger_dependents
     trigger(dependent_repos)
