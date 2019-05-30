@@ -79,8 +79,5 @@ if on_cdl_travis? && !travis_cron_job?
   }
   travis = Travis.new(triple)
   travis.validate_triple
-  # travis.push_image_to_dockerhub
   travis.trigger_dependents
 end
-
-puts "Hello from notify.rb"

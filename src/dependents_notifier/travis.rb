@@ -1,5 +1,4 @@
 require_relative 'assert_system'
-#require_relative 'docker_hub'
 require_relative 'failed'
 require_relative 'print_to'
 require 'json'
@@ -18,10 +17,6 @@ class Travis
       exit false
     end
   end
-
-  #def XX_push_image_to_dockerhub
-  #  DockerHub.new.push(image_name)
-  #end
 
   def trigger_dependents
     trigger(dependent_repos)

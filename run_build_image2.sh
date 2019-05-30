@@ -164,11 +164,6 @@ CI_cron_job()
 
 notify_dependent_repos()
 {
-  # TODO: drop need for volume-mount of docker.sock
-  # TODO: change to FROM cyberdojo/ruby-base
-  # --volume /var/run/docker.sock:/var/run/docker.sock \
-  #--env DOCKER_USERNAME \
-  #--env DOCKER_PASSWORD \
   docker run \
     --env GITHUB_TOKEN \
     --env TRAVIS \
