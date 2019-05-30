@@ -4,8 +4,10 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 repo_url()
 {
   local name="${1}"
+  # Running locally when offline is handy sometimes
   local straight_path="${ROOT_DIR}/../${name}"
   local curled_path="${SHUNIT_TMPDIR}/${name}"
+
   if [ -d "${straight_path}" ]; then
     echo "${straight_path}"
   elif [ ! -d "${curled_path}" ]; then
@@ -34,8 +36,8 @@ assert_build_image()
 build_image()
 {
   local src_dir=$1
-  #${ROOT_DIR}/run_build_image2.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
-  ${ROOT_DIR}/run_build_image2.sh ${src_dir} > ${stdoutF} 2> ${stderrF}
+  #${ROOT_DIR}/run_build_image.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
+  ${ROOT_DIR}/run_build_image.sh ${src_dir} > ${stdoutF} 2> ${stderrF}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,13 +91,6 @@ refute_start_point_created()
   grep --silent "${message}" <<< "${stdout}"
   assertFalse "${diagnostic}" $?
   echo -e "\t- start-point not created as expected"
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-assertStartPointRedAmberGreen()
-{
-  assertRedAmberGreen
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

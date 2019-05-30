@@ -3,12 +3,6 @@ language: generic
 
 script:
     - set -e
-    - #./src/build_tools.sh
-    - #echo ${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
-    - #./src/push_tools.sh
-    -
     - ./pipe_build_test.sh
     - echo ${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
     - ./src/push_tools.sh
-    -
-    - #./sh/push_image_builder.sh
