@@ -1,8 +1,0 @@
-#-----Ignore everything
-
-*
-
-#-----!Except these files
-
-!docker-compose.yml
-!outer_main.rb
