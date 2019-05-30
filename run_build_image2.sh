@@ -205,13 +205,13 @@ notify_dependent_repos()
 
 check_use $*
 echo
-banner "Trying to create docker-image $(image_name)"
+banner "Creating docker-image $(image_name)"
 build_image
 banner "Successfully created docker-image $(image_name)"
 gap
 
 if [ -d "$(src_dir_abs)/start_point" ]; then
-  banner "Trying to create a start-point image..."
+  banner "Creating a start-point image..."
   $(script_path) start-point create jj1 --languages "$(src_dir_abs)"
   $(script_path) start-point rm jj1
   banner 'Successfully created start-point image'
@@ -225,13 +225,13 @@ fi
 
 if on_CI && ! CI_cron_job && ! testing_myself; then
   gap
-  banner "Trying to push $(image_name) to dockerhub"
+  banner "Pushing $(image_name) to dockerhub"
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
   docker push $(image_name)
   docker logout
   banner "Successfully pushed $(image_name) to dockerhub"
   gap
-  banner 'Trying to notify dependent repos'
+  banner 'Notifying dependent repos'
   notify_dependent_repos
   banner 'Successfully notified dependent repos'
 fi
