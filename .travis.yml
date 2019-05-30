@@ -1,5 +1,10 @@
 services: docker
 language: generic
+branches:
+  only:
+  - master
+git:
+  depth: 5
 
 script:
     - set -e
