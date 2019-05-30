@@ -3,7 +3,7 @@
 echo '-----------------------------------------'
 echo 'testing test-frameworks'
 
-test_alpine()
+X_test_alpine()
 {
   echo '  java-junit'
   assertBuildImage $(repo_url java-junit)
@@ -15,7 +15,7 @@ test_alpine()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-test_ubuntu()
+X_test_ubuntu()
 {
   echo '  perl-testsimple'
   assertBuildImage $(repo_url perl-testsimple)
@@ -27,7 +27,7 @@ test_ubuntu()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-XX_test_6_times_9_options()
+X_test_6_times_9_options()
 {
   echo '  asm-assert'
   assertBuildImage $(repo_url asm-assert)

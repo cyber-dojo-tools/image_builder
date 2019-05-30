@@ -3,20 +3,19 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 
 repo_url()
 {
-  local NAME="${1}"
-  local STRAIGHT_PATH=`absPath "${ROOT_DIR}/../${1}"`
-  local CURLED_PATH="${SHUNIT_TMPDIR}/${1}"
-  if [ -d "${STRAIGHT_PATH}" ]; then
-    echo "${STRAIGHT_PATH}"
-  elif [ ! -d "${CURLED_PATH}" ]; then
-    local GITHUB_ORG=https://github.com/cyber-dojo-languages
-    local REPO_NAME="${1}.git"
-    local REPO_URL="${GITHUB_ORG}/${REPO_NAME}"
-    mkdir -p "${CURLED_PATH}"
-    git clone --single-branch --branch master --depth 1 "${REPO_URL}" "${CURLED_PATH}"
-    echo "${CURLED_PATH}"
+  local name="${1}"
+  local straight_path="${ROOT_DIR}/../${name}"
+  local curled_path="${SHUNIT_TMPDIR}/${name}"
+  if [ -d "${straight_path}" ]; then
+    echo "${straight_path}"
+  elif [ ! -d "${curled_path}" ]; then
+    local github_org=https://github.com/cyber-dojo-languages
+    local repo_url="${github_org}/${name}"
+    mkdir -p "${curled_path}"
+    git clone --single-branch --branch master --depth 1 "${repo_url}" "${curled_path}"
+    echo "${curled_path}"
   else
-    echo "${CURLED_PATH}"
+    echo "${curled_path}"
   fi
 }
 
@@ -25,13 +24,18 @@ repo_url()
 assertBuildImage()
 {
   build_image $1
-  assertTrue $?
+  local ok=$?
+  local nl=$'\n'
+  local stdout="<STDOUT>${newline}$(cat ${stdoutF})${newline}</STDOUT>${newline}"
+  local stderr="<STDERR>${newline}$(cat ${stderrF})${newline}</STDERR>${newline}"
+  assertTrue "${stdout}${stderr}" ${ok}
 }
 
 build_image()
 {
   local src_dir=$1
-  ${ROOT_DIR}/run_build_image.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
+  #${ROOT_DIR}/run_build_image2.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
+  ${ROOT_DIR}/run_build_image2.sh ${src_dir} > ${stdoutF} 2> ${stderrF}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

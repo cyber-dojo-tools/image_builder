@@ -3,23 +3,64 @@
 echo '-----------------------------------------'
 echo 'testing language-bases'
 
-test_alpine()
+image_name_from_stdout()
 {
-  echo '  java'
+  local stdout=$(cat "${stdoutF}")
+  [[ "${stdout}" =~ Successfully[[:space:]]created[[:space:]]docker-image[[:space:]]([^[:space:]]+) ]] && echo ${BASH_REMATCH[1]}
+}
+
+assertImageOS()
+{
+  local image_name="${1}"
+  local os="${2}"
+  local etc_issue=$(docker run --rm -i "${image_name}" bash -c 'cat /etc/issue')
+  local diagnostic="${image_name} is NOT based on ${os}...(${etc_issue})"
+  grep --silent "${os}" <<< "${etc_issue}"
+  assertTrue "${diagnostic}" $?
+  echo -e "\t-is based on ${os}"
+}
+
+assertSandboxUserIn()
+{
+  local image_name="${1}"
+  local sandbox_user='sandbox:x:41966:51966:'
+  local etc_passwd=$(docker run --rm -i "${image_name}" bash -c 'cat /etc/passwd')
+  local diagnostic="${image_name} does NOT have a sandbox user...${etc_passwd}"
+  grep --silent "${sandbox_user}" <<< "${etc_passwd}"
+  assertTrue "${diagnostic}" $?
+  echo -e "\t-has a sandbox user"
+}
+
+test_Alpine()
+{
   assertBuildImage $(repo_url java)
-  assertAlpineImageBuilt
-  assertSandboxUserPresent
-  refuteStartPointCreated
+  local image_name=$(image_name_from_stdout)
+  echo -e "\timage-name==${image_name}"
+  assertImageOS "${image_name}" Alpine
+  assertSandboxUserIn "${image_name}"
+  #refuteStartPointCreated
   #refuteRedAmberGreen
 }
 
-test_ubuntu()
+X_test_Ubuntu()
 {
-  echo '  perl'
   assertBuildImage $(repo_url perl)
-  assertUbuntuImageBuilt
-  assertSandboxUserPresent
-  refuteStartPointCreated
+  local image_name=$(image_name_from_stdout)
+  echo -e "\t${image_name}"
+  assertImageOS "${image_name}" Ubuntu
+  assertSandboxUserIn "${image_name}"
+  #refuteStartPointCreated
+  #refuteRedAmberGreen
+}
+
+X_test_Debian()
+{
+  assertBuildImage $(repo_url python)
+  local image_name=$(image_name_from_stdout)
+  echo -e "\t${image_name}"
+  assertImageOS "${image_name}" Debian
+  assertSandboxUserIn "${image_name}"
+  #refuteStartPointCreated
   #refuteRedAmberGreen
 }
 

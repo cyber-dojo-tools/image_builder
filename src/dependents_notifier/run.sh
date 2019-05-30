@@ -1,9 +1,10 @@
 #!/bin/bash
+set -e
 
-# Writes the name of the docker-image to stdout.
-# Folded into main script.
-
-readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
+if [ "${1}" = '' ]; then
+  echo 'Use: run.sh DIR'
+  exit 1
+fi
 
 absPath()
 {
@@ -14,7 +15,8 @@ absPath()
 readonly START_POINT_DIR=`absPath "${1}"`
 
 docker run \
-  --rm \
+  --env GITHUB_TOKEN \
   --interactive \
+  --rm \
   --volume "${START_POINT_DIR}:/data:ro" \
-  cyberdojotools/image_namer
+    cyberdojo/dependents_notifier
