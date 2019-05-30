@@ -2,15 +2,6 @@
 set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Checks cyber-dojo start-point source living in SRC_DIR
-#
-#  o) build a docker-image satisfying runner's requirements
-#     /docker
-#  o) check start-point files are valid
-#     /start_point
-#  o) check red-amber-green progression of starting files
-#     /docker and /start_point
-#
 # This script is curl'd and run in the Travis/CircleCI scripts
 # of all cyber-dojo-language (github org) repos.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -40,11 +31,16 @@ check_use()
 {
   if [ "${1}" == '--help' ]; then
     show_use_long
-    exit 1
+    exit 0
   fi
   if [ ! -d "${SRC_DIR}" ]; then
     show_use_short
     echo "error: SRC_DIR <${SRC_DIR}> does not exist"
+    exit 1
+  fi
+  if [ ! -d "${SRC_DIR}/docker" ]; then
+    show_use_short
+    echo "error: ${SRC_DIR}/docker does not exist"
     exit 1
   fi
 }
@@ -56,6 +52,7 @@ show_use_short()
   echo "Use: $(basename $0) [SRC_DIR|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
+  echo '  SRC_DIR must have a docker/ sub-dir'
   echo ''
 }
 
@@ -64,28 +61,18 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Creates the docker-image'
-  echo '-----------------------'
-  echo 'If SRC_DIR/docker/ exists this script will verify a docker-image'
-  echo 'can be created from its Dockerfile, with suitable adjustments to'
-  echo "fulfil to the runner's requirements."
-  echo 'If SRC_DIR/start_point/manifest.json exists the name of the'
-  echo 'docker-image will be taken from it, otherwise from'
-  echo 'SRC_DIR/docker/image_name.json'
+  echo 'Attempts to build a docker-image from SRC_DIR/docker/Dockerfile'
+  echo "adjusted to fulfil the runner service's requirements."
+  echo 'If SRC_DIR/start_point/manifest.json exists the name of the docker-image'
+  echo 'will be taken from it, otherwise from SRC_DIR/docker/image_name.json'
   echo
-  echo 'Creates the start-point image'
-  echo '----------------------------'
-  echo 'If SRC_DIR/start_point/ exists this script will verify a cyber-dojo'
-  echo 'start-point image can be created from SRC_DIR, which must be a git-repo,'
-  echo 'viz'
-  echo '  $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
-  echo
-  echo 'Checks the red->amber->green start files progression'
-  echo '---------------------------------------------------'
-  echo 'If SRC_DIR/docker/ and SRC_DIR/start_point/ exist this script will verify'
-  echo 'o) the starting-files give a red traffic-light'
-  echo 'o) with an introduced syntax error, give an amber traffic-light'
-  echo "o) with '9 * 6' replaced by '9 * 7', give a green traffic-light"
+  echo 'If SRC_DIR/start_point/ exists:'
+  echo '  1. Attempts to build a start-point image from the git-cloneable SRC_DIR.'
+  echo '     $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
+  echo '  2. Verifies the red->amber->green starting files progression'
+  echo '     o) the starting-files give a red traffic-light'
+  echo '     o) with an introduced syntax error, give an amber traffic-light'
+  echo "     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light"
   echo
 }
 
@@ -188,31 +175,13 @@ notify_dependents()
 
 # - - - - - - - - - - - - - - - - - -
 
-docker_dir()
-{
-  echo "${SRC_DIR}/docker"
-}
-
-start_point_dir()
-{
-  echo "${SRC_DIR}/start_point"
-}
-
-# - - - - - - - - - - - - - - - - - -
-
 check_use $*
 echo "Running with $(script_path)"
-
-if [ ! -d "$(docker_dir)" ]; then
-  echo "error: $(docker_dir)/ does not exist"
-  exit 1
-fi
-
 echo "# trying to create docker-image..."
 build_image
 echo '# docker-image can be created'
 
-if [ -d "$(start_point_dir)" ]; then
+if [ -d "${SRC_DIR}/start_point" ]; then
   echo "# trying to create a start-point image..."
   $(script_path) start-point create jj1 --languages "${SRC_DIR}"
   $(script_path) start-point rm jj1
