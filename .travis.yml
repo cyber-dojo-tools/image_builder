@@ -8,7 +8,6 @@ git:
 
 script:
     - set -e
-    - ./src/build_tools.sh
+    - ./pipe_build_test.sh
     - echo ${DOCKER_PASSWORD} | docker login --username ${DOCKER_USERNAME} --password-stdin
     - ./src/push_tools.sh
-    - ./pipe_build_test.sh && ./sh/push_image_builder.sh

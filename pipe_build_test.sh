@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-readonly SH_DIR="$( cd "$( dirname "${0}" )" && pwd )/sh"
+readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 
-${SH_DIR}/build_image_builder.sh
-${SH_DIR}/test_image_builder.sh
+"${ROOT_DIR}/src/build_tools.sh"
+"${ROOT_DIR}/test/run.sh"

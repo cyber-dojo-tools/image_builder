@@ -2,40 +2,70 @@
 set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Checks cyber-dojo start-point source living in SRC_DIR
-#
-#  o) build a docker-image satisfying runner's requirements
-#     /docker
-#  o) check start-point files are valid
-#     /start_point
-#  o) check red-amber-green progression of starting files
-#     /docker and /start_point
-#
-# This script is curl'd and run in the Travis/CircleCI scripts
-# of all cyber-dojo-language (github org) repos.
+# This script is curl'd and run in the Travis/CircleCI
+# scripts of all cyber-dojo-language repos. It
+#   o) builds their image
+#   o) tests it
+#   o) pushes it to dockerhub
+#   o) notifies any dependent repos
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# assumes following dir layout if running locally and offline.
-# .../cyber-dojo/commander
-# .../cyber-dojo-languages/image_builder
-# .../cyber-dojo-languages/gcc-assert
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
-readonly TMP_DIR=$(mktemp -d /tmp/cyber-dojo-custom.XXXXXXXXX)
+readonly TMP_DIR=$(mktemp -d)
+readonly TMP_CONTEXT_DIR=$(mktemp -d)
 
-readonly NETWORK=src_dir_network  # will die
-readonly NAME=src_dir_container   # will die
-readonly SCRIPT_NAME=cyber-dojo
+remove_tmp_dirs()
+{
+  rm -rf "${TMP_CONTEXT_DIR}" > /dev/null
+  rm -rf "${TMP_DIR}" > /dev/null;
+}
+
+exit_handler()
+{
+  remove_tmp_dirs
+}
+
+trap exit_handler INT EXIT
+
+# - - - - - - - - - - - - - - - - - -
+
+gap()
+{
+  for i in {1..5}; do echo '.'; done
+}
+
+line()
+{
+  for i in {1..80}; do echo -n '='; done
+  echo
+}
+
+banner()
+{
+  line
+  echo "${1}"
+  line
+}
+
+# - - - - - - - - - - - - - - - - - -
 
 check_use()
 {
   if [ "${1}" == '--help' ]; then
     show_use_long
-    exit 1
+    exit 0
   fi
   if [ ! -d "${SRC_DIR}" ]; then
     show_use_short
-    echo "error: SRC_DIR <${SRC_DIR}> does not exist"
+    echo 'error: ${SRC_DIR} does not exist'
+    echo "${SRC_DIR}"
+    exit 1
+  fi
+  if [ ! -d "${SRC_DIR}/docker" ]; then
+    show_use_short
+    echo 'error: ${SRC_DIR}/docker does not exist'
+    echo "${SRC_DIR}/docker"
     exit 1
   fi
 }
@@ -47,12 +77,8 @@ show_use_short()
   echo "Use: $(basename $0) [SRC_DIR|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
-  echo '  SRC_DIR must be an absolute path'
+  echo '  SRC_DIR must have a docker/ sub-dir'
   echo ''
-  # TODO?: SRC_DIR must be absolute because you cant create
-  #        a docker-volume from a relative path.
-  #        Check if $SRC_DIR is relative and if it is
-  #        expand it based on PWD ?
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -60,203 +86,154 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Creates the docker-image'
-  echo '-----------------------'
-  echo 'If SRC_DIR/docker/ exists this script will verify a docker-image'
-  echo 'can be created from its Dockerfile, with suitable adjustments to'
-  echo "fulfil to the runner's requirements."
-  echo 'If SRC_DIR/start_point/manifest.json exists the name of the'
-  echo 'docker-image will be taken from it, otherwise from'
-  echo 'SRC_DIR/docker/image_name.json'
+  echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile'
+  echo "adjusted to fulfil the runner service's requirements."
+  echo 'If ${SRC_DIR}/start_point/manifest.json exists the name of the docker-image'
+  echo 'will be taken from it, otherwise from ${SRC_DIR}/docker/image_name.json'
   echo
-  echo 'Creates the start-point image'
-  echo '----------------------------'
-  echo 'If SRC_DIR/start_point/ exists this script will verify a cyber-dojo'
-  echo 'start-point image can be created from SRC_DIR, which must be a git-repo,'
-  echo 'viz'
-  echo '  $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
+  echo 'If ${SRC_DIR}/start_point/ exists:'
+  echo '  1. Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'
+  echo '     $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
+  echo '  2. Verifies the red->amber->green starting files progression'
+  echo '     o) the starting-files give a red traffic-light'
+  echo '     o) with an introduced syntax error, give an amber traffic-light'
+  echo "     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light"
   echo
-  echo 'Checks the red->amber->green start files progression'
-  echo '---------------------------------------------------'
-  echo 'If SRC_DIR/docker/ and SRC_DIR/start_point/ exist this script will verify'
-  echo 'o) the starting-files give a red traffic-light'
-  echo 'o) with an introduced syntax error, give an amber traffic-light'
-  echo "o) with '9 * 6' replaced by '9 * 7', give a green traffic-light"
-  echo
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
-docker_dir()
-{
-  echo "${SRC_DIR}/docker"
-}
-
-docker_dir_exists()
-{
-  [ -d "$(docker_dir)" ]
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
-start_point_dir()
-{
-  echo "${SRC_DIR}/start_point"
-}
-
-start_point_dir_exists()
-{
-  [ -d "$(start_point_dir)" ]
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-
-absPath()
-{
-  cd "$(dirname "$1")"
-  printf "%s/%s\n" "$(pwd)" "$(basename "$1")"
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
 script_path()
 {
-  local STRAIGHT_PATH=`absPath "${MY_DIR}/../../cyber-dojo/commander/${SCRIPT_NAME}"`
-  local CURLED_PATH="${TMP_DIR}/${SCRIPT_NAME}"
+  local -r script_name=cyber-dojo
+  # Running locally when offline is handy sometimes
+  local -r straight_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
+  local -r curled_path="${TMP_DIR}/${script_name}"
 
-  if [ -f "${STRAIGHT_PATH}" ]; then
-    echo "${STRAIGHT_PATH}"
-  elif [ ! -f "${CURLED_PATH}" ]; then
-    local GITHUB_ORG=https://raw.githubusercontent.com/cyber-dojo
-    local REPO_NAME=commander
-    local URL="${GITHUB_ORG}/${REPO_NAME}/master/${SCRIPT_NAME}"
-    curl --silent --fail "${URL}" > "${CURLED_PATH}"
-    chmod 700 "${CURLED_PATH}"
-    echo "${CURLED_PATH}"
+  if [ -f "${straight_path}" ]; then
+    local -r env_var=COMMANDER_IMAGE=cyberdojo/commander:latest
+    echo "${env_var} ${straight_path}"
+  elif [ ! -f "${curled_path}" ]; then
+    local -r github_org=https://raw.githubusercontent.com/cyber-dojo
+    local -r repo_name=commander
+    local -r url="${github_org}/${repo_name}/master/${script_name}"
+    curl --silent --fail "${url}" > "${curled_path}"
+    chmod 700 "${curled_path}"
+    echo "${curled_path}"
   else
-    echo "${CURLED_PATH}"
+    echo "${curled_path}"
   fi
-}
-
-tmp_dir_remove()
-{
-  rm -rf ${TMP_DIR} > /dev/null;
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
-show_location()
+src_dir_abs()
 {
-  echo "Running with $(script_path)"
+  # docker volume-mounts cannot be relative
+  cd "$(dirname "${SRC_DIR}")"
+  printf "%s/%s\n" "$(pwd)" "$(basename "${SRC_DIR}")"
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
 
-network_create() # will die
-{
-  NETWORK_CREATED=false
-  docker network create ${NETWORK} > /dev/null
-  NETWORK_CREATED=true
-}
-
-network_remove() # will die
-{
-  if "${NETWORK_CREATED}" == "true"; then
-    echo 'clean-up: [docker network rm]'
-    docker network rm ${NETWORK} > /dev/null
-  fi
-}
-
-# - - - - - - - - - - - - - - - - - -
-
-volume_create() # will die
-{
-  # I create a data-volume-container which holds src-dir
-  # By default this lives on one network and the containers
-  # created _inside_ image_builder (from its docker-compose.yml file)
-  # live on a different network, and thus the later won't be able
-  # to see to the former. To solve this I'm putting the src-dir
-  # data-volume-container into its own dedicated network.
-  VOLUME_CREATED=false
-  docker create \
-    --volume=${SRC_DIR}:${SRC_DIR} \
-    --name=${NAME} \
-    --network=${NETWORK} \
-    cyberdojofoundation/image_builder \
-      /bin/true > /dev/null
-  VOLUME_CREATED=true
-}
-
-volume_remove() # will die
-{
-  if "${VOLUME_CREATED}" == "true"; then
-    echo 'clean-up: [docker volume rm]'
-    docker volume rm --force ${NAME} > /dev/null
-    docker rm ${NAME} > /dev/null
-  fi
-}
-
-# - - - - - - - - - - - - - - - - - -
-
-build_image() # will die
+image_name()
 {
   docker run \
-    --user=root \
-    --network=${NETWORK} \
-    --rm \
-    --tty \
-    --init \
     --interactive \
-    --env DOCKER_USERNAME \
-    --env DOCKER_PASSWORD \
-    --env GITHUB_TOKEN \
-    --env SRC_DIR=${SRC_DIR} \
-    --env TRAVIS \
-    --env TRAVIS_REPO_SLUG \
-    --env TRAVIS_EVENT_TYPE \
-    --volume=/var/run/docker.sock:/var/run/docker.sock \
-      cyberdojofoundation/image_builder \
-        /app/outer_main.rb $*
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+    cyberdojo/image_namer
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+
+build_image()
+{
+  # Copy the docker/ dir into a new temporary context-dir
+  # so we can overwrite its Dockerfile.
+  cp -R "$(src_dir_abs)/docker" "${TMP_CONTEXT_DIR}"
+
+  # Overwrite the Dockerfile with one containing
+  # extra commands to fulfil the runner's requirements.
+  cat "$(src_dir_abs)/docker/Dockerfile" \
+    | \
+      docker run \
+        --interactive \
+        --rm \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        cyberdojo/dockerfile_augmenter \
+    > \
+      "${TMP_CONTEXT_DIR}/docker/Dockerfile"
+
+  # Write new Dockerfile to stdout in case of debugging
+  cat "${TMP_CONTEXT_DIR}/docker/Dockerfile"
+  echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+  # Build the augmented docker-image.
+  docker build \
+    --tag "$(image_name)" \
+    "${TMP_CONTEXT_DIR}/docker"
 }
 
 # - - - - - - - - - - - - - - - - - -
 
-exit_handler()
+on_CI()
 {
-  tmp_dir_remove
-  volume_remove  # will die
-  network_remove # will die
+  [ "${TRAVIS}" = 'true' ]
+}
+
+CI_cron_job()
+{
+  [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
+}
+
+testing_myself()
+{
+  [ "${TRAVIS_REPO_SLUG}" = 'cyber-dojo-languages/image_builder' ]
+}
+
+notify_dependent_repos()
+{
+  docker run \
+    --env GITHUB_TOKEN \
+    --interactive \
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+      cyberdojo/dependents_notifier
 }
 
 # - - - - - - - - - - - - - - - - - -
 
 check_use $*
-show_location
+echo
+banner "Creating docker-image $(image_name)"
+build_image
+banner "Successfully created docker-image $(image_name)"
+gap
 
-# TODO: I think a docker/ dir HAS to exist...
-if docker_dir_exists; then
-  echo "# trying to create docker-image..."
-  # TODO: Embed and use build_image() from ./src/build_image.sh
-  trap exit_handler INT EXIT # TODO: move outside of if
-  volume_create
-  network_create
-  build_image $*
-  echo '# docker-image can be created'
-fi
-
-if start_point_dir_exists; then
-  echo "# trying to create a start-point image..."
-  $(script_path) start-point create jj1 --languages "${SRC_DIR}"
-  $(script_path) start-point rm jj1
-  echo '# start-point image can be created'
-fi
-
-if docker_dir_exists && start_point_dir_exists; then
-  echo "Checking red->amber->green progression..."
+if [ -d "$(src_dir_abs)/start_point" ]; then
+  banner "Creating a start-point image..."
+  eval $(script_path) start-point create jj1 --languages "$(src_dir_abs)"
+  eval $(script_path) start-point rm jj1
+  banner 'Successfully created start-point image'
+  gap
+  banner 'Checking red->amber->green progression'
   #...TODO (will use cyber-dojo/hiker service)
+else
+  "${SRC_DIR}/check_version.sh"
 fi
 
-#TODO
-#if on_CI && !cron_job; then
-#  ./src/notify_dependents.sh "${SRC_DIR}"
-#fi
+if on_CI && ! CI_cron_job && ! testing_myself; then
+  gap
+  banner "Pushing $(image_name) to dockerhub"
+  echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+  docker push $(image_name)
+  docker logout
+  banner "Successfully pushed $(image_name) to dockerhub"
+  gap
+  banner 'Notifying dependent repos'
+  notify_dependent_repos
+  banner 'Successfully notified dependent repos'
+fi
+
+echo

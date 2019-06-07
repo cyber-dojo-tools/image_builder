@@ -3,25 +3,21 @@
 echo '-----------------------------------------'
 echo 'testing language-bases'
 
-test_alpine()
+language_base_test()
 {
-  echo '  java'
-  assertBuildImage $(repo_url java)
-  assertAlpineImageBuilt
-  assertSandboxUserPresent
-  refuteStartPointCreated
-  #refuteRedAmberGreen
+  local os="${1}"
+  local name="${2}"
+  assert_build_image $(repo_url "${name}")
+  local image_name=$(image_name_from_stdout)
+  assert_image_OS "${image_name}" "${os}"
+  assert_sandbox_user_in "${image_name}"
+  refute_start_point_created
+  #refute_red_amber_green
 }
 
-test_ubuntu()
-{
-  echo '  perl'
-  assertBuildImage $(repo_url perl)
-  assertUbuntuImageBuilt
-  assertSandboxUserPresent
-  refuteStartPointCreated
-  #refuteRedAmberGreen
-}
+test_Alpine() { language_base_test Alpine java  ; }
+test_Ubuntu() { language_base_test Ubuntu perl  ; }
+test_Debian() { language_base_test Debian python; }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
