@@ -60,13 +60,13 @@ check_use()
     show_use_short
     echo 'error: ${SRC_DIR} does not exist'
     echo "${SRC_DIR}"
-    exit 1
+    exit 3
   fi
   if [ ! -d "${SRC_DIR}/docker" ]; then
     show_use_short
     echo 'error: ${SRC_DIR}/docker does not exist'
     echo "${SRC_DIR}/docker"
-    exit 1
+    exit 3
   fi
 }
 
@@ -106,22 +106,26 @@ show_use_long()
 script_path()
 {
   local -r script_name=cyber-dojo
-  # Running locally when offline is handy sometimes
-  local -r straight_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
+  # Run locally when offline
+  local -r local_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
   local -r curled_path="${TMP_DIR}/${script_name}"
 
-  if [ -f "${straight_path}" ]; then
-    local -r env_var=COMMANDER_IMAGE=cyberdojo/commander:latest
-    echo "${env_var} ${straight_path}"
-  elif [ ! -f "${curled_path}" ]; then
+  if on_CI && [ ! -f "${curled_path}" ]; then
     local -r github_org=https://raw.githubusercontent.com/cyber-dojo
     local -r repo_name=commander
     local -r url="${github_org}/${repo_name}/master/${script_name}"
     curl --silent --fail "${url}" > "${curled_path}"
     chmod 700 "${curled_path}"
     echo "${curled_path}"
-  else
+  elif on_CI && [ -f "${curled_path}" ]; then
     echo "${curled_path}"
+  elif [ -f "${local_path}" ]; then
+    local -r env_var=COMMANDER_IMAGE=cyberdojo/commander:latest
+    echo "${env_var} ${local_path}"
+  else
+    >&2 echo 'FAILED: Not a CI/CD run so expecting cyber-dojo script in dir at:'
+    >&2 echo "${MY_DIR}/../../cyber-dojo/commander"
+    exit 3
   fi
 }
 
