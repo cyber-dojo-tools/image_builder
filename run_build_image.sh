@@ -105,17 +105,18 @@ show_use_long()
 
 script_path()
 {
-  local script_name=cyber-dojo
+  local -r script_name=cyber-dojo
   # Running locally when offline is handy sometimes
-  local straight_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
-  local curled_path="${TMP_DIR}/${script_name}"
+  local -r straight_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
+  local -r curled_path="${TMP_DIR}/${script_name}"
 
   if [ -f "${straight_path}" ]; then
-    echo "${straight_path}"
+    local -r env_var=COMMANDER_IMAGE=cyberdojo/commander:latest
+    echo "${env_var} ${straight_path}"
   elif [ ! -f "${curled_path}" ]; then
-    local github_org=https://raw.githubusercontent.com/cyber-dojo
-    local repo_name=commander
-    local url="${github_org}/${repo_name}/master/${script_name}"
+    local -r github_org=https://raw.githubusercontent.com/cyber-dojo
+    local -r repo_name=commander
+    local -r url="${github_org}/${repo_name}/master/${script_name}"
     curl --silent --fail "${url}" > "${curled_path}"
     chmod 700 "${curled_path}"
     echo "${curled_path}"
@@ -212,8 +213,8 @@ gap
 
 if [ -d "$(src_dir_abs)/start_point" ]; then
   banner "Creating a start-point image..."
-  $(script_path) start-point create jj1 --languages "$(src_dir_abs)"
-  $(script_path) start-point rm jj1
+  eval $(script_path) start-point create jj1 --languages "$(src_dir_abs)"
+  eval $(script_path) start-point rm jj1
   banner 'Successfully created start-point image'
   gap
   banner 'Checking red->amber->green progression'
