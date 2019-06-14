@@ -29,16 +29,16 @@ jobs:
             PUBLISH=publish-tagged-image.sh
             curl -O --fail ${CIRCLECI_SCRIPT_DIR}/${PUBLISH}
             chmod 700 ./${PUBLISH}
-            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+            echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
             ./${PUBLISH}
-            ./src/push_tools.sh            
+            ./src/push_tools.sh
 
 workflows:
   version: 2
   build-publish-trigger:
     jobs:
       - build-publish-trigger:
-          context: cyberdojo-context
+          context: cyberdojo-languages-context
           filters:
             branches:
               only:
