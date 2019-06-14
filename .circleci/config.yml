@@ -13,6 +13,12 @@ jobs:
           name: Build tools and test them
           command: |
             set -e
+            # Need to find out if we are running the tests for image_builder
+            # itself, and if so, don't push built images!
+            echo "~~~~~~~~~~~~~~~~~~~~~"
+            echo "CIRCLE_PROJECT_REPONAME=:${CIRCLE_PROJECT_REPONAME}:"
+            echo "~~~~~~~~~~~~~~~~~~~~~"
+            exit 1
             echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
             ./pipe_build_up_test.sh
       - run:
