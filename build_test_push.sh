@@ -193,7 +193,6 @@ cron_job()
 
 testing_myself()
 {
-  # TODO: Update this
   [ "${CIRCLE_PROJECT_REPONAME}" = 'image_builder' ]
 }
 
