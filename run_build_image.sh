@@ -183,7 +183,9 @@ build_image()
 
 on_CI()
 {
-  [ "${TRAVIS}" = 'true' ]
+  # image_builder now runs on CircleCI
+  # all the languages,testFrameworks currently run on Travis
+  [ "${TRAVIS}" = 'true' ] || [ -n "${CIRCLE_SHA1}" ]
 }
 
 CI_cron_job()
