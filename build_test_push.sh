@@ -195,6 +195,7 @@ testing_myself()
 notify_dependent_repos()
 {
   docker run \
+    --env CIRCLE_API_USER_TOKEN \
     --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
