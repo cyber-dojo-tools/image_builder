@@ -228,6 +228,13 @@ else
   "${SRC_DIR}/check_version.sh"
 fi
 
+# Need to find out if we are running the tests for image_builder
+# itself, and if so, don't push built images!
+
+echo "~~~~~~~~~~~~~~~~~~~~~"
+echo "CIRCLE_PROJECT_REPONAME=:${CIRCLE_PROJECT_REPONAME}:"
+echo "~~~~~~~~~~~~~~~~~~~~~"
+
 # Currently not pushing to dockerhub if cron_job...
 if on_CI && ! cron_job && ! testing_myself; then
   gap
