@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+exit 0
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # This script is curl'd and run in the Travis
 # scripts of all cyber-dojo-language repos. It
