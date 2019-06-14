@@ -227,6 +227,30 @@ else
   "${SRC_DIR}/check_version.sh"
 fi
 
+echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+echo "env-var TRAVIS=:${TRAVIS}:"
+if on_CI; then
+  echo "on_CI is true"
+else
+  echo "on_CI is false"
+fi
+
+echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+echo "env-var TRAVIS_EVENT_TYPE=:${TRAVIS_EVENT_TYPE}:"
+if CI_cron_job; then
+  echo "CI_cron_job is true"
+else
+  echo "CI_cron_job is false"
+fi
+
+echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+echo "env-var TRAVIS_REPO_SLUG=:${TRAVIS_REPO_SLUG}:"
+if testing_myself; then
+  echo "testing_myself is true"
+else
+  echo "testing_myself is false"
+fi
+
 if on_CI && ! CI_cron_job && ! testing_myself; then
   gap
   banner "Pushing $(image_name) to dockerhub"
