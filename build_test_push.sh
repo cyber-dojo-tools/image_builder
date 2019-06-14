@@ -195,7 +195,6 @@ testing_myself()
 notify_dependent_repos()
 {
   docker run \
-    --env GITHUB_TOKEN \
     --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
