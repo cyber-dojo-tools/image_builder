@@ -3,20 +3,29 @@ set -e
 
 # https://circleci.com/docs/2.0/api-job-trigger/
 #
-# NB:1 CIRCLE_API_USER_TOKEN is a personal API token.
-# https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
-# Remember to copy the token so you can add it as an env-var at the project level.
-#
-# NB:2
+# NB:1
 # <quote>
 # Jobs that are triggered via the API do **not** have access
 # to environment variables created for a CircleCI Context
 # </quote>
-# So require env-vars cannot be specified once at the org level in the context.
+# So env-vars cannot be specified once at the org level in a CircleCI Context.
 # Which is a shame. Instead they have to be repeatedly defined for each project.
 # The is not so bad since one project can Import (env) Variables
 # from another project. See
 # https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project
+#
+# NB:2
+# CIRCLE_API_USER_TOKEN is a personal API token.
+# https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
+# This env-var has to be added to each project (see NB:1).
+#
+# NB:3
+# Triggering a CircleCI workflow via a CircleCI API POST request
+# means the latest git-commit sha (CIRCLE_SHA1) is _NOT_ unique.
+# (Aside, CIRCLE_WORKFLOW_ID is). I normally use the git commit sha
+# to ensure a unique image tag and thus image immutability.
+# However, in this case, images created for the cyber-dojo-languages
+# org (eg java-junit) always use the :latest tag anyway.
 
 VCS_TYPE=github
 ORG=cyber-dojo-languages
