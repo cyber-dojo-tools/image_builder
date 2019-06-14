@@ -37,7 +37,7 @@ build_image()
 {
   local src_dir=$1
   #${ROOT_DIR}/run_build_image.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
-  ${ROOT_DIR}/run_build_image.sh ${src_dir} > ${stdoutF} 2> ${stderrF}
+  ${ROOT_DIR}/run_build_image2.sh ${src_dir} > ${stdoutF} 2> ${stderrF}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-# turn off building from Travis as switch to CircleCI is
-# happening and the DOCKER_USER is different.
-exit 0
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # This script is curl'd and run in the Travis
 # scripts of all cyber-dojo-language repos. It
