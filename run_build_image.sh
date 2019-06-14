@@ -2,7 +2,7 @@
 set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This script is curl'd and run in the Travis/CircleCI
+# This script is curl'd and run in the Travis
 # scripts of all cyber-dojo-language repos. It
 #   o) builds their image
 #   o) tests it

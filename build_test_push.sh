@@ -2,9 +2,8 @@
 set -e
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This script is curl'd and run in the Travis/CircleCI
-# scripts of all cyber-dojo-language repos. It
-#   o) builds their image
+# This script is curl'd and run in CircleCI scripts. It
+#   o) builds a cyber-dojo-language image
 #   o) tests it
 #   o) pushes it to dockerhub
 #   o) notifies any dependent repos
@@ -183,18 +182,18 @@ build_image()
 
 on_CI()
 {
-  # image_builder now runs on CircleCI
-  # all the languages,testFrameworks currently run on Travis
-  [ "${TRAVIS}" = 'true' ] || [ -n "${CIRCLE_SHA1}" ]
+  [ -n "${CIRCLE_SHA1}" ]
 }
 
 cron_job()
 {
+  # TODO: Update this
   [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
 }
 
 testing_myself()
 {
+  # TODO: Update this
   [ "${TRAVIS_REPO_SLUG}" = 'cyber-dojo-languages/image_builder' ]
 }
 
