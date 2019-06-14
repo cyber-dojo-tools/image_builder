@@ -3,7 +3,7 @@
 [run_build_image.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/run_build_image.sh)
 is the script (containing docker commands) which all the
 [cyber-dojo-languages github organization](https://github.com/cyber-dojo-languages)
-repos curl and then run as the only command in their .travis.yml file.
+repos curl and then run as the only command in their CI script.
 
 There are two kinds of repos in the cyber-dojo-languages github organization:
 - language repos
@@ -14,7 +14,7 @@ There are two kinds of repos in the cyber-dojo-languages github organization:
 # language repos
 Contain a docker/Dockerfile which installs a base language.
 The image_builder attempts to build the docker image.
-If successful and the run is not via a Travis cron-job it
+If successful and the run is not via a CI cron-job it
 1. pushes the image to the
 [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/)
 dockerhub
@@ -27,7 +27,7 @@ See [example](https://github.com/cyber-dojo-languages/python).
 Contain a docker/Dockerfile which installs a test-framework.
 Also contains start_point/files for the test-framework.
 The image_builder attempts to build and test the docker image.
-If successful, and the run is not via a Travis cron-job it
+If successful, and the run is not via a CI cron-job it
 1. pushes the image to the
 [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/)
 dockerhub
@@ -36,9 +36,9 @@ See [example](https://github.com/cyber-dojo-languages/python-pytest).
 
 The tests
 - Verify the start_point can be created using the command `cyber-dojo start-point create name --dir=REPO_DIR`
-- Verify the start_point files untweaked test-run traffic-light is red
-- Verify the start_point files tweaked to green test-run traffic-light is green
-- Verify the start_point files tweaked to amber test-run traffic-light is amber
+- WIP: Verify the start_point files untweaked test-run traffic-light is red
+- WIP: Verify the start_point files tweaked to green test-run traffic-light is green
+- WIP: Verify the start_point files tweaked to amber test-run traffic-light is amber
 
 - - - -
 
@@ -46,7 +46,7 @@ The tests
 You must use image_builder to create images from the Dockerfiles.
 The Dockerfiles **cannot** be used to build a (working) docker image with a
 raw `docker build` command. This is because image_builder augments the
-Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner-stateless)
+Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner)
 requirements:
 - it adds Linux user called sandbox
 - it adds a Linux group called sandbox
