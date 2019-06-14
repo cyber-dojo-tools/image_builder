@@ -2,7 +2,7 @@
 # Main entry point for cyberdojo/dependents_notifier docker image.
 # The SRC_DIR dir has been volume mounted to /data
 
-require_relative 'travis'
+require_relative 'circleci'
 require 'json'
 
 def dockerfile
@@ -47,6 +47,7 @@ triple = {
   'image_name'     => image_name,
   'test_framework' => test_framework?
 }
-travis = Travis.new(triple)
-travis.validate_triple
-travis.trigger_dependents
+
+ci = CircleCI.new(triple)
+ci.validate_triple
+ci.trigger_dependents

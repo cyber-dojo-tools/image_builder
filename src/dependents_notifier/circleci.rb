@@ -3,12 +3,7 @@ require_relative 'failed'
 require_relative 'print_to'
 require 'json'
 
-# The Dockerfile installs
-#   o) curl
-#   o) the Travis gem
-#   o) the /app/post_trigger.sh script
-
-class Travis
+class CircleCI
 
   def initialize(triple)
     @triple = triple
@@ -101,46 +96,12 @@ class Travis
 
   def trigger(repos)
     print_to STDOUT, "number of dependent repos: #{repos.size}"
-    # Travis limits the number of triggers to 10 per hour.
-    # You can see this in the trigger reponse:
-    #   { ... "remaining_requests": 10, ... }
-    # Once you get past 10, the output you get is
-    #   Forbidden
-    # Some repos have more than 10 immediate dependents on their own.
-    # I shuffle the repos so, over time, all dependents are triggered.
     repos.shuffle.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
-      output = assert_backtick "/app/post_trigger.sh #{token} #{cdl} #{repo_name}"
+      output = assert_backtick "/app/post_trigger-circleci.sh #{repo_name}"
       print_to STDOUT, output
       print_to STDOUT, "\n", '- - - - - - - - -'
     end
-  end
-
-  # - - - - - - - - - - - - - - - - - - - - -
-
-  def token
-    @token ||= get_token
-  end
-
-  def get_token
-    login
-    begin
-      assert_backtick('travis token --org').strip # prints the token
-    ensure
-      logout
-    end
-  end
-
-  def login
-    `travis login --skip-completion-check --github-token ${GITHUB_TOKEN}`
-    status = $?.exitstatus
-    unless status == success
-      failed "exit_status == #{status}"
-    end
-  end
-
-  def logout
-    assert_system 'travis logout'
   end
 
   # - - - - - - - - - - - - - - - - - - - - -

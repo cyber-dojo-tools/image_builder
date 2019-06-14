@@ -2,6 +2,6 @@
 !assert_system.rb
 !failed.rb
 !notify.rb
-!post_trigger.sh
+!post_trigger-circleci.sh
 !print_to.rb
-!travis.rb
+!circleci.rb
