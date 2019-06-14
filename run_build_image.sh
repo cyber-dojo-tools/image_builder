@@ -146,7 +146,7 @@ image_name()
     --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
-    cyberdojo/image_namer
+    cyberdojofoundation/image_namer
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
@@ -165,7 +165,7 @@ build_image()
         --interactive \
         --rm \
         --volume /var/run/docker.sock:/var/run/docker.sock \
-        cyberdojo/dockerfile_augmenter \
+        cyberdojofoundation/dockerfile_augmenter \
     > \
       "${TMP_CONTEXT_DIR}/docker/Dockerfile"
 
@@ -205,7 +205,7 @@ notify_dependent_repos()
     --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
-      cyberdojo/dependents_notifier
+      cyberdojofoundation/dependents_notifier
 }
 
 # - - - - - - - - - - - - - - - - - -
