@@ -188,7 +188,7 @@ on_CI()
   [ "${TRAVIS}" = 'true' ] || [ -n "${CIRCLE_SHA1}" ]
 }
 
-CI_cron_job()
+cron_job()
 {
   [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
 }
@@ -230,7 +230,7 @@ else
 fi
 
 # Currently not pushing to dockerhub if cron_job...
-if on_CI && !CI_cron_job && !testing_myself; then
+if on_CI && ! cron_job && ! testing_myself; then
   gap
   banner "Pushing $(image_name) to dockerhub"
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
