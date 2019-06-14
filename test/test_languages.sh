@@ -13,6 +13,8 @@ language_base_test()
   assert_sandbox_user_in "${image_name}"
   refute_start_point_created
   #refute_red_amber_green
+  refute_pushing_to_dockerhub "${image_name}"
+  refute_notifying_dependents
 }
 
 test_Alpine() { language_base_test Alpine java  ; }

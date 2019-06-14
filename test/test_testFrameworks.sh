@@ -13,6 +13,8 @@ language_testFramework_test()
   assert_sandbox_user_in "${image_name}"
   assert_start_point_created
   #assert_red_amber_green
+  refute_pushing_to_dockerhub "${image_name}"
+  refute_notifying_dependents
 }
 
 test_Alpine() { language_testFramework_test Alpine java-junit     ; }

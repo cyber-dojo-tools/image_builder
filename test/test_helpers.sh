@@ -37,7 +37,7 @@ build_image()
 {
   local src_dir=$1
   #${ROOT_DIR}/build_test_push.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
-  ${ROOT_DIR}/build_test_push.sh  ${src_dir} # ;>       ${stdoutF}  2>       ${stderrF}
+  ${ROOT_DIR}/build_test_push.sh  ${src_dir} >       ${stdoutF}  2>       ${stderrF}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -90,7 +90,32 @@ refute_start_point_created()
   local diagnostic="start-point NOT created...${stdout}"
   grep --silent "${message}" <<< "${stdout}"
   assertFalse "${diagnostic}" $?
-  echo -e "\t- start-point not created as expected"
+  echo -e "\t- start-point not created, as expected"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+refute_pushing_to_dockerhub()
+{
+  local -r image_name="${1}"
+  local stdout=$(cat "${stdoutF}")
+  local message="Pushing ${image_name} to dockerhub"
+  local diagnostic="image ${image_name} WAS pushed to dockerhub...${stdout}"
+  grep --silent "${message}" <<< "${stdout}"
+  assertFalse "${diagnostic}" $?
+  echo -e "\t- image NOT pushed to dockerhub, as expected"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+refute_notifying_dependents()
+{
+  local stdout=$(cat "${stdoutF}")
+  local message='Notifying dependent repos'
+  local diagnostic="Dependent repos WERE notified...${stdout}"
+  grep --silent "${message}" <<< "${stdout}"
+  assertFalse "${diagnostic}" $?
+  echo -e "\t- dependent repos NOT notified, as expected"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -

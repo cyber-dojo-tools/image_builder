@@ -185,14 +185,10 @@ on_CI()
   [ -n "${CIRCLE_SHA1}" ]
 }
 
-cron_job()
-{
-  # TODO: Update this
-  [ "${TRAVIS_EVENT_TYPE}" = 'cron' ]
-}
-
 testing_myself()
 {
+  # Don't push CDL images or notify dependent repos
+  # if building CDL images as part of image_builders own tests.
   [ "${CIRCLE_PROJECT_REPONAME}" = 'image_builder' ]
 }
 
@@ -227,13 +223,7 @@ else
   "${SRC_DIR}/check_version.sh"
 fi
 
-if testing_myself; then
-  echo "Testing myself so not pushing CDL images or notifying dependent repos"
-  exit 0
-fi
-
-# Currently not pushing to dockerhub if cron_job...
-if on_CI && ! cron_job; then
+if on_CI && !testing_myself; then
   gap
   banner "Pushing $(image_name) to dockerhub"
   docker push $(image_name)
