@@ -223,7 +223,7 @@ else
   "${SRC_DIR}/check_version.sh"
 fi
 
-if on_CI && !testing_myself; then
+if on_CI && ! testing_myself; then
   gap
   banner "Pushing $(image_name) to dockerhub"
   docker push $(image_name)
