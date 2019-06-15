@@ -8,14 +8,13 @@ set -e
 # Jobs that are triggered via the API do **not** have access
 # to environment variables created for a CircleCI Context
 # </quote>
-# So env-vars cannot be specified once at the org level in a CircleCI Context.
-# Which is a shame. Instead they have to be repeatedly defined for each project.
+# Instead they have to be repeatedly defined for each project.
 # The is not so bad since one project can Import (env) Variables
 # from another project. See
 # https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project
 #
 # NB:2
-# CIRCLE_API_USER_TOKEN is a personal API token.
+# CIRCLE_API_MACHINE_USER_TOKEN is a personal API token.
 # https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
 # This env-var has to be added to each project (see NB:1).
 #
@@ -32,6 +31,6 @@ ORG=cyber-dojo-languages
 PROJECT="${1}" # eg 'java-junit'
 BRANCH=master
 
-curl -u ${CIRCLE_API_USER_TOKEN}: \
+curl -u ${CIRCLE_API_MACHINE_USER_TOKEN}: \
      -d build_parameters[CIRCLE_JOB]=build-publish-trigger \
      https://circleci.com/api/v1.1/project/${VCS_TYPE}/${ORG}/${PROJECT}/tree/${BRANCH}

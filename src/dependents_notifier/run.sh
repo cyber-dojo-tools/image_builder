@@ -15,6 +15,7 @@ absPath()
 readonly START_POINT_DIR=`absPath "${1}"`
 
 docker run \
+  --env CIRCLE_API_MACHINE_USER_TOKEN \
   --interactive \
   --rm \
   --volume "${START_POINT_DIR}:/data:ro" \

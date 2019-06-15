@@ -195,7 +195,7 @@ testing_myself()
 notify_dependent_repos()
 {
   docker run \
-    --env CIRCLE_API_USER_TOKEN \
+    --env CIRCLE_API_MACHINE_USER_TOKEN \
     --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
@@ -217,7 +217,7 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
   eval $(script_path) start-point rm jj1
   banner 'Successfully created start-point image'
   gap
-  banner 'Checking red->amber->green progression'
+  banner 'Checking red->amber->green progression (TODO)'
   #...TODO (will use cyber-dojo/hiker service)
 else
   "${SRC_DIR}/check_version.sh"
