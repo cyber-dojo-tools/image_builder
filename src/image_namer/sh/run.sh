@@ -2,7 +2,6 @@
 set -e
 
 # Writes the name of the docker-image to stdout.
-# Folded into main script.
 
 absPath()
 {
