@@ -142,7 +142,6 @@ src_dir_abs()
 image_name()
 {
   docker run \
-    --interactive \
     --rm \
     --volume "$(src_dir_abs):/data:ro" \
     cyberdojofoundation/image_namer
@@ -164,7 +163,7 @@ build_image()
         --interactive \
         --rm \
         --volume /var/run/docker.sock:/var/run/docker.sock \
-        cyberdojofoundation/dockerfile_augmenter \
+        cyberdojofoundation/image_dockerfile_augmenter \
     > \
       "${TMP_CONTEXT_DIR}/docker/Dockerfile"
 
