@@ -195,7 +195,6 @@ notify_dependent_projects()
   docker run \
     --env CIRCLE_API_MACHINE_USER_TOKEN \
     --rm \
-    --volume "$(src_dir_abs):/data:ro" \
       cyberdojofoundation/dependents_notifier \
         "${repos}"
 }
