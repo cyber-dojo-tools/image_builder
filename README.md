@@ -1,6 +1,6 @@
 # image_builder
 
-[run_build_image.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/run_build_image.sh)
+[build_test_push_notify.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/build_test_push_notify.sh)
 is the script (containing docker commands) which all the
 [cyber-dojo-languages github organization](https://github.com/cyber-dojo-languages)
 repos curl and then run as the only command in their CI script.

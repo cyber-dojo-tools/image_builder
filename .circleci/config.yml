@@ -15,12 +15,6 @@ jobs:
             set -e
             echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
             ./pipe_build_up_test.sh
-      - run:
-          name: Publish tools on dockerhub
-          command: |
-            set -e
-            echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-            ./src/push_tools.sh
 
 workflows:
   version: 2

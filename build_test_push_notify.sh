@@ -179,6 +179,29 @@ build_image()
 
 # - - - - - - - - - - - - - - - - - -
 
+dependent_projects()
+{
+  docker run \
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+      cyberdojofoundation/image_dependents
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+notify_dependent_projects()
+{
+  local -r repos=$(dependent_projects)
+  docker run \
+    --env CIRCLE_API_MACHINE_USER_TOKEN \
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+      cyberdojofoundation/dependents_notifier \
+        "${repos}"
+}
+
+# - - - - - - - - - - - - - - - - - -
+
 on_CI()
 {
   [ -n "${CIRCLE_SHA1}" ]
@@ -187,18 +210,8 @@ on_CI()
 testing_myself()
 {
   # Don't push CDL images or notify dependent repos
-  # if building CDL images as part of image_builders own tests.
+  # if building CDL images as part of image_builder's own tests.
   [ "${CIRCLE_PROJECT_REPONAME}" = 'image_builder' ]
-}
-
-notify_dependent_repos()
-{
-  docker run \
-    --env CIRCLE_API_MACHINE_USER_TOKEN \
-    --interactive \
-    --rm \
-    --volume "$(src_dir_abs):/data:ro" \
-      cyberdojofoundation/dependents_notifier
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -228,9 +241,9 @@ if on_CI && ! testing_myself; then
   docker push $(image_name)
   banner "Successfully pushed $(image_name) to dockerhub"
   gap
-  banner 'Notifying dependent repos'
-  notify_dependent_repos
-  banner 'Successfully notified dependent repos'
+  banner 'Notifying dependent projects'
+  notify_dependent_projects
+  banner 'Successfully notified dependent projects'
 fi
 
 echo
