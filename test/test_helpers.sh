@@ -90,7 +90,7 @@ refute_start_point_created()
   local diagnostic="start-point NOT created...${stdout}"
   grep --silent "${message}" <<< "${stdout}"
   assertFalse "${diagnostic}" $?
-  echo -e "\t- start-point not created, as expected"
+  echo -e "\t- start-point NOT created, as expected"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
