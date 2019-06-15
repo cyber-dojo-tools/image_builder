@@ -1,3 +1,0 @@
-
-  o) install_coreutils
-     I think I can drop this as I no longer have a stateful runner
