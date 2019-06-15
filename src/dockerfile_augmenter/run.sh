@@ -10,4 +10,4 @@ cat "${1}/Dockerfile" \
       --interactive \
       --rm \
       --volume /var/run/docker.sock:/var/run/docker.sock \
-      cyberdojotools/dockerfile_augmenter
+      cyberdojofoundation/dockerfile_augmenter

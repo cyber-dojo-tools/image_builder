@@ -16,4 +16,4 @@ docker run \
   --interactive \
   --rm \
   --volume "${START_POINT_DIR}:/data:ro" \
-  cyberdojotools/image_namer
+  cyberdojofoundation/image_namer

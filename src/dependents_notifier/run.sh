@@ -19,4 +19,4 @@ docker run \
   --interactive \
   --rm \
   --volume "${START_POINT_DIR}:/data:ro" \
-    cyberdojo/dependents_notifier
+    cyberdojofoundation/dependents_notifier
