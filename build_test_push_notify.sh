@@ -6,7 +6,7 @@ set -e
 #   o) builds a cyber-dojo-language image
 #   o) tests it
 #   o) pushes it to dockerhub
-#   o) notifies any dependent repos
+#   o) notifies any dependent CircleCI projects
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
@@ -218,7 +218,7 @@ if [ -d "$(src_dir_abs)/start_point" ]; then
   banner 'Successfully created start-point image'
   gap
   banner 'Checking red->amber->green progression (TODO)'
-  #...TODO (will use cyber-dojo/hiker service)
+  #...TODO (will use cyber-dojo-languages/hiker service)
 else
   "${SRC_DIR}/check_version.sh"
 fi
