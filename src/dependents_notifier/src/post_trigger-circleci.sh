@@ -31,6 +31,6 @@ ORG=cyber-dojo-languages
 PROJECT="${1}" # eg 'java-junit'
 BRANCH=master
 
-curl -u ${CIRCLE_API_MACHINE_USER_TOKEN}: \
-     -d build_parameters[CIRCLE_JOB]=build-publish-trigger \
+curl --user ${CIRCLE_API_MACHINE_USER_TOKEN}: \
+     --data build_parameters[CIRCLE_JOB]=build-publish-trigger \
      https://circleci.com/api/v1.1/project/${VCS_TYPE}/${ORG}/${PROJECT}/tree/${BRANCH}

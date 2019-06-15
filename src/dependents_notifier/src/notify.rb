@@ -1,5 +1,5 @@
 
-# Main entry point for cyberdojo/dependents_notifier docker image.
+# Main entry point for cyberdojofoundation/dependents_notifier docker image.
 # The SRC_DIR dir has been volume mounted to /data
 
 require_relative 'circleci'
@@ -12,7 +12,7 @@ end
 # - - - - - - - - - - - - - - - - -
 
 def from
-  from_line = dockerfile.lines.find { |line| line.start_with?('FROM') }
+  from_line = dockerfile.lines.find { |line| line.lstrip.start_with?('FROM') }
   from_line.split[1]
 end
 
