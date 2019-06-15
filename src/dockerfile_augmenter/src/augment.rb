@@ -219,7 +219,7 @@ def banner_start
   [
     '',
     '# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',
-    "# START of extra commands to fulfil runner's requirements",
+    "# START of extra commands to fulfil runner's requirements (os=#{os})",
     ''
   ]
 end
