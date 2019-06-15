@@ -98,7 +98,7 @@ class CircleCI
     print_to STDOUT, "number of dependent repos: #{repos.size}"
     repos.shuffle.each do |repo_name|
       puts "  #{cdl}/#{repo_name}"
-      output = assert_backtick "/app/post_trigger-circleci.sh #{repo_name}"
+      output = assert_backtick "#{__dir__}/post_trigger-circleci.sh #{repo_name}"
       print_to STDOUT, output
       print_to STDOUT, "\n", '- - - - - - - - -'
     end
