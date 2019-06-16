@@ -195,7 +195,7 @@ notify_dependent_projects()
   docker run \
     --env CIRCLE_API_MACHINE_USER_TOKEN \
     --rm \
-      cyberdojofoundation/dependents_notifier \
+      cyberdojofoundation/image_notifier \
         "${repos}"
 }
 
