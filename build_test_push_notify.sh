@@ -9,6 +9,7 @@ set -e
 #   o) notifies any dependent CircleCI projects
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
 readonly TMP_DIR=$(mktemp -d)
@@ -20,12 +21,7 @@ remove_tmp_dirs()
   rm -rf "${TMP_DIR}" > /dev/null;
 }
 
-exit_handler()
-{
-  remove_tmp_dirs
-}
-
-trap exit_handler INT EXIT
+trap remove_tmp_dirs INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
@@ -51,20 +47,18 @@ banner()
 
 check_use()
 {
-  if [ "${1}" == '--help' ]; then
+  if [ -z "${1}" ] || [ "${1}" = '-h' ] || [ "${1}" = '--help' ]; then
     show_use_long
     exit 0
   fi
   if [ ! -d "${SRC_DIR}" ]; then
     show_use_short
-    echo 'error: ${SRC_DIR} does not exist'
-    echo "${SRC_DIR}"
+    echo "error: ${SRC_DIR} does not exist"
     exit 3
   fi
   if [ ! -d "${SRC_DIR}/docker" ]; then
     show_use_short
-    echo 'error: ${SRC_DIR}/docker does not exist'
-    echo "${SRC_DIR}/docker"
+    echo "error: ${SRC_DIR}/docker does not exist"
     exit 3
   fi
 }
@@ -73,7 +67,7 @@ check_use()
 
 show_use_short()
 {
-  echo "Use: $(basename $0) [SRC_DIR|--help]"
+  echo "Use: ${MY_NAME} [SRC_DIR|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
   echo '  SRC_DIR must have a docker/ sub-dir'
@@ -133,8 +127,7 @@ script_path()
 src_dir_abs()
 {
   # docker volume-mounts cannot be relative
-  cd "$(dirname "${SRC_DIR}")"
-  printf "%s/%s\n" "$(pwd)" "$(basename "${SRC_DIR}")"
+  echo $(cd ${SRC_DIR} && pwd)
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
