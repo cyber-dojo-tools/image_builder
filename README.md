@@ -1,41 +1,37 @@
 # image_builder
 
-[build_test_push_notify.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/build_test_push_notify.sh)
-is the script (containing docker commands) which all the
-[cyber-dojo-languages github organization](https://github.com/cyber-dojo-languages)
-repos curl and then run as the only command in their CI script.
+[build_test_push_notify.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/build_test_push_notify.sh) is the script (containing docker commands) which all the
+[cyber-dojo-languages](https://github.com/cyber-dojo-languages) repos
+run in their .circleci/config.yml
 
 There are two kinds of repos in the cyber-dojo-languages github organization:
-- language repos
+- baseLanguage repos
 - testFramework repos
 
 - - - -
 
-# language repos
-Contain a docker/Dockerfile which installs a base language.
-The image_builder attempts to build the docker image.
-If successful and the run is not via a CI cron-job it
-1. pushes the image to the
-[cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/)
-dockerhub
-2. triggers all dependent github repos.
-See [example](https://github.com/cyber-dojo-languages/python).
+# baseLanguage repos
+For example, [python](https://github.com/cyber-dojo-languages/python).
+- contain a docker/Dockerfile which installs a base language.
+- attempts to build the docker image, taking its name from the file docker/image_name.json
+- if successful:
+  - pushes the docker image to the [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/) dockerhub
+  - triggers the workflow for all CircleCI projects (eg python-pytest) whose Dockerfile's FROM matches the image name.
 
 - - - -
 
 # testFramework repos
-Contain a docker/Dockerfile which installs a test-framework.
-Also contains start_point/files for the test-framework.
-The image_builder attempts to build and test the docker image.
-If successful, and the run is not via a CI cron-job it
-1. pushes the image to the
-[cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/)
-dockerhub
-2. triggers all dependent github repos.
-See [example](https://github.com/cyber-dojo-languages/python-pytest).
+For example, [python-pytest](https://github.com/cyber-dojo-languages/python-pytest).
+- contain a docker/Dockerfile which installs a test-framework.
+- contain start_point/files for the test-framework.
+- attempts to build the docker image, taking its name from the file start_point/manifest.json,
+with the docker/Dockerfile [augmented](https://github.com/cyber-dojo-languages/image_dockerfile_augmenter) to fulfil the [runner's](https://github.com/cyber-dojo/runner) requirements.
+- if successful:
+  - pushes the docker image to the [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/)
 
 The tests
-- Verify the start_point can be created using the command `cyber-dojo start-point create name --dir=REPO_DIR`
+- Verify the start_point can be created using the command:
+  - `cyber-dojo start-point create name --languages ${REPO_URL}`
 - WIP: Verify the start_point files untweaked test-run traffic-light is red
 - WIP: Verify the start_point files tweaked to green test-run traffic-light is green
 - WIP: Verify the start_point files tweaked to amber test-run traffic-light is amber
@@ -43,17 +39,15 @@ The tests
 - - - -
 
 # augmented Dockerfile
-You must use image_builder to create images from the Dockerfiles.
-The Dockerfiles **cannot** be used to build a (working) docker image with a
-raw `docker build` command. This is because image_builder augments the
-Dockerfiles to fulfil several [runner](https://github.com/cyber-dojo/runner)
+Un-augmented Dockerfiles **cannot** be used to build a (working) docker image with a
+ `docker build` command. This is because [runner](https://github.com/cyber-dojo/runner) has several
 requirements:
-- it adds Linux user called sandbox
-- it adds a Linux group called sandbox
-- on Alpine it installs bash so every cyber-dojo.sh runs in the same shell
-- on Alpine it installs coreutils so file stamp granularity is in microseconds
-- on Alpine it installs file to allow (file --mime-encoding ${filename})
-- on Alpine it updates tar to support the --touch option
+- all OS's need a Linux user called sandbox
+- all OS's need a Linux group called sandbox
+- Alpine needs `bash` to ensure every `cyber-dojo.sh` runs in the same shell
+- Alpine needs `coreutils` so file stamp granularity is in microseconds
+- Alpine needs `file` to check if a file is binary or text (--mime-encoding)
+- Alpine needs `tar` to support the `--touch` option
 
 - - - -
 
