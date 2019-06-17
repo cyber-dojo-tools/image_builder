@@ -15,7 +15,7 @@ For example, [python](https://github.com/cyber-dojo-languages/python).
 - contain a docker/Dockerfile which installs a base language.
 - attempts to build the docker image, taking its name from the file docker/image_name.json
 - if successful:
-  - pushes the docker image to the [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/) dockerhub
+  - pushes the docker image to [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/) on dockerhub
   - triggers the workflow for all CircleCI projects (eg python-pytest) whose Dockerfile's FROM matches the image name.
 
 - - - -
@@ -27,7 +27,7 @@ For example, [python-pytest](https://github.com/cyber-dojo-languages/python-pyte
 - attempts to build the docker image, taking its name from the file start_point/manifest.json,
 with the docker/Dockerfile [augmented](https://github.com/cyber-dojo-languages/image_dockerfile_augmenter) to fulfil the [runner's](https://github.com/cyber-dojo/runner) requirements.
 - if successful:
-  - pushes the docker image to the [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/)
+  - pushes the docker image to [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/) on dockerhub
 
 The tests
 - Verify the start_point can be created using the command:
