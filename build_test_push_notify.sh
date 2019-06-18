@@ -12,8 +12,12 @@ set -e
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
-readonly TMP_DIR=$(mktemp -d)
-readonly TMP_CONTEXT_DIR=$(mktemp -d)
+
+readonly TMP1=$(cd ${MY_DIR} && mktemp -d XXXXXX)
+readonly TMP_DIR=${MY_DIR}/${TMP1}
+
+readonly TMP2=$(cd ${MY_DIR} && mktemp -d XXXXXX)
+readonly TMP_CONTEXT_DIR=${MY_DIR}/${TMP2}
 
 remove_tmp_dirs()
 {
