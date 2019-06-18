@@ -60,9 +60,9 @@ check_use()
     echo "error: ${SRC_DIR} does not exist"
     exit 3
   fi
-  if [ ! -d "${SRC_DIR}/docker" ]; then
+  if [ ! -f "${SRC_DIR}/Dockerfile" ]; then
     show_use_short
-    echo "error: ${SRC_DIR}/docker does not exist"
+    echo "error: ${SRC_DIR}/Dockerfile does not exist"
     exit 3
   fi
 }
@@ -74,7 +74,7 @@ show_use_short()
   echo "Use: ${MY_NAME} [SRC_DIR|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
-  echo '  SRC_DIR must have a docker/ sub-dir'
+  echo '  SRC_DIR must have a Dockerfile'
   echo ''
 }
 
@@ -83,10 +83,10 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile'
+  echo 'Attempts to build a docker-image from ${SRC_DIR}/Dockerfile'
   echo "adjusted to fulfil the runner service's requirements."
   echo 'If ${SRC_DIR}/start_point/manifest.json exists the name of the docker-image'
-  echo 'will be taken from it, otherwise from ${SRC_DIR}/docker/image_name.json'
+  echo 'will be taken from it, otherwise from ${SRC_DIR}/image_name.json'
   echo
   echo 'If ${SRC_DIR}/start_point/ exists:'
   echo '  1. Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'
@@ -148,13 +148,13 @@ image_name()
 
 build_image()
 {
-  # Copy the docker/ dir into a new temporary context-dir
+  # Copy the src_dir into a new temporary context-dir
   # so we can overwrite its Dockerfile.
-  cp -R "$(src_dir_abs)/docker" "${TMP_CONTEXT_DIR}"
+  cp -R "$(src_dir_abs)/" "${TMP_CONTEXT_DIR}"
 
   # Overwrite the Dockerfile with one containing
   # extra commands to fulfil the runner's requirements.
-  cat "$(src_dir_abs)/docker/Dockerfile" \
+  cat "$(src_dir_abs)/Dockerfile" \
     | \
       docker run \
         --interactive \
@@ -162,16 +162,16 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "${TMP_CONTEXT_DIR}/docker/Dockerfile"
+      "${TMP_CONTEXT_DIR}/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "${TMP_CONTEXT_DIR}/docker/Dockerfile"
+  cat "${TMP_CONTEXT_DIR}/Dockerfile"
   echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
   # Build the augmented docker-image.
   docker build \
     --tag "$(image_name)" \
-    "${TMP_CONTEXT_DIR}/docker"
+    "${TMP_CONTEXT_DIR}"
 }
 
 # - - - - - - - - - - - - - - - - - -
