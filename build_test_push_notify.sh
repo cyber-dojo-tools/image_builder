@@ -51,7 +51,7 @@ banner()
 
 check_use()
 {
-  if [ -z "${1}" ] || [ "${1}" = '-h' ] || [ "${1}" = '--help' ]; then
+  if [ "${1}" = '-h' ] || [ "${1}" = '--help' ]; then
     show_use_long
     exit 0
   fi
