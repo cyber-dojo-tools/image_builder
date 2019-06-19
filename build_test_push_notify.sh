@@ -9,15 +9,24 @@ set -e
 #   o) notifies any dependent CircleCI projects
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+on_CI()
+{
+  [ -n "${CIRCLE_SHA1}" ]
+}
+
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
 
-readonly TMP1=$(cd ${MY_DIR} && mktemp -d XXXXXX)
-readonly TMP_DIR=${MY_DIR}/${TMP1}
-
-readonly TMP2=$(cd ${MY_DIR} && mktemp -d XXXXXX)
-readonly TMP_CONTEXT_DIR=${MY_DIR}/${TMP2}
+if on_CI; then
+  readonly TMP_DIR=$(mktemp -d /tmp/XXXXXX)
+  readonly TMP_CONTEXT_DIR=$(mktemp -d /tmp/XXXXXX)
+else
+  readonly TMP1=$(cd ${MY_DIR} && mktemp -d XXXXXX)
+  readonly TMP_DIR=${MY_DIR}/${TMP1}
+  readonly TMP2=$(cd ${MY_DIR} && mktemp -d XXXXXX)
+  readonly TMP_CONTEXT_DIR=${MY_DIR}/${TMP2}
+fi
 
 remove_tmp_dirs()
 {
@@ -197,11 +206,6 @@ notify_dependent_projects()
 }
 
 # - - - - - - - - - - - - - - - - - -
-
-on_CI()
-{
-  [ -n "${CIRCLE_SHA1}" ]
-}
 
 testing_myself()
 {
