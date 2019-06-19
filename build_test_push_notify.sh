@@ -9,32 +9,17 @@ set -e
 #   o) notifies any dependent CircleCI projects
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-on_CI()
-{
-  [ -n "${CIRCLE_SHA1}" ]
-}
-
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
+readonly TMP_DIR=$(mktemp -d /tmp/XXXXXX)
 
-if on_CI; then
-  readonly TMP_DIR=$(mktemp -d /tmp/XXXXXX)
-  readonly TMP_CONTEXT_DIR=$(mktemp -d /tmp/XXXXXX)
-else
-  readonly TMP1=$(cd ${MY_DIR} && mktemp -d XXXXXX)
-  readonly TMP_DIR=${MY_DIR}/${TMP1}
-  readonly TMP2=$(cd ${MY_DIR} && mktemp -d XXXXXX)
-  readonly TMP_CONTEXT_DIR=${MY_DIR}/${TMP2}
-fi
-
-remove_tmp_dirs()
+remove_tmp_dir()
 {
-  rm -rf "${TMP_CONTEXT_DIR}" > /dev/null
   rm -rf "${TMP_DIR}" > /dev/null;
 }
 
-trap remove_tmp_dirs INT EXIT
+trap remove_tmp_dir INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
@@ -157,12 +142,8 @@ image_name()
 
 build_image()
 {
-  # Copy the src_dir into a new temporary context-dir
-  # so we can overwrite its Dockerfile.
-  cp -R "$(src_dir_abs)/" "${TMP_CONTEXT_DIR}"
-
-  # Overwrite the Dockerfile with one containing
-  # extra commands to fulfil the runner's requirements.
+  # Create new Dockerfile containing extra
+  # commands to fulfil the runner's requirements.
   cat "$(src_dir_abs)/Dockerfile" \
     | \
       docker run \
@@ -171,16 +152,17 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "${TMP_CONTEXT_DIR}/Dockerfile"
+      "${TMP_DIR}/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "${TMP_CONTEXT_DIR}/Dockerfile"
+  cat "${TMP_DIR}/Dockerfile"
   echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
   # Build the augmented docker-image.
   docker build \
+    --file "${TMP_DIR}/Dockerfile" \
     --tag "$(image_name)" \
-    "${TMP_CONTEXT_DIR}"
+    "$(src_dir_abs)"
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -203,6 +185,13 @@ notify_dependent_projects()
     --rm \
       cyberdojofoundation/image_notifier \
         ${repos}
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+on_CI()
+{
+  [ -n "${CIRCLE_SHA1}" ]
 }
 
 # - - - - - - - - - - - - - - - - - -
