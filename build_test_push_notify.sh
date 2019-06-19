@@ -54,9 +54,9 @@ check_use()
     echo "error: ${SRC_DIR} does not exist"
     exit 3
   fi
-  if [ ! -f "${SRC_DIR}/Dockerfile" ]; then
+  if [ ! -f "${SRC_DIR}/Dockerfile.base" ]; then
     show_use_short
-    echo "error: ${SRC_DIR}/Dockerfile does not exist"
+    echo "error: ${SRC_DIR}/Dockerfile.base does not exist"
     exit 3
   fi
 }
@@ -68,7 +68,7 @@ show_use_short()
   echo "Use: ${MY_NAME} [SRC_DIR|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
-  echo '  SRC_DIR must have a Dockerfile'
+  echo '  SRC_DIR must have a Dockerfile.base'
   echo ''
 }
 
@@ -77,7 +77,7 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Attempts to build a docker-image from ${SRC_DIR}/Dockerfile'
+  echo 'Attempts to build a docker-image from ${SRC_DIR}/Dockerfile.base'
   echo "adjusted to fulfil the runner service's requirements."
   echo 'If ${SRC_DIR}/start_point/manifest.json exists the name of the docker-image'
   echo 'will be taken from it, otherwise from ${SRC_DIR}/image_name.json'
@@ -144,7 +144,7 @@ build_image()
 {
   # Create new Dockerfile containing extra
   # commands to fulfil the runner's requirements.
-  cat "$(src_dir_abs)/Dockerfile" \
+  cat "$(src_dir_abs)/Dockerfile.base" \
     | \
       docker run \
         --interactive \
@@ -152,14 +152,14 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "$(src_dir_abs)/Dockerfile.augmented"
+      "$(src_dir_abs)/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "$(src_dir_abs)/Dockerfile.augmented"
+  cat "$(src_dir_abs)/Dockerfile"
 
   # Build the augmented docker-image.
   docker build \
-    --file "$(src_dir_abs)/Dockerfile.augmented" \
+    --file "$(src_dir_abs)/Dockerfile" \
     --tag "$(image_name)" \
     "$(src_dir_abs)"
 }
