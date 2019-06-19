@@ -12,6 +12,14 @@ set -e
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
+readonly TMP_DIR=$(mktemp -d /tmp/XXXXXX)
+
+remove_tmp_dir()
+{
+  rm -rf "${TMP_DIR}" > /dev/null;
+}
+
+trap remove_tmp_dir INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
