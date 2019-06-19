@@ -12,14 +12,6 @@ set -e
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
-readonly TMP_DIR=$(mktemp -d /tmp/XXXXXX)
-
-remove_tmp_dir()
-{
-  rm -rf "${TMP_DIR}" > /dev/null;
-}
-
-trap remove_tmp_dir INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
@@ -152,15 +144,14 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "${TMP_DIR}/Dockerfile"
+      "$(src_dir_abs)/Dockerfile.augmented"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "${TMP_DIR}/Dockerfile"
-  echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+  cat "$(src_dir_abs)/Dockerfile.augmented"
 
   # Build the augmented docker-image.
   docker build \
-    --file "${TMP_DIR}/Dockerfile" \
+    --file "$(src_dir_abs)/Dockerfile.augmented" \
     --tag "$(image_name)" \
     "$(src_dir_abs)"
 }
