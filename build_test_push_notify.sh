@@ -54,9 +54,9 @@ check_use()
     echo "error: ${SRC_DIR} does not exist"
     exit 3
   fi
-  if [ ! -f "${SRC_DIR}/Dockerfile.base" ]; then
+  if [ ! -f "${SRC_DIR}/docker/Dockerfile.base" ]; then
     show_use_short
-    echo "error: ${SRC_DIR}/Dockerfile.base does not exist"
+    echo "error: ${SRC_DIR}/docker/Dockerfile.base does not exist"
     exit 3
   fi
 }
@@ -68,7 +68,7 @@ show_use_short()
   echo "Use: ${MY_NAME} [SRC_DIR|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
-  echo '  SRC_DIR must have a Dockerfile.base'
+  echo '  SRC_DIR/docker/Dockerfile.base must exist'
   echo ''
 }
 
@@ -77,10 +77,10 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Attempts to build a docker-image from ${SRC_DIR}/Dockerfile.base'
+  echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile.base'
   echo "adjusted to fulfil the runner service's requirements."
   echo 'If ${SRC_DIR}/start_point/manifest.json exists the name of the docker-image'
-  echo 'will be taken from it, otherwise from ${SRC_DIR}/image_name.json'
+  echo 'will be taken from it, otherwise from ${SRC_DIR}/docker/image_name.json'
   echo
   echo 'If ${SRC_DIR}/start_point/ exists:'
   echo '  1. Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'
@@ -144,7 +144,7 @@ build_image()
 {
   # Create new Dockerfile containing extra
   # commands to fulfil the runner's requirements.
-  cat "$(src_dir_abs)/Dockerfile.base" \
+  cat "$(src_dir_abs)/docker/Dockerfile.base" \
     | \
       docker run \
         --interactive \
@@ -152,16 +152,16 @@ build_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "$(src_dir_abs)/Dockerfile"
+      "$(src_dir_abs)/docker/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "$(src_dir_abs)/Dockerfile"
+  cat "$(src_dir_abs)/docker/Dockerfile"
 
   # Build the augmented docker-image.
   docker build \
-    --file "$(src_dir_abs)/Dockerfile" \
+    --file "$(src_dir_abs)/docker/Dockerfile" \
     --tag "$(image_name)" \
-    "$(src_dir_abs)"
+    "$(src_dir_abs)/docker"
 }
 
 # - - - - - - - - - - - - - - - - - -
