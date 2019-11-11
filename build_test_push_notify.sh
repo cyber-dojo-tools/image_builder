@@ -23,21 +23,6 @@ trap remove_tmp_dir INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
-line()
-{
-  for i in {1..80}; do echo -n '='; done
-  echo
-}
-
-banner()
-{
-  line
-  echo "${1}"
-  #line
-}
-
-# - - - - - - - - - - - - - - - - - -
-
 check_use()
 {
   if [ "${1}" = '-h' ] || [ "${1}" = '--help' ]; then
@@ -60,7 +45,7 @@ check_use()
 
 show_use_short()
 {
-  echo "Use: ${MY_NAME} [SRC_DIR|--help]"
+  echo "Use: ${MY_NAME} [SRC_DIR|-h|--help]"
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
   echo '  SRC_DIR/docker/Dockerfile.base must exist'
@@ -173,12 +158,14 @@ dependent_projects()
 
 notify_dependent_projects()
 {
+  echo 'Notifying dependent projects'
   local -r repos=$(dependent_projects)
   docker run \
     --env CIRCLE_API_MACHINE_USER_TOKEN \
     --rm \
       cyberdojofoundation/image_notifier \
         ${repos}
+  echo 'Successfully notified dependent projects'
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -201,27 +188,27 @@ testing_myself()
 
 create_cdl_docker_image()
 {
-  echo
-  banner "Creating docker-image $(image_name)"
+  echo "Building docker-image $(image_name)"
   build_image
-  banner "Successfully created docker-image $(image_name)"
 }
 
 # - - - - - - - - - - - - - - - - - -
 
+has_start_point()
+{
+  [ -d "$(src_dir_abs)/start_point" ]
+}
+
 start_point_image_name()
 {
-  echo jj1
+  echo test_start_point_image
 }
 
 create_start_point_image()
 {
   local -r name=$(start_point_image_name)
-  if [ -d "$(src_dir_abs)/start_point" ]; then
-    banner "Creating start-point image..."
-    eval $(script_path) start-point create "${name}" --languages "$(src_dir_abs)"
-    banner "Successfully created start-point image"
-  fi
+  echo "Building ${name}"
+  eval $(script_path) start-point create "${name}" --languages "$(src_dir_abs)"
 }
 
 remove_start_point_image()
@@ -234,7 +221,7 @@ remove_start_point_image()
 check_red_amber_green()
 {
   local -r name=$(start_point_image_name)
-  banner 'Checking red->amber->green progression (TODO)'
+  echo 'Checking red->amber->green progression (TODO)'
   #...TODO (will use cyber-dojo-languages/image_hiker/check_red_amber_green.rb
 }
 
@@ -242,39 +229,31 @@ check_red_amber_green()
 
 check_version()
 {
-  if [ ! -d "$(src_dir_abs)/start_point" ]; then
-    "${SRC_DIR}/check_version.sh"
-  fi
+  "${SRC_DIR}/check_version.sh"
 }
 
 # - - - - - - - - - - - - - - - - - -
 
 push_cdl_image_to_dockerhub()
 {
-  banner "Pushing $(image_name) to dockerhub"
+  echo "Pushing $(image_name) to dockerhub"
   docker push $(image_name)
-  banner "Successfully pushed $(image_name) to dockerhub"
-}
-
-# - - - - - - - - - - - - - - - - - -
-
-notify_dependent_repos()
-{
-  banner 'Notifying dependent projects'
-  notify_dependent_projects
-  banner 'Successfully notified dependent projects'
+  echo "Successfully pushed $(image_name) to dockerhub"
 }
 
 # - - - - - - - - - - - - - - - - - -
 
 check_use $*
 create_cdl_docker_image
-create_start_point_image
-check_red_amber_green
-remove_start_point_image
-check_version
+if has_start_point; then
+  create_start_point_image
+  check_red_amber_green
+  remove_start_point_image
+else
+  check_version
+fi
 if on_CI && ! testing_myself; then
   push_cdl_image_to_dockerhub
-  notify_dependent_repos
+  notify_dependent_projects
 fi
 echo
