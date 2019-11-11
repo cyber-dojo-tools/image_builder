@@ -23,11 +23,6 @@ trap remove_tmp_dir INT EXIT
 
 # - - - - - - - - - - - - - - - - - -
 
-gap()
-{
-  for i in {1..5}; do echo '.'; done
-}
-
 line()
 {
   for i in {1..80}; do echo -n '='; done
@@ -38,7 +33,7 @@ banner()
 {
   line
   echo "${1}"
-  line
+  #line
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -204,34 +199,82 @@ testing_myself()
 
 # - - - - - - - - - - - - - - - - - -
 
-check_use $*
-echo
-banner "Creating docker-image $(image_name)"
-build_image
-banner "Successfully created docker-image $(image_name)"
-gap
+create_cdl_docker_image()
+{
+  echo
+  banner "Creating docker-image $(image_name)"
+  build_image
+  banner "Successfully created docker-image $(image_name)"
+}
 
-if [ -d "$(src_dir_abs)/start_point" ]; then
-  banner "Creating a start-point image..."
-  eval $(script_path) start-point create jj1 --languages "$(src_dir_abs)"
-  eval $(script_path) start-point rm jj1
-  banner 'Successfully created start-point image'
-  gap
+# - - - - - - - - - - - - - - - - - -
+
+start_point_image_name()
+{
+  echo jj1
+}
+
+create_start_point_image()
+{
+  local -r name=$(start_point_image_name)
+  if [ -d "$(src_dir_abs)/start_point" ]; then
+    banner "Creating start-point image..."
+    eval $(script_path) start-point create "${name}" --languages "$(src_dir_abs)"
+    banner "Successfully created start-point image"
+  fi
+}
+
+remove_start_point_image()
+{
+  docker image rm $(start_point_image_name) > /dev/null
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+check_red_amber_green()
+{
+  local -r name=$(start_point_image_name)
   banner 'Checking red->amber->green progression (TODO)'
-  #...TODO (will use cyber-dojo-languages/hiker service)
-else
-  "${SRC_DIR}/check_version.sh"
-fi
+  #...TODO (will use cyber-dojo-languages/image_hiker/check_red_amber_green.rb
+}
 
-if on_CI && ! testing_myself; then
-  gap
+# - - - - - - - - - - - - - - - - - -
+
+check_version()
+{
+  if [ ! -d "$(src_dir_abs)/start_point" ]; then
+    "${SRC_DIR}/check_version.sh"
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+push_cdl_image_to_dockerhub()
+{
   banner "Pushing $(image_name) to dockerhub"
   docker push $(image_name)
   banner "Successfully pushed $(image_name) to dockerhub"
-  gap
+}
+
+# - - - - - - - - - - - - - - - - - -
+
+notify_dependent_repos()
+{
   banner 'Notifying dependent projects'
   notify_dependent_projects
   banner 'Successfully notified dependent projects'
-fi
+}
 
+# - - - - - - - - - - - - - - - - - -
+
+check_use $*
+create_cdl_docker_image
+create_start_point_image
+check_red_amber_green
+remove_start_point_image
+check_version
+if on_CI && ! testing_myself; then
+  push_cdl_image_to_dockerhub
+  notify_dependent_repos
+fi
 echo
