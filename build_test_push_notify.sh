@@ -172,7 +172,7 @@ notify_dependent_projects()
 
 on_CI()
 {
-  [ -n "${CIRCLE_SHA1}" ] || [ -n "${TRAVIS}" ]
+  [ -n "${CIRCLE_SHA1}" ]
 }
 
 # - - - - - - - - - - - - - - - - - -
