@@ -1,11 +1,21 @@
 #!/bin/bash -Ee
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This script is curl'd and run in CircleCI scripts. It
-#   o) builds a cyber-dojo-language image
-#   o) tests it
-#   o) pushes it to dockerhub
-#   o) notifies any dependent github projects
+# This script is curl'd and run in CircleCI scripts.
+# It
+#   1) builds a language-test-framework image
+#      eg cyberdojofoundation/java-junit
+#      it typically gets the image name from the SRC_DIR manifest.json
+#   2) builds a --languages start-points image
+#      eg as created by a command such as
+#         $ cyber-dojo start-point create NAME --languages SRC_DIR
+#   3) tests it
+#      the start-point files from 2) are '9*6' tweaked to red/green/amber
+#      and passed to runner.run_cyber_dojo_sh()
+#      and the returned [stdout,stderr,status]
+#      are passed to ragger.colour()
+#   4) pushes the image built in 1) to dockerhub
+#   5) notifies any dependent github projects
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_NAME=$(basename $0)
@@ -102,6 +112,8 @@ ip_address()
 readonly IP_ADDRESS=$(ip_address)
 
 #- - - - - - - - - - - - - - - - - - - - - - -
+# path for cyber-dojo script
+#- - - - - - - - - - - - - - - - - - - - - - -
 script_path()
 {
   local -r script_name=cyber-dojo
@@ -129,26 +141,13 @@ script_path()
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
-src_dir_abs()
-{
-  # docker volume-mounts cannot be relative
-  echo $(cd ${SRC_DIR} && pwd)
-}
-
+# build the language-test-framework image (1)
 #- - - - - - - - - - - - - - - - - - - - - - -
-image_name()
-{
-  docker run \
-    --rm \
-    --volume "$(src_dir_abs):/data:ro" \
-    cyberdojofoundation/image_namer
-}
-
-#- - - - - - - - - - - - - - - - - - - - - - -
-build_image()
+build_cdl_docker_image()
 {
   # Create new Dockerfile containing extra
   # commands to fulfil the runner's requirements.
+  echo "Building docker-image $(image_name)"
   cat "$(src_dir_abs)/docker/Dockerfile.base" \
     | \
       docker run \
@@ -169,6 +168,22 @@ build_image()
     "$(src_dir_abs)/docker"
 }
 
+#- - - - - - - - - - - - - - - - - - - - - - -
+src_dir_abs()
+{
+  # docker volume-mounts cannot be relative
+  echo $(cd ${SRC_DIR} && pwd)
+}
+
+#- - - - - - - - - - - - - - - - - - - - - - -
+image_name()
+{
+  docker run \
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+    cyberdojofoundation/image_namer
+}
+
 # - - - - - - - - - - - - - - - - - -
 on_CI()
 {
@@ -184,13 +199,6 @@ testing_myself()
 }
 
 # - - - - - - - - - - - - - - - - - -
-create_cdl_docker_image()
-{
-  echo "Building docker-image $(image_name)"
-  build_image
-}
-
-# - - - - - - - - - - - - - - - - - -
 has_start_point()
 {
   [ -d "$(src_dir_abs)/start_point" ]
@@ -202,6 +210,8 @@ start_point_image_name()
   echo test_start_point_image
 }
 
+# - - - - - - - - - - - - - - - - - -
+# start-point image which serves languages start-points
 # - - - - - - - - - - - - - - - - - -
 create_start_point_image()
 {
@@ -219,7 +229,7 @@ remove_start_point_image()
 # - - - - - - - - - - - - - - - - - -
 check_red_amber_green()
 {
-  echo Checking red->amber->green progression
+  echo 'Checking red->amber->green progression'
   create_docker_network
   start_languages
   start_ragger
@@ -234,6 +244,8 @@ check_red_amber_green()
   assert_traffic_light green
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - -
+# network to host containers
 # - - - - - - - - - - - - - - - - - - - - - - -
 network_name()
 {
@@ -252,6 +264,8 @@ remove_docker_network()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+# languages start-point service to serve '6*9' files
+# - - - - - - - - - - - - - - - - - - - - - - -
 languages_name()
 {
   echo traffic-light-languages
@@ -265,7 +279,6 @@ remove_languages()
 start_languages()
 {
   local -r image=$(start_point_image_name)
-  echo "languages image :${image}:"
   local -r port="${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
   echo "Creating $(languages_name) service"
   local -r cid=$(docker run \
@@ -283,6 +296,8 @@ start_languages()
       ${image})
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - -
+# ragger service to determine traffic-light colours
 # - - - - - - - - - - - - - - - - - - - - - - -
 ragger_name()
 {
@@ -314,6 +329,8 @@ start_ragger()
       "${image}")
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - -
+# runner service to pass '6*9' starting files to
 # - - - - - - - - - - - - - - - - - - - - - - -
 runner_name()
 {
@@ -394,11 +411,8 @@ ready()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-traffic_light_name()
-{
-  echo traffic-light
-}
-
+# check red->amber->green progression of '6*9'
+# - - - - - - - - - - - - - - - - - - - - - - -
 assert_traffic_light()
 {
   local -r colour="${1}" # eg red
@@ -406,7 +420,7 @@ assert_traffic_light()
     --env NO_PROMETHEUS \
     --env SRC_DIR=$(src_dir_abs) \
     --init \
-    --name $(traffic_light_name) \
+    --name traffic-light \
     --network $(network_name) \
     --read-only \
     --restart no \
@@ -419,14 +433,7 @@ assert_traffic_light()
 }
 
 # - - - - - - - - - - - - - - - - - -
-dependent_projects()
-{
-  docker run \
-    --rm \
-    --volume "$(src_dir_abs):/data:ro" \
-      cyberdojofoundation/image_dependents
-}
-
+# notify github projects that use the built image as their base FROM image
 # - - - - - - - - - - - - - - - - - -
 notify_dependent_projects()
 {
@@ -457,6 +464,15 @@ notify_dependent_projects()
 }
 
 # - - - - - - - - - - - - - - - - - -
+dependent_projects()
+{
+  docker run \
+    --rm \
+    --volume "$(src_dir_abs):/data:ro" \
+      cyberdojofoundation/image_dependents
+}
+
+# - - - - - - - - - - - - - - - - - -
 check_version()
 {
   "${SRC_DIR}/check_version.sh"
@@ -483,7 +499,7 @@ versioner_env_vars()
 export $(versioner_env_vars)
 exit_zero_if_show_help $*
 exit_non_zero_unless_good_SRC_DIR $*
-create_cdl_docker_image
+build_cdl_docker_image
 if has_start_point; then
   create_start_point_image
   check_red_amber_green
