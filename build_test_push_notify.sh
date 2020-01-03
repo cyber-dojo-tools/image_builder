@@ -223,7 +223,7 @@ create_start_point_image()
 # - - - - - - - - - - - - - - - - - -
 remove_start_point_image()
 {
-  docker image rm $(start_point_image_name) > /dev/null
+  docker image rm $(start_point_image_name) > /dev/null || true
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -260,7 +260,7 @@ create_docker_network()
 
 remove_docker_network()
 {
-  docker network remove $(network_name) > /dev/null
+  docker network remove $(network_name) > /dev/null || true
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
