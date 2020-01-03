@@ -223,7 +223,7 @@ create_start_point_image()
 # - - - - - - - - - - - - - - - - - -
 remove_start_point_image()
 {
-  docker image remove --force $(start_point_image_name) > /dev/null || true
+  docker image remove --force $(start_point_image_name) > /dev/null 2>&1 || true
 }
 
 # - - - - - - - - - - - - - - - - - -
@@ -260,7 +260,7 @@ create_docker_network()
 
 remove_docker_network()
 {
-  docker network remove $(network_name) > /dev/null || true
+  docker network remove $(network_name) > /dev/null 2>&1 || true
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -273,7 +273,7 @@ languages_name()
 
 remove_languages()
 {
-  docker rm --force $(languages_name) > /dev/null || true
+  docker rm --force $(languages_name) > /dev/null 2>&1 || true
 }
 
 start_languages()
@@ -306,7 +306,7 @@ ragger_name()
 
 remove_ragger()
 {
-  docker rm --force $(ragger_name) > /dev/null || true
+  docker rm --force $(ragger_name) > /dev/null 2>&1 || true
 }
 
 start_ragger()
@@ -339,7 +339,7 @@ runner_name()
 
 remove_runner()
 {
-  docker rm --force $(runner_name) > /dev/null || true
+  docker rm --force $(runner_name) > /dev/null 2>&1 || true
 }
 
 start_runner()
