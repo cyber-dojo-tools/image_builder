@@ -287,7 +287,7 @@ start_languages()
     --init \
     --name $(languages_name) \
     --network $(network_name) \
-    --network-alias languages \
+    --network-alias languages-start-points \
     --publish "${port}:${port}" \
     --read-only \
     --restart no \
@@ -429,7 +429,6 @@ assert_traffic_light()
     --user nobody \
     --volume $(src_dir_abs):$(src_dir_abs):ro \
       cyberdojofoundation/image_hiker:latest "${colour}"
-  # TODO: assertion!
 }
 
 # - - - - - - - - - - - - - - - - - -
