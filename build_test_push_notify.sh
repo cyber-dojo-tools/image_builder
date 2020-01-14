@@ -5,7 +5,9 @@
 # It
 #   1) builds a language-test-framework image
 #      eg cyberdojofoundation/java-junit
-#      it typically gets the image name from the SRC_DIR manifest.json
+#      it gets the image name from SRC_DIR in...
+#      - docker/image_name.json (if its a base image eg groovy)
+#      - start_point/manifest.json (if its a test-framework image, eg groovy-junit)
 #   2) builds a --languages start-points image
 #      as created by a command such as
 #         $ cyber-dojo start-point create NAME --languages SRC_DIR
