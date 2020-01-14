@@ -7,13 +7,12 @@
 #      eg cyberdojofoundation/java-junit
 #      it typically gets the image name from the SRC_DIR manifest.json
 #   2) builds a --languages start-points image
-#      eg as created by a command such as
+#      as created by a command such as
 #         $ cyber-dojo start-point create NAME --languages SRC_DIR
 #   3) tests it
-#      the start-point files from 2) are '9*6' tweaked to red/green/amber
-#      and passed to runner.run_cyber_dojo_sh()
-#      and the returned [stdout,stderr,status]
-#      are passed to ragger.colour()
+#      - the start-point files from 2) are '9*6' tweaked to red/green/amber
+#      - and passed to runner.run_cyber_dojo_sh()
+#      - and inspect the returned colour
 #   4) pushes the image built in 1) to dockerhub
 #   5) notifies any dependent github projects
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -35,7 +34,6 @@ trap_handler()
   remove_start_point_image
   remove_languages
   remove_runner
-  remove_ragger
   remove_docker_network
 }
 trap trap_handler EXIT
@@ -232,11 +230,9 @@ check_red_amber_green()
   echo 'Checking red->amber->green progression'
   create_docker_network
   start_languages
-  start_ragger
   start_runner
 
   wait_until_ready languages "${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
-  wait_until_ready ragger    "${CYBER_DOJO_RAGGER_PORT}"
   wait_until_ready runner    "${CYBER_DOJO_RUNNER_PORT}"
 
   assert_traffic_light red
@@ -294,39 +290,6 @@ start_languages()
     --tmpfs /tmp \
     --user nobody \
       ${image})
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# ragger service to determine traffic-light colours
-# - - - - - - - - - - - - - - - - - - - - - - -
-ragger_name()
-{
-  echo traffic-light-ragger
-}
-
-remove_ragger()
-{
-  docker rm --force $(ragger_name) > /dev/null 2>&1 || true
-}
-
-start_ragger()
-{
-  local -r image="${CYBER_DOJO_RAGGER_IMAGE}:${CYBER_DOJO_RAGGER_TAG}"
-  local -r port="${CYBER_DOJO_RAGGER_PORT}"
-  echo "Creating $(ragger_name) service"
-  local -r cid=$(docker run \
-    --detach \
-    --env NO_PROMETHEUS \
-    --init \
-    --name $(ragger_name) \
-    --network $(network_name) \
-    --network-alias ragger \
-    --publish "${port}:${port}" \
-    --read-only \
-    --restart no \
-    --tmpfs /tmp \
-    --user nobody \
-      "${image}")
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -491,7 +454,7 @@ push_cdl_image_to_dockerhub()
 # - - - - - - - - - - - - - - - - - -
 versioner_env_vars()
 {
-  docker run --rm cyberdojo/versioner:latest sh -c 'cat /app/.env'
+  docker run --rm cyberdojo/versioner:latest
 }
 
 # - - - - - - - - - - - - - - - - - -
