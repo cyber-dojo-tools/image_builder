@@ -1,45 +1,64 @@
 #!/bin/bash -Ee
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This script is curl'd and run in CircleCI scripts.
-# It
-#   1) builds a language-test-framework image
-#      eg cyberdojofoundation/java-junit
-#      it gets the image name from SRC_DIR in...
-#      - docker/image_name.json (if its a base image eg groovy)
-#      - start_point/manifest.json (if its a test-framework image, eg groovy-junit)
-#   2) builds a --languages start-points image
-#      as created by a command such as
-#         $ cyber-dojo start-point create NAME --languages SRC_DIR
-#   3) tests it
-#      - the start-point files from 2) are '9*6' tweaked to red/green/amber
-#      - and passed to runner.run_cyber_dojo_sh()
-#      - and inspect the returned colour
-#   4) pushes the image built in 1) to dockerhub
-#   5) notifies any dependent github projects
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
+# Curl'd and run in CircleCI scripts of all
+# repos of the cyber-dojo-languages organization.
+# - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
-readonly TMP_DIR=$(mktemp -d /tmp/XXXXXX)
+readonly TMP_DIR=$(mktemp -d /tmp/cyber-dojo.image_builder.XXXXXX)
 
-remove_tmp_dir()
-{
-  rm -rf "${TMP_DIR}" > /dev/null
-}
-
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 trap_handler()
 {
-  remove_tmp_dir
+  rm -rf "${TMP_DIR}" > /dev/null
   remove_start_point_image
   remove_runner
   remove_docker_network
 }
 trap trap_handler EXIT
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
+show_use_short()
+{
+  echo "Use: ${MY_NAME} [SRC_DIR|-h|--help]"
+  echo ''
+  echo '  SRC_DIR defaults to ${PWD}'
+  echo '  SRC_DIR/docker/Dockerfile.base must exist'
+  echo ''
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+show_use_long()
+{
+  show_use_short
+  echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile.base'
+  echo "adjusted to fulfil the runner service's requirements."
+  echo ''
+  echo '1. If ${SRC_DIR}/start_point/manifest.json exists, the name of the docker-image'
+  echo 'will be taken from it, otherwise from ${SRC_DIR}/docker/image_name.json'
+  echo ''
+  echo '2. If ${SRC_DIR}/start_point/ exists:'
+  echo '  *) Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'
+  echo '     $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
+  echo '  *) Verifies the red|amber|green start_point/ files traffic-lights'
+  echo '     o) the starting-files give a red traffic-light.'
+  echo "     o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light."
+  echo "     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light."
+  echo "  *) If there is no source file containing '6 * 9', looks for the file"
+  echo '     ${SRC_DIR}/start_point/options.json. For example, see:'
+  echo '     https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point'
+  echo ''
+  echo '3. If running on the CI/CD pipeine:'
+  echo '  *) Pushes the docker-image to dockerhub'
+  echo '  *) Triggers cyber-dojo-languages github repositories that use'
+  echo '     the docker-image as their base (FROM) image.'
+  echo
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 exit_zero_if_show_help()
 {
   if [ "${1}" == '-h' ] || [ "${1}" == '--help' ]; then
@@ -48,7 +67,7 @@ exit_zero_if_show_help()
   fi
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 exit_non_zero_unless_good_SRC_DIR()
 {
   if [ ! -d "${SRC_DIR}" ]; then
@@ -63,42 +82,7 @@ exit_non_zero_unless_good_SRC_DIR()
   fi
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-show_use_short()
-{
-  echo "Use: ${MY_NAME} [SRC_DIR|-h|--help]"
-  echo ''
-  echo '  SRC_DIR defaults to ${PWD}'
-  echo '  SRC_DIR/docker/Dockerfile.base must exist'
-  echo ''
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - -
-show_use_long()
-{
-  show_use_short
-  echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile.base'
-  echo "(adjusted to fulfil the runner service's requirements)."
-  echo ''
-  echo '1. If ${SRC_DIR}/start_point/manifest.json exists, the name of the docker-image'
-  echo 'will be taken from it, otherwise from ${SRC_DIR}/docker/image_name.json'
-  echo ''
-  echo '2. If ${SRC_DIR}/start_point/ exists:'
-  echo '  *) Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'
-  echo '     $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
-  echo '  *) Verifies the red->amber->green starting files progression'
-  echo '     o) the starting-files give a red traffic-light.'
-  echo '     o) with an introduced syntax error, give an amber traffic-light.'
-  echo "     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light."
-  echo ''
-  echo '3. If running on the CI/CD pipeine:'
-  echo '  *) Pushes the docker-image to dockerhub'
-  echo '  *) Triggers cyber-dojo-languages github repositories that use'
-  echo '     the docker-image as their base (FROM) image.'
-  echo
-}
-
-# - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 ip_address()
 {
   if [ -n "${DOCKER_MACHINE_NAME}" ]; then
@@ -107,41 +91,29 @@ ip_address()
     echo localhost
   fi
 }
-
 readonly IP_ADDRESS=$(ip_address)
 
-#- - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 # path for cyber-dojo script
-#- - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 script_path()
 {
-  local -r script_name=cyber-dojo
-  # Run locally when offline
-  local -r local_path="${MY_DIR}/../../cyber-dojo/commander/${script_name}"
-  local -r curled_path="${TMP_DIR}/${script_name}"
-
-  if on_CI && [ ! -f "${curled_path}" ]; then
-    local -r github_org=https://raw.githubusercontent.com/cyber-dojo
-    local -r repo_name=commander
-    local -r url="${github_org}/${repo_name}/master/${script_name}"
-    curl --silent --fail "${url}" > "${curled_path}"
-    chmod 700 "${curled_path}"
-    echo "${curled_path}"
-  elif on_CI && [ -f "${curled_path}" ]; then
-    echo "${curled_path}"
-  elif [ -f "${local_path}" ]; then
-    local -r env_var=COMMANDER_IMAGE=cyberdojo/commander:latest
-    echo "${env_var} ${local_path}"
+  local -r name=cyber-dojo
+  local -r local_path="${MY_DIR}/../../cyber-dojo/commander/${name}"
+  if [ -f "${local_path}" ]; then
+    echo "${local_path}"
   else
-    >&2 echo 'FAILED: Not a CI/CD run so expecting cyber-dojo script in dir at:'
-    >&2 echo "${MY_DIR}/../../cyber-dojo/commander"
-    exit 42
+    local -r github_repo=https://raw.githubusercontent.com/cyber-dojo/commander
+    local -r remote_path="${github_repo}/master/${name}"
+    curl --fail --output "${TMP_DIR}/${name}" --silent "${remote_path}"
+    chmod 700 "${TMP_DIR}/${name}"
+    echo "${TMP_DIR}/${name}"
   fi
 }
 
-#- - - - - - - - - - - - - - - - - - - - - - -
-# build the language-test-framework image (1)
-#- - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
+# build the language-test-framework image
+# - - - - - - - - - - - - - - - - - - - - - - -
 build_cdl_docker_image()
 {
   # Create new Dockerfile containing extra
@@ -183,13 +155,13 @@ image_name()
     cyberdojofoundation/image_namer
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 on_CI()
 {
   [ -n "${CIRCLE_SHA1}" ]
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 testing_myself()
 {
   # Don't push CDL images or notify dependent repos
@@ -197,35 +169,35 @@ testing_myself()
   [ "${CIRCLE_PROJECT_REPONAME}" = 'image_builder' ]
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 has_start_point()
 {
   [ -d "$(src_dir_abs)/start_point" ]
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 start_point_image_name()
 {
   echo test_start_point_image
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 # start-point image which serves languages start-points
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 create_start_point_image()
 {
   local -r name=$(start_point_image_name)
   echo "Building ${name}"
-  eval $(script_path) start-point create "${name}" --languages "$(src_dir_abs)"
+  "$(script_path)" start-point create "${name}" --languages "$(src_dir_abs)"
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 remove_start_point_image()
 {
   docker image remove --force $(start_point_image_name) > /dev/null 2>&1 || true
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 check_red_amber_green()
 {
   echo 'Checking red->amber->green progression'
@@ -264,11 +236,6 @@ runner_name()
   echo traffic-light-runner
 }
 
-remove_runner()
-{
-  docker rm --force $(runner_name) > /dev/null 2>&1 || true
-}
-
 start_runner()
 {
   local -r image="${CYBER_DOJO_RUNNER_IMAGE}:${CYBER_DOJO_RUNNER_TAG}"
@@ -290,7 +257,12 @@ start_runner()
        "${image}")
 }
 
-# - - - - - - - - - - - - - - - - - - - - -
+remove_runner()
+{
+  docker rm --force $(runner_name) > /dev/null 2>&1 || true
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 readonly READY_FILENAME='/tmp/curl-ready-output'
 
 wait_until_ready()
@@ -318,7 +290,7 @@ wait_until_ready()
   exit 42
 }
 
-# - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 ready()
 {
   local -r port="${1}"
@@ -339,6 +311,7 @@ ready()
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 # check red->amber->green progression of '6*9'
+# Works via a volume-mount and not via a git-clone.
 # - - - - - - - - - - - - - - - - - - - - - - -
 assert_traffic_light()
 {
@@ -358,9 +331,9 @@ assert_traffic_light()
       cyberdojofoundation/image_hiker:latest "${colour}"
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 # notify github projects that use the built image as their base FROM image
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 notify_dependent_projects()
 {
   echo 'Notifying dependent projects'
@@ -389,7 +362,7 @@ notify_dependent_projects()
   echo 'Successfully notified dependent projects'
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 dependent_projects()
 {
   docker run \
@@ -398,13 +371,13 @@ dependent_projects()
       cyberdojofoundation/image_dependents
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 check_version()
 {
   "${SRC_DIR}/check_version.sh"
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 push_cdl_image_to_dockerhub()
 {
   echo "Pushing $(image_name) to dockerhub"
@@ -415,13 +388,13 @@ push_cdl_image_to_dockerhub()
   docker logout
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 versioner_env_vars()
 {
   docker run --rm cyberdojo/versioner:latest
 }
 
-# - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - -
 export $(versioner_env_vars)
 exit_zero_if_show_help $*
 exit_non_zero_unless_good_SRC_DIR $*
