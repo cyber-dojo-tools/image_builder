@@ -34,7 +34,6 @@ trap_handler()
 {
   remove_tmp_dir
   remove_start_point_image
-  remove_languages
   remove_runner
   remove_docker_network
 }
@@ -231,12 +230,8 @@ check_red_amber_green()
 {
   echo 'Checking red->amber->green progression'
   create_docker_network
-  start_languages
   start_runner
-
-  wait_until_ready languages "${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
-  wait_until_ready runner    "${CYBER_DOJO_RUNNER_PORT}"
-
+  wait_until_ready runner "${CYBER_DOJO_RUNNER_PORT}"
   assert_traffic_light red
   assert_traffic_light amber
   assert_traffic_light green
@@ -259,39 +254,6 @@ create_docker_network()
 remove_docker_network()
 {
   docker network remove $(network_name) > /dev/null 2>&1 || true
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# languages start-point service to serve '6*9' files
-# - - - - - - - - - - - - - - - - - - - - - - -
-languages_name()
-{
-  echo traffic-light-languages
-}
-
-remove_languages()
-{
-  docker rm --force $(languages_name) > /dev/null 2>&1 || true
-}
-
-start_languages()
-{
-  local -r image=$(start_point_image_name)
-  local -r port="${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
-  echo "Creating $(languages_name) service"
-  local -r cid=$(docker run \
-    --detach \
-    --env NO_PROMETHEUS \
-    --init \
-    --name $(languages_name) \
-    --network $(network_name) \
-    --network-alias languages-start-points \
-    --publish "${port}:${port}" \
-    --read-only \
-    --restart no \
-    --tmpfs /tmp \
-    --user nobody \
-      ${image})
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -472,7 +434,7 @@ else
 fi
 if on_CI && ! testing_myself; then
   push_cdl_image_to_dockerhub
-  #notify_dependent_projects
+  #notify_dependent_projects # not-live yet
 else
   echo Not pushing image to dockerhub
   echo Not notifying dependent repos
