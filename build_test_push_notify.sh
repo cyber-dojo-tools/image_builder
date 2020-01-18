@@ -473,4 +473,7 @@ fi
 if on_CI && ! testing_myself; then
   push_cdl_image_to_dockerhub
   #notify_dependent_projects
+else
+  echo Not pushing image to dockerhub
+  echo Not notifying dependent repos
 fi
