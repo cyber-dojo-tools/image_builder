@@ -97,16 +97,17 @@ readonly IP_ADDRESS=$(ip_address)
 # - - - - - - - - - - - - - - - - - - - - - - -
 # path for cyber-dojo script
 # - - - - - - - - - - - - - - - - - - - - - - -
-script_path()
+cyber_dojo()
 {
   local -r name=cyber-dojo
-  local -r local_path="${MY_DIR}/../../cyber-dojo/commander/${name}"
-  if [ -f "${local_path}" ]; then
-    echo "${local_path}"
+  if [ -x "$(command -v ${name})" ]; then
+    >&2 echo "Found executable ${name} on the PATH"
+    echo "${name}"
   else
-    local -r github_repo=https://raw.githubusercontent.com/cyber-dojo/commander
-    local -r remote_path="${github_repo}/master/${name}"
-    curl --fail --output "${TMP_DIR}/${name}" --silent "${remote_path}"
+    local -r url="https://raw.githubusercontent.com/cyber-dojo/commander/master/${name}"
+    >&2 echo "Did not find executable ${name} on the PATH"
+    >&2 echo "Attempting to curl it from ${url}"
+    curl --fail --output "${TMP_DIR}/${name}" --silent "${url}"
     chmod 700 "${TMP_DIR}/${name}"
     echo "${TMP_DIR}/${name}"
   fi
@@ -189,7 +190,7 @@ create_start_point_image()
 {
   local -r name=$(start_point_image_name)
   echo "Building ${name}"
-  "$(script_path)" start-point create "${name}" --languages "$(src_dir_abs)"
+  "$(cyber_dojo)" start-point create "${name}" --languages "$(src_dir_abs)"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
