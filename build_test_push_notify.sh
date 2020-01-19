@@ -201,7 +201,7 @@ remove_start_point_image()
 # - - - - - - - - - - - - - - - - - - - - - - -
 check_red_amber_green()
 {
-  echo 'Checking red->amber->green progression'
+  echo 'Checking red|amber|green traffic-lights'
   create_docker_network
   start_runner
   wait_until_ready runner "${CYBER_DOJO_RUNNER_PORT}"
@@ -397,13 +397,14 @@ versioner_env_vars()
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 export $(versioner_env_vars)
-exit_zero_if_show_help $*
-exit_non_zero_unless_good_SRC_DIR $*
+exit_zero_if_show_help ${*}
+exit_non_zero_unless_good_SRC_DIR ${*}
 build_cdl_docker_image
 if has_start_point; then
   create_start_point_image
   check_red_amber_green
 else
+  echo 'No ${SRC_DIR}/start_point dir so assuming base-language image'
   check_version
 fi
 if on_CI && ! testing_myself; then
