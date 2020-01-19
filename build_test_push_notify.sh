@@ -37,8 +37,9 @@ show_use_long()
   echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile.base'
   echo "adjusted to fulfil the runner service's requirements."
   echo ''
-  echo '1. If ${SRC_DIR}/start_point/manifest.json exists, the name of the docker-image'
-  echo 'will be taken from it, otherwise from ${SRC_DIR}/docker/image_name.json'
+  echo '1. If ${SRC_DIR}/start_point/manifest.json exists, the name'
+  echo '   of the docker-image will be taken from it, otherwise from'
+  echo '   ${SRC_DIR}/docker/image_name.json'
   echo ''
   echo '2. If ${SRC_DIR}/start_point/ exists:'
   echo '  *) Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'

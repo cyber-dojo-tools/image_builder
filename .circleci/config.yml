@@ -1,20 +1,13 @@
 version: 2
 jobs:
   build-publish-trigger:
-
     machine:
-      enabled: true
-
-    working_directory: ~/repo
-
+      image: ubuntu-1604:201903-01
     steps:
       - checkout
       - run:
-          name: Build tools and test them
-          command: |
-            set -e
-            echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-            ./pipe_build_up_test.sh
+          name: Build image, test it, push it dockerhub
+          command: ./pipe_build_up_test.sh
 
 workflows:
   version: 2
