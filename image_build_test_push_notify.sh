@@ -34,29 +34,45 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  echo 'Attempts to build a docker-image from ${SRC_DIR}/docker/Dockerfile.base'
-  echo "adjusted to fulfil the runner service's requirements."
-  echo ''
-  echo '1. If ${SRC_DIR}/start_point/manifest.json exists, the name'
-  echo '   of the docker-image will be taken from it, otherwise from'
-  echo '   ${SRC_DIR}/docker/image_name.json'
-  echo ''
-  echo '2. If ${SRC_DIR}/start_point/ exists:'
-  echo '  *) Attempts to build a start-point image from the git-cloneable ${SRC_DIR}.'
-  echo '     $ cyber-dojo start-point create ... --languages ${SRC_DIR}'
-  echo '  *) Verifies the red|amber|green start_point/ files traffic-lights'
-  echo '     o) the starting-files give a red traffic-light.'
-  echo "     o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light."
-  echo "     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light."
-  echo "  *) If there is no source file containing '6 * 9', looks for the file"
-  echo '     ${SRC_DIR}/start_point/options.json. For example, see:'
-  echo '     https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point'
-  echo ''
-  echo '3. If running on the CI/CD pipeine:'
-  echo '  *) Pushes the docker-image to dockerhub'
-  echo '  *) Triggers cyber-dojo-languages github repositories that use'
-  echo '     the docker-image as their base (FROM) image.'
-  echo
+  define TEXT <<- EOF
+  Creates \${SRC_DIR}/docker/Dockerfile from \${SRC_DIR}/docker/Dockerfile.base
+  adjusted to fulfil the runner service's requirements, and then
+  attempts to build a docker-image from the Dockerfile.
+
+  1. If \${SRC_DIR}/start_point/manifest.json exists, the name
+     of the docker-image will be taken from it, otherwise from
+     \${SRC_DIR}/docker/image_name.json
+
+  2. If \${SRC_DIR}/start_point/ exists:
+    *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
+       $ cyber-dojo start-point create ... --languages \${SRC_DIR}
+    *) Verifies the red|amber|green traffic-lights for \${SRC_DIR}/start_point/ files
+       o) unmodified, give a red traffic-light.
+       o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
+       o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
+    *) If there is no \${SRC_DIR}/start_point/ file containing '6 * 9', 
+       looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
+       https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
+
+  3. If running on the CI/CD pipeine:
+    *) Pushes the docker-image to dockerhub
+    *) Triggers cyber-dojo-languages github repositories that use
+       the docker-image as their base (FROM) image.
+
+EOF
+  printf "${TEXT}"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+define()
+{
+  o=;
+  while IFS="\n" read -r a
+  do
+    o="$o$a"'
+';
+  done
+  eval "$1=\$o"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
