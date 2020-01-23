@@ -1,6 +1,7 @@
 #!/bin/bash -Ee
 
 # Will be deleted once all scripts use image_build_test_push_notify.sh
+exit(42)
 # - - - - - - - - - - - - - - - - - - - - - - -
 # Curl'd and run in CircleCI scripts of all
 # repos of the cyber-dojo-languages organization.

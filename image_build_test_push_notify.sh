@@ -50,7 +50,7 @@ show_use_long()
        o) unmodified, give a red traffic-light.
        o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
        o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
-    *) If there is no \${SRC_DIR}/start_point/ file containing '6 * 9', 
+    *) If there is no \${SRC_DIR}/start_point/ file containing '6 * 9',
        looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
        https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
@@ -122,7 +122,7 @@ cyber_dojo()
   else
     local -r url="https://raw.githubusercontent.com/cyber-dojo/commander/master/${name}"
     >&2 echo "Did not find executable ${name} on the PATH"
-    >&2 echo "Attempting to curl it from ${url}"
+    >&2 echo "Curling it from ${url}"
     curl --fail --output "${TMP_DIR}/${name}" --silent "${url}"
     chmod 700 "${TMP_DIR}/${name}"
     echo "${TMP_DIR}/${name}"
@@ -400,7 +400,7 @@ push_cdl_image_to_dockerhub()
 {
   echo "Pushing $(image_name) to dockerhub"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
-  echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+  echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
   docker push $(image_name)
   echo "Successfully pushed $(image_name) to dockerhub"
   docker logout
@@ -421,7 +421,7 @@ if has_start_point; then
   create_start_point_image
   check_red_amber_green
 else
-  echo 'No ${SRC_DIR}/start_point dir so assuming base-language image'
+  echo 'No ${SRC_DIR}/start_point/ dir so assuming base-language repo'
   check_version
 fi
 if on_CI && ! testing_myself; then
