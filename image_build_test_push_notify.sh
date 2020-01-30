@@ -9,11 +9,12 @@ readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
 readonly TMP_DIR=$(mktemp -d /tmp/cyber-dojo.image_builder.XXXXXX)
+remove_tmp_dir() { rm -rf "${TMP_DIR}" > /dev/null; }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 trap_handler()
 {
-  rm -rf "${TMP_DIR}" > /dev/null
+  remove_tmp_dir
   remove_start_point_image
   remove_runner
   remove_docker_network
@@ -95,6 +96,15 @@ exit_non_zero_unless_good_SRC_DIR()
   if [ ! -f "${SRC_DIR}/docker/Dockerfile.base" ]; then
     show_use_short
     echo "error: ${SRC_DIR}/docker/Dockerfile.base does not exist"
+    exit 42
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+exit_non_zero_unless_docker_installed()
+{
+  if [ ! -x docker ]; then
+    echo error: docker is not installed
     exit 42
   fi
 }
@@ -416,6 +426,7 @@ versioner_env_vars()
 export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
 exit_non_zero_unless_good_SRC_DIR ${*}
+exit_non_zero_unless_docker_installed
 build_cdl_docker_image
 if has_start_point; then
   create_start_point_image
