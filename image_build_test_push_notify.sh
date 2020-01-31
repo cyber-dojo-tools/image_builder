@@ -3,12 +3,17 @@
 # - - - - - - - - - - - - - - - - - - - - - - -
 # Curl'd and run in CircleCI scripts of all
 # repos of the cyber-dojo-languages organization.
+#
+# Note: TMP_DIR is off ~ and not /tmp because if we are
+# not running on native Linux (eg on Docker-Toolbox on a Mac)
+# then we need the TMP_DIR in a location which is visible
+# (as a default) to the VM being used.
 # - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
 readonly SRC_DIR=${1:-${PWD}}
-readonly TMP_DIR=$(mktemp -d /tmp/cyber-dojo.image_builder.XXXXXX)
+readonly TMP_DIR=$(mktemp -d ~/tmp-cyber-dojo.image_builder.XXXXXX)
 remove_tmp_dir() { rm -rf "${TMP_DIR}" > /dev/null; }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -210,13 +215,26 @@ start_point_image_name()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# start-point image which serves languages start-points
-# - - - - - - - - - - - - - - - - - - - - - - -
 create_start_point_image()
 {
+  echo "Checking $(src_dir_abs)"
+  echo 'Looking for uncommitted changes'
+  if [[ -z $(cd $(src_dir_abs) && git status -s ) ]]; then
+    echo 'Found none'
+    echo "Using $(src_dir_abs)"
+    local -r url="$(src_dir_abs)"
+  else
+    echo 'Found some'
+    local -r url="${TMP_DIR}/$(basename $(src_dir_abs))"
+    echo "So copying it to ${url}"
+    cp -r "$(src_dir_abs)" "${TMP_DIR}"
+    echo "Committing the changes in ${url}"
+    cd ${url} && git add . && git commit -m "Save"
+    echo "Using ${url}"
+  fi
   local -r name=$(start_point_image_name)
   echo "Building ${name}"
-  "$(cyber_dojo)" start-point create "${name}" --languages "$(src_dir_abs)"
+  "$(cyber_dojo)" start-point create "${name}" --languages "${url}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
