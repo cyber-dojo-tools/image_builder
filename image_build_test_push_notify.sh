@@ -229,7 +229,11 @@ create_start_point_image()
     echo "So copying it to ${url}"
     cp -r "$(src_dir_abs)" "${TMP_DIR}"
     echo "Committing the changes in ${url}"
-    cd ${url} && git add . && git commit -m "Save"
+    cd ${url}
+    git config user.email "cyber-dojo-machine-user@cyber-dojo.org"
+    git config user.name "CyberDojoMachineUser"
+    git add .
+    git commit -m "Save"
     echo "Using ${url}"
   fi
   local -r name=$(start_point_image_name)
