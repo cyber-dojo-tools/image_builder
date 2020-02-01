@@ -42,28 +42,26 @@ show_use_long()
   show_use_short
   define TEXT <<- EOF
   Creates \${SRC_DIR}/docker/Dockerfile from \${SRC_DIR}/docker/Dockerfile.base
-  adjusted to fulfil the runner service's requirements, and then
-  attempts to build a docker-image from the Dockerfile.
+  adjusted to fulfil the runner service's requirements, and then attempts to
+  build a docker-image from the Dockerfile. The name of the docker-image is the
+  'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
+  otherwise of \${SRC_DIR}/docker/image_name.json.
 
-  1. If \${SRC_DIR}/start_point/manifest.json exists, the name
-     of the docker-image will be taken from it, otherwise from
-     \${SRC_DIR}/docker/image_name.json
+  If \${SRC_DIR}/start_point/ exists:
+  *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
+     $ cyber-dojo start-point create ... --languages \${SRC_DIR}
+  *) Verifies the red|amber|green traffic-lights for \${SRC_DIR}/start_point/ files
+     o) unmodified, give a red traffic-light.
+     o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
+     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
+  *) If there is no \${SRC_DIR}/start_point/ file containing '6 * 9',
+     looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
+     https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
-  2. If \${SRC_DIR}/start_point/ exists:
-    *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
-       $ cyber-dojo start-point create ... --languages \${SRC_DIR}
-    *) Verifies the red|amber|green traffic-lights for \${SRC_DIR}/start_point/ files
-       o) unmodified, give a red traffic-light.
-       o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
-       o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
-    *) If there is no \${SRC_DIR}/start_point/ file containing '6 * 9',
-       looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
-       https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
-
-  3. If running on the CI/CD pipeine:
-    *) Pushes the docker-image to dockerhub
-    *) Triggers cyber-dojo-languages github repositories that use
-       the docker-image as their base (FROM) image.
+  If running on the CI/CD pipeine:
+  *) Pushes the docker-image to dockerhub
+  *) Triggers cyber-dojo-languages github repositories that use
+     the created docker-image as their base (FROM) image.
 
 EOF
   printf "${TEXT}"
@@ -126,8 +124,6 @@ ip_address()
 readonly IP_ADDRESS=$(ip_address)
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# path for cyber-dojo script
-# - - - - - - - - - - - - - - - - - - - - - - -
 cyber_dojo()
 {
   local -r name=cyber-dojo
@@ -144,8 +140,6 @@ cyber_dojo()
   fi
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - -
-# build the language-test-framework image
 # - - - - - - - - - - - - - - - - - - - - - - -
 build_cdl_docker_image()
 {
@@ -360,8 +354,9 @@ ready()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# check red->amber->green progression of '6*9'
-# Works via a volume-mount and not via a git-clone.
+# check red->amber->green progression of '6 * 9'
+# Works via a volume-mount and not via a git-clone
+# so uncommitted changes in SRC_DIR will be seen.
 # - - - - - - - - - - - - - - - - - - - - - - -
 assert_traffic_light()
 {
