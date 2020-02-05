@@ -382,7 +382,7 @@ assert_traffic_light()
 notify_dependent_projects()
 {
   echo 'Notifying dependent projects'
-  set -x
+
   local -r commit_push=github_automated_commit_push.sh
   local -r curled_path="${TMP_DIR}/${commit_push}"
   local -r github_org=https://raw.githubusercontent.com/cyber-dojo
@@ -400,9 +400,6 @@ notify_dependent_projects()
   local -r from_sha="${CIRCLE_SHA1}" # eg a9334c964f81800a910dc3d301543262161fbbff
   local -r to_org=cyber-dojo-languages
 
-  echo 'GOT TO HERE'
-  echo "curled_path=:${curled_path}:"
-  
   ${curled_path} \
     "${from_org}" "${from_repo}" "${from_sha}" \
     "${to_org}" $(dependent_projects)
@@ -457,7 +454,7 @@ else
 fi
 if on_CI && ! testing_myself; then
   push_cdl_image_to_dockerhub
-  notify_dependent_projects
+  # notify_dependent_projects # Off
 else
   echo Not pushing image to dockerhub
   echo Not notifying dependent repos
