@@ -386,7 +386,7 @@ notify_dependent_projects()
   local -r commit_push=github_automated_commit_push.sh
   local -r curled_path="${TMP_DIR}/${commit_push}"
   local -r github_org=https://raw.githubusercontent.com/cyber-dojo
-  local -r url="${github_org}/cyber-dojo/master/circle-ci/${commit_push}"
+  local -r url="${github_org}/cyber-dojo/master/sh/circle-ci/${commit_push}"
 
   curl \
     --fail \
