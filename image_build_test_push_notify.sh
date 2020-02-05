@@ -382,7 +382,7 @@ assert_traffic_light()
 notify_dependent_projects()
 {
   echo 'Notifying dependent projects'
-
+  set -x
   local -r commit_push=github_automated_commit_push.sh
   local -r curled_path="${TMP_DIR}/${commit_push}"
   local -r github_org=https://raw.githubusercontent.com/cyber-dojo
