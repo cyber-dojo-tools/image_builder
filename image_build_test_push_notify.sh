@@ -400,7 +400,7 @@ notify_dependent_projects()
   local -r from_sha="${CIRCLE_SHA1}" # eg a9334c964f81800a910dc3d301543262161fbbff
   local -r to_org=cyber-dojo-languages
 
-  $(curled_path) \
+  ${curled_path} \
     "${from_org}" "${from_repo}" "${from_sha}" \
     "${to_org}" $(dependent_projects)
 
