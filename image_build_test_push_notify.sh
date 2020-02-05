@@ -7,7 +7,7 @@
 # Note: TMP_DIR is off ~ and not /tmp because if we are
 # not running on native Linux (eg on Docker-Toolbox on a Mac)
 # then we need the TMP_DIR in a location which is visible
-# (as a default) to the VM being used.
+# (as a default volume-mount) inside the VM being used.
 # - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_NAME=$(basename $0)
@@ -454,8 +454,7 @@ else
 fi
 if on_CI && ! testing_myself; then
   push_cdl_image_to_dockerhub
-  dependents="$(dependent_projects)"
-  #notify_dependent_projects # Not live yet
+  notify_dependent_projects
 else
   echo Not pushing image to dockerhub
   echo Not notifying dependent repos
