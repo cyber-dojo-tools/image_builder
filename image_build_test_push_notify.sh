@@ -162,6 +162,7 @@ build_cdl_docker_image()
   # Build the augmented docker-image.
   docker build \
     --file "$(src_dir_abs)/docker/Dockerfile" \
+    --force-rm \
     --tag "$(image_name)" \
     "$(src_dir_abs)/docker"
 }
