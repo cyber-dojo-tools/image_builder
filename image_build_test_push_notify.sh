@@ -11,7 +11,7 @@
 # - - - - - - - - - - - - - - - - - - - - - - -
 
 readonly MY_NAME=$(basename $0)
-readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
+readonly MY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SRC_DIR=${1:-${PWD}}
 readonly TMP_DIR=$(mktemp -d ~/tmp-cyber-dojo.image_builder.XXXXXX)
 remove_tmp_dir() { rm -rf "${TMP_DIR}" > /dev/null; }
