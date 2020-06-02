@@ -4,8 +4,9 @@ readonly ROOT_DIR="$( cd "$( dirname "${0}" )" && cd .. && pwd )"
 repo_url()
 {
   local name="${1}"
+
   # Running locally when offline is handy sometimes
-  local straight_path="${ROOT_DIR}/../${name}"
+  local straight_path="${ROOT_DIR}/../../cyber-dojo-languages/${name}"
   local curled_path="${SHUNIT_TMPDIR}/${name}"
 
   if [ -d "${straight_path}" ]; then
@@ -27,7 +28,7 @@ assert_build_image()
 {
   build_image $1
   local ok=$?
-  local nl=$'\n'
+  local newline=$'\n'
   local stdout="<STDOUT>${newline}$(cat ${stdoutF})${newline}</STDOUT>${newline}"
   local stderr="<STDERR>${newline}$(cat ${stderrF})${newline}</STDERR>${newline}"
   assertTrue "${stdout}${stderr}" ${ok}
@@ -36,8 +37,8 @@ assert_build_image()
 build_image()
 {
   local src_dir=$1
-  #${ROOT_DIR}/build_test_push_notify.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
-  ${ROOT_DIR}/build_test_push_notify.sh  ${src_dir} >       ${stdoutF}  2>       ${stderrF}
+  ${ROOT_DIR}/image_build_test_push_notify.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
+  #${ROOT_DIR}/image_build_test_push_notify.sh  ${src_dir} >       ${stdoutF}  2>       ${stderrF}
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -45,13 +46,14 @@ build_image()
 image_name_from_stdout()
 {
   local stdout=$(cat "${stdoutF}")
-  [[ "${stdout}" =~ Successfully[[:space:]]created[[:space:]]docker-image[[:space:]]([^[:space:]]+) ]] && echo ${BASH_REMATCH[1]}
+  [[ "${stdout}" =~ Successfully[[:space:]]tagged[[:space:]]([^[:space:]]+) ]] && echo ${BASH_REMATCH[1]}
 }
 
 assert_image_OS()
 {
   local image_name="${1}"
   local os="${2}"
+
   local etc_issue=$(docker run --rm -i "${image_name}" bash -c 'cat /etc/issue')
   local diagnostic="${image_name} is NOT based on ${os}...(${etc_issue})"
   grep --silent "${os}" <<< "${etc_issue}"

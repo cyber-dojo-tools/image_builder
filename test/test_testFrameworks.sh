@@ -11,19 +11,18 @@ language_testFramework_test()
   local image_name=$(image_name_from_stdout)
   assert_image_OS "${image_name}" "${os}"
   assert_sandbox_user_in "${image_name}"
-  assert_start_point_created
-  #assert_red_amber_green
-  refute_pushing_to_dockerhub "${image_name}"
-  refute_notifying_dependents
+  #assert_start_point_created
+  #refute_pushing_to_dockerhub "${image_name}"
+  #refute_notifying_dependents
 }
 
-test_Alpine() { language_testFramework_test Alpine java-junit     ; }
-test_Ubuntu() { language_testFramework_test Ubuntu perl-testsimple; }
-test_Debian() { language_testFramework_test Debian python-pytest  ; }
+test_Alpine() { language_testFramework_test Alpine ruby-testunit    ; }
+test_Debian() { language_testFramework_test Debian perl-testsimple ; }
+test_Ubuntu() { language_testFramework_test Ubuntu haskell-hunit   ; }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-X_test_6_times_9_options()
+XXXXX_test_6_times_9_options()
 {
   echo '  asm-assert'
   assertBuildImage $(repo_url asm-assert)

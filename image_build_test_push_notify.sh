@@ -104,10 +104,11 @@ exit_non_zero_unless_good_SRC_DIR()
 # - - - - - - - - - - - - - - - - - - - - - - -
 exit_non_zero_unless_docker_installed()
 {
-  if [ ! -x docker ]; then
-    echo error: docker is not installed
-    exit 42
-  fi
+  :
+  #if [ ! -x docker ]; then
+  #  echo error: docker is not installed
+  #  exit 42
+  #fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -175,7 +176,7 @@ build_cdl_image()
   # Create new Dockerfile containing extra
   # commands to fulfil the runner's requirements.
   echo "Building docker-image $(image_name)"
-  cat "$(src_dir_abs)/docker/Dockerfile.base" \
+  cat "${GIT_REPO_URL}/docker/Dockerfile.base" \
     | \
       docker run \
         --interactive \
@@ -183,18 +184,18 @@ build_cdl_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "$(src_dir_abs)/docker/Dockerfile"
+      "${GIT_REPO_URL}/docker/Dockerfile"
 
   # Write new Dockerfile to stdout in case of debugging
-  cat "$(src_dir_abs)/docker/Dockerfile"
+  cat "${GIT_REPO_URL}/docker/Dockerfile"
 
   # Build the augmented docker-image.
   docker build \
     --build-arg COMMIT_SHA="$(git_repo_commit_sha)" \
-    --file "$(src_dir_abs)/docker/Dockerfile" \
+    --file "${GIT_REPO_URL}/docker/Dockerfile" \
     --force-rm \
     --tag "$(image_name)" \
-    "$(src_dir_abs)/docker"
+    "${GIT_REPO_URL}/docker"
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
