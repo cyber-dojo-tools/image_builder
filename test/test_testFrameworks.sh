@@ -8,7 +8,7 @@ language_testFramework_test()
   local os="${1}"
   local name="${2}"
 
-  assert_build_image $(repo_url "${name}")
+  build_image $(repo_url "${name}")
   #local image_name=$(image_name_from_stdout)
   #assert_image_OS "${image_name}" "${os}"
   #assert_sandbox_user_in "${image_name}"
