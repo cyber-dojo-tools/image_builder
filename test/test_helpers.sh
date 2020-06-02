@@ -53,12 +53,12 @@ assert_image_OS()
 {
   local -r image_name="${1}"
   local -r os="${2}"
-  #local -r diagnostic="${image_name} is NOT based on ${os}..."
-  assertTrue 'Unexpected OS' 0
-  echo 9
-  docker run --rm -it "${image_name}" bash -c "cat /etc/issue | grep --silent ${os}"
+  local -r diagnostic="${image_name} is NOT based on ${os}..."
+  #assertTrue 'Unexpected OS' 0
+  #echo 9
+  docker run --rm -it "${image_name}" bash -c "cat /etc/issue | grep -q ${os}"
   assertTrue 'Unexpected OS' "$?"
-  echo 10
+  #echo 10
 
   echo -e "\t- image-name is ${image_name}"
   echo -e "\t- the OS is ${os}"
