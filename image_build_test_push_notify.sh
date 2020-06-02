@@ -1,8 +1,13 @@
 #!/bin/bash -Ee
 
+# ... TODO: Save uncommited changed to tmp-dir before creating cdl image
+# 146 TODO: Augment dockerfile to include SHA as env-var
+# 435 TODO: tag image from SHA and push that too.
+
+
 # - - - - - - - - - - - - - - - - - - - - - - -
-# Curl'd and run in CircleCI scripts of all
-# repos of the cyber-dojo-languages organization.
+# Curl'd and run in CircleCI scripts of all repos
+# of the cyber-dojo-languages github organization.
 #
 # Note: TMP_DIR is off ~ and not /tmp because if we are
 # not running on native Linux (eg on Docker-Toolbox on a Mac)
@@ -60,8 +65,6 @@ show_use_long()
 
   If running on the CI/CD pipeine:
   *) Pushes the docker-image to dockerhub
-  *) Triggers cyber-dojo-languages github repositories that use
-     the created docker-image as their base (FROM) image.
 
 EOF
   printf "${TEXT}"
@@ -141,6 +144,31 @@ cyber_dojo()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+set_git_repo_url()
+{
+  echo "Checking $(src_dir_abs)"
+  echo 'Looking for uncommitted changes'
+  if [[ -z $(cd $(src_dir_abs) && git status -s) ]]; then
+    echo 'Found none'
+    echo "Using $(src_dir_abs)"
+    GIT_REPO_URL="$(src_dir_abs)"
+  else
+    echo 'Found some'
+    local -r url="${TMP_DIR}/$(basename $(src_dir_abs))"
+    echo "So copying it to ${url}"
+    cp -r "$(src_dir_abs)" "${TMP_DIR}"
+    echo "Committing the changes in ${url}"
+    cd ${url}
+    git config user.email "cyber-dojo-machine-user@cyber-dojo.org"
+    git config user.name "CyberDojoMachineUser"
+    git add .
+    git commit -m "Save"
+    echo "Using ${url}"
+    GIT_REPO_URL="${url}"
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 build_cdl_docker_image()
 {
   # Create new Dockerfile containing extra
@@ -212,28 +240,9 @@ start_point_image_name()
 # - - - - - - - - - - - - - - - - - - - - - - -
 create_start_point_image()
 {
-  echo "Checking $(src_dir_abs)"
-  echo 'Looking for uncommitted changes'
-  if [[ -z $(cd $(src_dir_abs) && git status -s ) ]]; then
-    echo 'Found none'
-    echo "Using $(src_dir_abs)"
-    local -r url="$(src_dir_abs)"
-  else
-    echo 'Found some'
-    local -r url="${TMP_DIR}/$(basename $(src_dir_abs))"
-    echo "So copying it to ${url}"
-    cp -r "$(src_dir_abs)" "${TMP_DIR}"
-    echo "Committing the changes in ${url}"
-    cd ${url}
-    git config user.email "cyber-dojo-machine-user@cyber-dojo.org"
-    git config user.name "CyberDojoMachineUser"
-    git add .
-    git commit -m "Save"
-    echo "Using ${url}"
-  fi
   local -r name=$(start_point_image_name)
   echo "Building ${name}"
-  "$(cyber_dojo)" start-point create "${name}" --languages "${url}"
+  "$(cyber_dojo)" start-point create "${name}" --languages "${GIT_REPO_URL}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -424,7 +433,7 @@ check_version()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-push_cdl_image_to_dockerhub()
+push_cdl_images_to_dockerhub()
 {
   echo "Pushing $(image_name) to dockerhub"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
@@ -445,6 +454,7 @@ export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
 exit_non_zero_unless_good_SRC_DIR ${*}
 exit_non_zero_unless_docker_installed
+set_git_repo_url
 build_cdl_docker_image
 if has_start_point; then
   create_start_point_image
@@ -454,7 +464,7 @@ else
   check_version
 fi
 if on_CI && ! testing_myself; then
-  push_cdl_image_to_dockerhub
+  push_cdl_images_to_dockerhub
   # notify_dependent_projects # Off
 else
   echo Not pushing image to dockerhub
