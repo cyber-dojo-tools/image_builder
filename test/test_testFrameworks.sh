@@ -7,6 +7,7 @@ language_testFramework_test()
 {
   local os="${1}"
   local name="${2}"
+
   assert_build_image $(repo_url "${name}")
   local image_name=$(image_name_from_stdout)
   assert_image_OS "${image_name}" "${os}"
@@ -34,7 +35,7 @@ XXXXX_test_6_times_9_options()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly MY_DIR="$( cd "$( dirname "${0}" )" && pwd )"
+readonly MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 . ${MY_DIR}/test_helpers.sh
 . ${MY_DIR}/shunit2_helpers.sh
