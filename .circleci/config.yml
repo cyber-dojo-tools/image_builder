@@ -14,7 +14,7 @@ workflows:
   build-publish-trigger:
     jobs:
       - build-publish-trigger:
-          context: cyberdojo-languages-context
+          context: cyberdojo-tools-context
           filters:
             branches:
               only:
