@@ -37,8 +37,8 @@ assert_build_image()
 build_image()
 {
   local src_dir=$1
-  ${ROOT_DIR}/image_build_test_push_notify.sh ${src_dir}
-  #${ROOT_DIR}/image_build_test_push_notify.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
+  #${ROOT_DIR}/image_build_test_push_notify.sh ${src_dir}
+  ${ROOT_DIR}/image_build_test_push_notify.sh ${src_dir} > >(tee ${stdoutF}) 2> >(tee ${stderrF} >&2)
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - -
