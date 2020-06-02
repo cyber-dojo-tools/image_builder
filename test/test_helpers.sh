@@ -54,11 +54,11 @@ assert_image_OS()
   set -x
   local -r image_name="${1}"
   local -r os="${2}"
-  local -r diagnostic="${image_name} is NOT based on ${os}..."
+  #local -r diagnostic="${image_name} is NOT based on ${os}..."
 
   echo 9
   docker run --rm -it "${image_name}" bash -c "cat /etc/issue | grep ${os}"
-  assertTrue "${diagnostic}" $?
+  assertTrue 'Incorrect OS' $?
   echo 10
 
   echo -e "\t- image-name is ${image_name}"
