@@ -1,10 +1,5 @@
 #!/bin/bash -Ee
 
-# ... TODO: Save uncommited changed to tmp-dir before creating cdl image
-# 146 TODO: Augment dockerfile to include SHA as env-var
-# 435 TODO: tag image from SHA and push that too.
-
-
 # - - - - - - - - - - - - - - - - - - - - - - -
 # Curl'd and run in CircleCI scripts of all repos
 # of the cyber-dojo-languages github organization.
@@ -169,7 +164,13 @@ set_git_repo_url()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-build_cdl_docker_image()
+git_repo_commit_sha()
+{
+  echo "$(cd "${GIT_REPO_URL}" && git rev-parse HEAD)"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+build_cdl_image()
 {
   # Create new Dockerfile containing extra
   # commands to fulfil the runner's requirements.
@@ -189,6 +190,7 @@ build_cdl_docker_image()
 
   # Build the augmented docker-image.
   docker build \
+    --build-arg COMMIT_SHA="$(git_repo_commit_sha)" \
     --file "$(src_dir_abs)/docker/Dockerfile" \
     --force-rm \
     --tag "$(image_name)" \
@@ -433,13 +435,25 @@ check_version()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+tag_cdl_image_with_commit_sha()
+{
+  local -r sha="$(git_repo_commit_sha)"
+  local -r tag="${sha:0:7}"
+  docker tag $(image_name) $(image_name):${tag}
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 push_cdl_images_to_dockerhub()
 {
+  local -r sha="$(git_repo_commit_sha)"
+  local -r tag="${sha:0:7}"
   echo "Pushing $(image_name) to dockerhub"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
   docker push $(image_name)
   echo "Successfully pushed $(image_name) to dockerhub"
+  docker push $(image_name):${tag}
+  echo "Successfully pushed $(image_name):${tag} to dockerhub"
   docker logout
 }
 
@@ -455,7 +469,8 @@ exit_zero_if_show_help ${*}
 exit_non_zero_unless_good_SRC_DIR ${*}
 exit_non_zero_unless_docker_installed
 set_git_repo_url
-build_cdl_docker_image
+build_cdl_image
+tag_cdl_image_with_commit_sha
 if has_start_point; then
   create_start_point_image
   check_red_amber_green
