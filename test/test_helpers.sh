@@ -45,12 +45,14 @@ build_image()
 
 image_name_from_stdout()
 {
+  set -x
   local stdout=$(cat "${stdoutF}")
   [[ "${stdout}" =~ Successfully[[:space:]]tagged[[:space:]]([^[:space:]]+) ]] && echo ${BASH_REMATCH[1]}
 }
 
 assert_image_OS()
 {
+  echo 4
   local image_name="${1}"
   local os="${2}"
 

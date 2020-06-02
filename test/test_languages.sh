@@ -9,8 +9,11 @@ language_base_test()
   local name="${2}"
 
   build_image $(repo_url "${name}")
+  echo 1
   local image_name=$(image_name_from_stdout)
+  echo 2
   assert_image_OS "${image_name}" "${os}"
+  echo 3
   #assert_sandbox_user_in "${image_name}"
   #refute_start_point_created
   #refute_red_amber_green
