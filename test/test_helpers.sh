@@ -45,23 +45,30 @@ build_image()
 
 image_name_from_stdout()
 {
-  set -x
   local stdout=$(cat "${stdoutF}")
   [[ "${stdout}" =~ Successfully[[:space:]]tagged[[:space:]]([^[:space:]]+) ]] && echo ${BASH_REMATCH[1]}
 }
 
 assert_image_OS()
 {
+  set -x
   echo 4
   local image_name="${1}"
+  echo 5
   local os="${2}"
-
+  echo 6
   local etc_issue=$(docker run --rm -i "${image_name}" bash -c 'cat /etc/issue')
+  echo 7
   local diagnostic="${image_name} is NOT based on ${os}...(${etc_issue})"
+  echo 8
   grep --silent "${os}" <<< "${etc_issue}"
+  echo 9
   assertTrue "${diagnostic}" $?
+  echo 10
   echo -e "\t- image-name is ${image_name}"
+  echo 11
   echo -e "\t- the OS is ${os}"
+  echo 12
 }
 
 assert_sandbox_user_in()
