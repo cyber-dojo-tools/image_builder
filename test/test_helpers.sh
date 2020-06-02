@@ -52,19 +52,12 @@ image_name_from_stdout()
 assert_image_OS()
 {
   set -x
-  local -r etc_issue="$(docker run --rm -it "${image_name}" bash -c 'cat /etc/issue | head -n +1')"
-
-  echo '~~~~~~~~~~~~~~~~~~~~~~~'
-  echo "etc_issue:${etc_issue}:"
-  echo '~~~~~~~~~~~~~~~~~~~~~~~'
-
   local -r image_name="${1}"
   local -r os="${2}"
-
-  local diagnostic="${image_name} is NOT based on ${os}..."
+  local -r diagnostic="${image_name} is NOT based on ${os}..."
 
   echo 9
-  echo "${etc_issue}" | grep --silent "${os}"
+  docker run --rm -it "${image_name}" bash -c "cat /etc/issue | grep ${os}"
   assertTrue "${diagnostic}" $?
   echo 10
 
