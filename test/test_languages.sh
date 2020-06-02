@@ -9,9 +9,9 @@ language_base_test()
   local name="${2}"
 
   assert_build_image $(repo_url "${name}")
-  local image_name=$(image_name_from_stdout)
-  assert_image_OS "${image_name}" "${os}"
-  assert_sandbox_user_in "${image_name}"
+  #local image_name=$(image_name_from_stdout)
+  #assert_image_OS "${image_name}" "${os}"
+  #assert_sandbox_user_in "${image_name}"
   #refute_start_point_created
   #refute_red_amber_green
   #refute_pushing_to_dockerhub "${image_name}"
