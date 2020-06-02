@@ -57,7 +57,7 @@ assert_image_OS()
   local etc_issue="$(docker run --rm -i ${image_name} bash -c 'cat /etc/issue')"
   local diagnostic="${image_name} is NOT based on ${os}..."
   echo 9
-  grep --silent "${os}" <<< "${etc_issue}"
+  echo "${etc_issue}" | tr '\n' ' ' | grep --silent "${os}" 
   assertTrue "${diagnostic}" $?
   echo 10
   echo -e "\t- image-name is ${image_name}"
