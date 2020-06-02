@@ -45,7 +45,10 @@ show_use_long()
   adjusted to fulfil the runner service's requirements, and then attempts to
   build a docker-image from the Dockerfile. The name of the docker-image is the
   'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
-  otherwise of \${SRC_DIR}/docker/image_name.json.
+  otherwise of \${SRC_DIR}/docker/image_name.json. Tags the docker-image with the
+  1st seven characters of the HEAD git commit sha of \${SRC_DIR}. The docker-image
+  contains the environment variable SHA which is the full 40 character HEAD commit
+  sha of \${SRC_DIR}
 
   If \${SRC_DIR}/start_point/ exists:
   *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
@@ -59,7 +62,7 @@ show_use_long()
      https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
   If running on the CI/CD pipeine:
-  *) Pushes the docker-image to dockerhub
+  *) Pushes the docker-images to dockerhub
 
 EOF
   printf "${TEXT}"
@@ -165,7 +168,7 @@ set_git_repo_url()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-git_repo_commit_sha()
+git_commit_sha()
 {
   echo "$(cd "${GIT_REPO_URL}" && git rev-parse HEAD)"
 }
@@ -191,7 +194,7 @@ build_cdl_image()
 
   # Build the augmented docker-image.
   docker build \
-    --build-arg COMMIT_SHA="$(git_repo_commit_sha)" \
+    --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
     --file "${GIT_REPO_URL}/docker/Dockerfile" \
     --force-rm \
     --tag "$(image_name)" \
@@ -438,7 +441,7 @@ check_version()
 # - - - - - - - - - - - - - - - - - - - - - - -
 tag_cdl_image_with_commit_sha()
 {
-  local -r sha="$(git_repo_commit_sha)"
+  local -r sha="$(git_commit_sha)"
   local -r tag="${sha:0:7}"
   docker tag $(image_name) $(image_name):${tag}
 }
@@ -446,7 +449,7 @@ tag_cdl_image_with_commit_sha()
 # - - - - - - - - - - - - - - - - - - - - - - -
 push_cdl_images_to_dockerhub()
 {
-  local -r sha="$(git_repo_commit_sha)"
+  local -r sha="$(git_commit_sha)"
   local -r tag="${sha:0:7}"
   echo "Pushing $(image_name) to dockerhub"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
