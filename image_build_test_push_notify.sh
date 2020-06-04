@@ -10,7 +10,6 @@
 # (as a default volume-mount) inside the VM being used.
 # - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly MY_NAME=$(basename $0)
 readonly MY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SRC_DIR=${1:-${PWD}}
 readonly TMP_DIR=$(mktemp -d ~/tmp-cyber-dojo.image_builder.XXXXXX)
@@ -27,6 +26,7 @@ trap_handler()
 trap trap_handler EXIT
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+readonly MY_NAME=$(basename $0)
 show_use_short()
 {
   echo "Use: ${MY_NAME} [SRC_DIR|-h|--help]"
@@ -41,28 +41,35 @@ show_use_long()
 {
   show_use_short
   define TEXT <<- EOF
-  Creates \${SRC_DIR}/docker/Dockerfile from \${SRC_DIR}/docker/Dockerfile.base
-  adjusted to fulfil the runner service's requirements, and then attempts to
-  build a docker-image from the Dockerfile. The name of the docker-image is the
-  'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
-  otherwise of \${SRC_DIR}/docker/image_name.json. Tags the docker-image with the
-  1st seven characters of the HEAD git commit sha of \${SRC_DIR}. The docker-image
-  contains the environment variable SHA which is the full 40 character HEAD commit
-  sha of \${SRC_DIR}
+  Builds a docker-image from \${SRC_DIR}/docker/Dockerfile.base
+  augmented to fulfil the runner service's requirements.
+  The name of the docker-image is:
+    the 'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
+    otherwise of \${SRC_DIR}/docker/image_name.json.
+  Embeds an env-var inside this image as follows:
+    SHA=$(cd \${SRC_DIR} && git rev-parse HEAD)
 
   If \${SRC_DIR}/start_point/ exists:
-  *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
-     $ cyber-dojo start-point create ... --languages \${SRC_DIR}
-  *) Verifies the red|amber|green traffic-lights for \${SRC_DIR}/start_point/ files
-     o) unmodified, give a red traffic-light.
-     o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
-     o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
-  *) If there is no \${SRC_DIR}/start_point/ file containing '6 * 9',
-     looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
-     https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
+    *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
+       $ cyber-dojo start-point create ... --languages \${SRC_DIR}
+
+    *) Verifies the red|amber|green traffic-lights for \${SRC_DIR}/start_point/ files
+       o) unmodified, give a red traffic-light.
+       o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
+       o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
+       If there is no \${SRC_DIR}/start_point/ file containing '6 * 9',
+       looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
+       https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
   If running on the CI/CD pipeine:
-  *) Pushes the docker-images to dockerhub
+    *) Tags the docker-image with TAG=${SHA:0:7}
+
+    *) Creates a 2nd docker image containing \${SRC_DIR}/start_point/ with
+       the 'image_name' property in mainfest.json tagged with ${TAG}.
+       The name of this 2nd docker image is the same as the 1st docker image
+       except its registry is cyberdojostartpoints
+
+    *) Pushes both tagged docker-images to dockerhub
 
 EOF
   printf "${TEXT}"
@@ -107,11 +114,10 @@ exit_non_zero_unless_good_SRC_DIR()
 # - - - - - - - - - - - - - - - - - - - - - - -
 exit_non_zero_unless_docker_installed()
 {
-  :
-  #if [ ! -x docker ]; then
-  #  echo error: docker is not installed
-  #  exit 42
-  #fi
+  if [ ! -x docker ]; then
+    echo error: docker is not installed
+    exit 42
+  fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -221,6 +227,13 @@ image_name()
 on_CI()
 {
   [ -n "${CIRCLE_SHA1}" ]
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+scheduled_CI()
+{
+  # when CI is running for a commit, this is the commit's username
+  [ "${CIRCLE_USERNAME}" == "" ]
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -475,6 +488,7 @@ exit_non_zero_unless_docker_installed
 set_git_repo_url
 build_cdl_image
 tag_cdl_image_with_commit_sha
+
 if has_start_point; then
   create_start_point_image
   check_red_amber_green
@@ -482,7 +496,10 @@ else
   echo 'No ${SRC_DIR}/start_point/ dir so assuming base-language repo'
   check_version
 fi
-if on_CI && ! testing_myself; then
+
+if on_CI && ! scheduled_CI && ! testing_myself; then
+  #build_start_point_image
+  #push_start_point_image_to_dockerhub
   push_cdl_images_to_dockerhub
   # notify_dependent_projects # Off
 else
