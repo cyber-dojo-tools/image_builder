@@ -8,6 +8,6 @@ ${my_dir}/test_debian_base.sh
 ${my_dir}/test_ubuntu_base.sh
 
 # before these
-${my_dir}/test_alpine_testFramework.sh
-${my_dir}/test_debian_testFramework.sh
-${my_dir}/test_ubuntu_testFramework.sh
+${my_dir}/test_alpine_test_framework.sh
+${my_dir}/test_debian_test_framework.sh
+${my_dir}/test_ubuntu_test_framework.sh
