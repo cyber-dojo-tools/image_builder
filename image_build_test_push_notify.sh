@@ -114,10 +114,10 @@ exit_non_zero_unless_good_SRC_DIR()
 # - - - - - - - - - - - - - - - - - - - - - - -
 exit_non_zero_unless_docker_installed()
 {
-  if [ ! -x docker ]; then
-    echo error: docker is not installed
-    exit 42
-  fi
+  #if [ ! -x docker ]; then
+  #  echo error: docker is not installed
+  #  exit 42
+  #fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
