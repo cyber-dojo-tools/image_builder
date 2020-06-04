@@ -1,8 +1,5 @@
 #!/bin/bash -Eeu
 
-echo '-----------------------------------------'
-echo 'testing language-bases'
-
 language_base_test()
 {
   local os="${1}"
@@ -18,14 +15,9 @@ language_base_test()
   #refute_notifying_dependents
 }
 
-test_Alpine() { language_base_test Alpine ruby    ; }
-test_Debian() { language_base_test Debian perl    ; }
-test_Ubuntu() { language_base_test Ubuntu haskell ; }
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-readonly MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-. ${MY_DIR}/test_helpers.sh
-. ${MY_DIR}/shunit2_helpers.sh
-. ${MY_DIR}/shunit2
+MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${MY_DIR}/helpers.sh
+source ${MY_DIR}/shunit2_helpers.sh
+source ${MY_DIR}/shunit2
