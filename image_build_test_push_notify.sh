@@ -417,7 +417,8 @@ assert_traffic_light()
 build_start_point_image_and_push_to_dockerhub()
 {
   local -r start_point_dir="${SRC_DIR}/start_point"
-  local -r tag="$(git_commit_tag)"
+  local -r commit_sha="$(git_commit_sha)"
+  local -r tag="${commit_sha:0:7}"
 
   local -r start_point_image_name=$( \
     docker run \
@@ -426,11 +427,10 @@ build_start_point_image_and_push_to_dockerhub()
       cyberdojofoundation/image_manifest_tagger \
       "${tag}")
 
-  cat << EOF > "${TMP_DIR}/Dockerfile"
-  FROM alpine:latest
-  COPY . /start_point
-  ARG SHA=$(git_commit_sha)
-  ENV SHA=${SHA}
+cat << EOF > "${TMP_DIR}/Dockerfile"
+FROM alpine:latest
+COPY . /start_point
+ENV SHA=${commit_sha}
 EOF
 
   docker build \
