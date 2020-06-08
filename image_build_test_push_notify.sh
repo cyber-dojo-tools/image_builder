@@ -444,6 +444,7 @@ EOF
   echo "Successfully pushed ${start_point_image_name} to dockerhub"
   docker push "${start_point_image_name}:${tag}"
   echo "Successfully pushed ${start_point_image_name}:${tag} to dockerhub"
+  docker logout
 
   # How to get start_point/ dir out...for $cyber-dojo start-point build
   # id=$(docker create "${start_point_image_name}")
@@ -540,8 +541,8 @@ else
 fi
 
 if on_CI && ! scheduled_CI && ! testing_myself; then
-  build_start_point_image_and_push_to_dockerhub
   push_cdl_images_to_dockerhub
+  build_start_point_image_and_push_to_dockerhub
   # notify_dependent_projects # Off
 else
   echo Not pushing image to dockerhub
