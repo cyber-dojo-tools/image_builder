@@ -429,6 +429,8 @@ build_start_point_image_and_push_to_dockerhub()
   cat << EOF > "${TMP_DIR}/Dockerfile"
   FROM alpine:latest
   COPY . /start_point
+  ARG SHA=$(git_commit_sha)
+  ENV SHA=${SHA}
 EOF
 
   docker build \
