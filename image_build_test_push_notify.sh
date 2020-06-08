@@ -428,7 +428,7 @@ build_start_point_image_and_push_to_dockerhub()
       "${tag}")
 
 cat << EOF > "${TMP_DIR}/Dockerfile"
-FROM alpine:latest
+FROM busybox:latest
 COPY . /start_point
 ENV SHA=${commit_sha}
 EOF
