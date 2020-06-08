@@ -69,7 +69,7 @@ show_use_long()
        The name of this 2nd docker image is the same as the 1st docker image
        except its registry is cyberdojostartpoints
 
-    *) Pushes both tagged docker-images to dockerhub
+    *) Pushes both docker-images (tagged to ${TAG}) to dockerhub
 
 EOF
   printf "${TEXT}"
@@ -178,6 +178,13 @@ set_git_repo_url()
 git_commit_sha()
 {
   echo "$(cd "${GIT_REPO_URL}" && git rev-parse HEAD)"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+git_commit_tag()
+{
+  local -r sha="$(git_commit_sha)"
+  echo "${sha:0:7}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -407,6 +414,44 @@ assert_traffic_light()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+build_start_point_image_and_push_to_dockerhub()
+{
+  local -r start_point_dir="${SRC_DIR}/start_point"
+  local -r tag="$(git_commit_tag)"
+
+  local -r start_point_image_name=$( \
+    docker run \
+      --volume "${start_point_dir}:/start_point:rw" \
+      --rm \
+      cyberdojofoundation/image_manifest_tagger \
+      "${tag}")
+
+  cat << EOF > "${TMP_DIR}/Dockerfile"
+  FROM alpine:latest
+  COPY . /start_point
+EOF
+
+  docker build \
+    --file "${TMP_DIR}/Dockerfile" \
+    --tag "${start_point_image_name}" \
+    "${start_point_dir}"
+
+  docker tag "${start_point_image_name}" "${start_point_image_name}:${tag}"
+  # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
+  echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+  echo "Pushing ${start_point_image_name} to dockerhub"
+  docker push "${start_point_image_name}"
+  echo "Successfully pushed ${start_point_image_name} to dockerhub"
+  docker push "${start_point_image_name}:${tag}"
+  echo "Successfully pushed ${start_point_image_name}:${tag} to dockerhub"
+
+  # How to get start_point/ dir out...for $cyber-dojo start-point build
+  # id=$(docker create "${start_point_image_name}")
+  # docker cp "${id}":/start_point/. "${MY_DIR}/tmp"
+  # docker rm --force "${id}"
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 # notify github projects that use the built image as their base FROM image
 # - - - - - - - - - - - - - - - - - - - - - - -
 notify_dependent_projects()
@@ -455,23 +500,19 @@ check_version()
 # - - - - - - - - - - - - - - - - - - - - - - -
 tag_cdl_image_with_commit_sha()
 {
-  local -r sha="$(git_commit_sha)"
-  local -r tag="${sha:0:7}"
-  docker tag $(image_name) $(image_name):${tag}
+  docker tag $(image_name) $(image_name):$(git_commit_tag)
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 push_cdl_images_to_dockerhub()
 {
-  local -r sha="$(git_commit_sha)"
-  local -r tag="${sha:0:7}"
   echo "Pushing $(image_name) to dockerhub"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
   docker push $(image_name)
   echo "Successfully pushed $(image_name) to dockerhub"
-  docker push $(image_name):${tag}
-  echo "Successfully pushed $(image_name):${tag} to dockerhub"
+  docker push $(image_name):$(git_commit_tag)
+  echo "Successfully pushed $(image_name):$(git_commit_tag) to dockerhub"
   docker logout
 }
 
@@ -499,8 +540,7 @@ else
 fi
 
 if on_CI && ! scheduled_CI && ! testing_myself; then
-  #build_start_point_image
-  #push_start_point_image_to_dockerhub
+  build_start_point_image_and_push_to_dockerhub
   push_cdl_images_to_dockerhub
   # notify_dependent_projects # Off
 else
