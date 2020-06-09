@@ -420,6 +420,8 @@ build_start_point_image_and_push_to_dockerhub()
   local -r commit_sha="$(git_commit_sha)"
   local -r tag="${commit_sha:0:7}"
 
+  # Get the untagged manifest.json image_name
+  # and tag the image_name inside manifest.json
   local -r start_point_image_name=$( \
     docker run \
       --volume "${start_point_dir}:/start_point:rw" \
@@ -427,23 +429,20 @@ build_start_point_image_and_push_to_dockerhub()
       cyberdojofoundation/image_manifest_tagger \
       "${tag}")
 
+  # Prepare a Dockerfile ready to build a start_point/ image
 cat << EOF > "${TMP_DIR}/Dockerfile"
 FROM busybox:latest
 COPY . /start_point
 ENV SHA=${commit_sha}
 EOF
 
+  # Build the start_point/ image
   docker build \
     --file "${TMP_DIR}/Dockerfile" \
     --tag "${start_point_image_name}" \
     "${start_point_dir}"
 
-  # ====================================
-  # TODO:
-  # $cyber-dojo start-point build --languages=tmp ${start_point_image_name}
-  # to verify start-point
-  # ====================================
-
+  # Push the start_point/ image to dockerhub
   docker tag "${start_point_image_name}" "${start_point_image_name}:${tag}"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
@@ -453,11 +452,6 @@ EOF
   docker push "${start_point_image_name}:${tag}"
   echo "Successfully pushed ${start_point_image_name}:${tag} to dockerhub"
   docker logout
-
-  # How to get start_point/ dir out...for $cyber-dojo start-point build
-  # id=$(docker create "${start_point_image_name}")
-  # docker cp "${id}":/start_point/. "${MY_DIR}/tmp"
-  # docker rm --force "${id}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -541,7 +535,7 @@ build_cdl_image
 tag_cdl_image_with_commit_sha
 
 if has_start_point; then
-  create_start_point_image
+  create_start_point_image # TODO: build_start_point_image
   check_red_amber_green
 else
   echo 'No ${SRC_DIR}/start_point/ dir so assuming base-language repo'
@@ -551,7 +545,7 @@ fi
 if on_CI && ! scheduled_CI && ! testing_myself; then
   push_cdl_images_to_dockerhub
   if has_start_point; then
-    build_start_point_image_and_push_to_dockerhub # TODO step still wip
+    build_start_point_image_and_push_to_dockerhub # TODO: split any rely on previous build
   fi
   # notify_dependent_projects # Off
 else
