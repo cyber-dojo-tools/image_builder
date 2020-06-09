@@ -542,8 +542,7 @@ else
   check_version
 fi
 
-#if on_CI && ! scheduled_CI && ! testing_myself; then
-if on_CI && ! testing_myself; then
+if on_CI && ! scheduled_CI && ! testing_myself; then
   push_cdl_images_to_dockerhub
   build_start_point_image_and_push_to_dockerhub
   # notify_dependent_projects # Off
