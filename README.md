@@ -1,8 +1,8 @@
 # image_builder
 
-[build_test_push_notify.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/build_test_push_notify.sh) is the script (containing docker commands) which all the
+[image_build_test_push_notify.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/image_build_test_push_notify.sh) is the script (containing docker commands) which all the
 [cyber-dojo-languages](https://github.com/cyber-dojo-languages) repos
-run in their .circleci/config.yml
+run in their `.circleci/config.yml` file.
 
 There are two kinds of repos in the cyber-dojo-languages github organization:
 - baseLanguage repos
@@ -11,26 +11,31 @@ There are two kinds of repos in the cyber-dojo-languages github organization:
 - - - -
 
 # baseLanguage repos
-For example, [python](https://github.com/cyber-dojo-languages/python).
-- contain a docker/Dockerfile.base which installs a base language.
-- attempts to build the docker image, taking its name from the file docker/image_name.json
+For example, [python](https://github.com/cyber-dojo-languages/python)
+- contain a `docker/Dockerfile.base` which installs a base language
+- attempts to build the docker image, taking its name from the file `docker/image_name.json`
 - if successful:
-  - pushes the docker image to [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/) on dockerhub
-  - triggers the workflow for all CircleCI projects (eg python-pytest) whose Dockerfile's FROM matches the image name.
+  - tags the docker image with the 1st seven characters of the git commit sha
+  - pushes the docker image to [cyberdojofoundation](https://hub.docker.com/orgs/cyberdojofoundation/repositories) on dockerhub
 
 - - - -
 
 # testFramework repos
 For example, [python-pytest](https://github.com/cyber-dojo-languages/python-pytest).
-- contain a docker/Dockerfile.base which installs a test-framework.
-- contain start_point/files for the test-framework.
-- attempts to build the docker image, taking its name from the file start_point/manifest.json,
-with docker/Dockerfile.base [augmented](https://github.com/cyber-dojo-languages/image_dockerfile_augmenter) to fulfil the [runner's](https://github.com/cyber-dojo/runner) requirements.
-- Verifies the start_point files, untweaked, give a red traffic-light
-- Verifies the start_point files, tweaked to green, give a green traffic-light
-- Verifies the start_point files, tweaked to amber, give an amber traffic-light
-- if successful:
-  - pushes the docker image to [cyberdojofoundation](https://hub.docker.com/u/cyberdojofoundation/) on dockerhub
+- contain a `docker/Dockerfile.base` which installs a test-framework
+  - attempts to build the docker image, taking its name from the `image_name` property of `start_point/manifest.json`, with `docker/Dockerfile.base` [augmented](https://github.com/cyber-dojo-languages/image_dockerfile_augmenter) to fulfil the [runner's](https://github.com/cyber-dojo/runner) requirements
+  - verifies the start_point files, untweaked, give a red traffic-light
+  - verifies the start_point files, tweaked to green, give a green traffic-light
+  - verifies the start_point files, tweaked to amber, give an amber traffic-light
+  - if successful:
+    - tags this docker image with the 1st seven characters of the git commit sha
+    - pushes this docker image to [cyberdojofoundation](https://hub.docker.com/orgs/cyberdojofoundation/repositories) on dockerhub (latest and sha tag)
+- contain `start_point/` files for the test-framework
+  - attempts to build a start-point image (with the name taken from the `image_name` property of `start_point/manifest.json` again
+  - if successful:
+    - tags the `image_name` of the `start_point/manifest.json` *inside* this image with the 1st seven characters of the git commit sha
+    - tags the docker image with the 1st seven characters of the git commit sha
+    - pushes this docker image to [cyberdojostartpoints](https://hub.docker.com/orgs/cyberdojostartpoints/repositories) on dockerhub (latest and sha tag)
 
 - - - -
 
@@ -43,9 +48,8 @@ requirements. All OS's need:
 - a `/home/sandbox/` dir for the sandbox user's home dir.
 - `bash` to ensure every `cyber-dojo.sh` runs in the same shell.
 - `file` to check if a file is binary or text (--mime-encoding).
-- `tar` with the `--touch` option.
+- `tar` to tar pipe files out of the container.
 - `truncate` to truncate large files.
-- file stamp granularity in microseconds (`coreutils` on Alpine).
 
 - - - -
 
