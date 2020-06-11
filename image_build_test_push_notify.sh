@@ -192,6 +192,7 @@ build_cdl_image()
   echo "Building image $(image_name) from $(src_dir_abs)/docker/Dockerfile"
   docker build \
     --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
+    --compress \
     --file "$(src_dir_abs)/docker/Dockerfile" \
     --force-rm \
     --tag "$(image_name)" \
