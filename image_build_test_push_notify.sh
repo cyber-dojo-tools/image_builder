@@ -47,7 +47,7 @@ show_use_long()
     the 'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
     otherwise of \${SRC_DIR}/docker/image_name.json.
   Embeds an env-var inside this image as follows:
-    SHA=$(cd \${SRC_DIR} && git rev-parse HEAD)
+    SHA=\$(cd \${SRC_DIR} && git rev-parse HEAD)
 
   If \${SRC_DIR}/start_point/ exists:
     *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
