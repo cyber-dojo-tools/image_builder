@@ -427,6 +427,7 @@ EOF
 
   # Build the start_point/ image
   docker build \
+    --compress \
     --file "${TMP_DIR}/Dockerfile" \
     --tag "${start_point_image_name}" \
     "${start_point_dir}"
