@@ -20,7 +20,8 @@ trap_handler()
 {
   remove_tmp_dir
   remove_start_point_image
-  remove_runner
+  remove_runner_container
+  remove_lsp_container
   remove_docker_network
 }
 trap trap_handler EXIT
@@ -171,7 +172,7 @@ set_git_repo_url()
 # - - - - - - - - - - - - - - - - - - - - - - -
 git_commit_sha()
 {
-  echo "$(cd "${GIT_REPO_URL}" && git rev-parse HEAD)"
+  echo "$(cd "$(src_dir_abs)" && git rev-parse HEAD)"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -253,7 +254,6 @@ start_point_image_name()
   echo test_start_point_image
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - -
 create_start_point_image()
 {
   local -r name=$(start_point_image_name)
@@ -261,7 +261,6 @@ create_start_point_image()
   "$(cyber_dojo)" start-point create "${name}" --languages "${GIT_REPO_URL}"
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - -
 remove_start_point_image()
 {
   docker image remove --force $(start_point_image_name) > /dev/null 2>&1 || true
@@ -272,8 +271,13 @@ check_red_amber_green()
 {
   echo 'Checking red|amber|green traffic-lights'
   create_docker_network
-  start_runner
-  wait_until_ready runner "${CYBER_DOJO_RUNNER_PORT}"
+  # start 1st service needed by image_hiker
+  start_runner_container
+  wait_until_ready "$(runner_container_name)" "${CYBER_DOJO_RUNNER_PORT}"
+  # start 2nd service needed by image_hiker
+  start_lsp_container
+  wait_until_ready "$(lsp_container_name)" "${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
+  # now check red|amber|green
   assert_traffic_light red
   assert_traffic_light amber
   assert_traffic_light green
@@ -282,41 +286,41 @@ check_red_amber_green()
 # - - - - - - - - - - - - - - - - - - - - - - -
 # network to host containers
 # - - - - - - - - - - - - - - - - - - - - - - -
-network_name()
+docker_network_name()
 {
   echo traffic-light
 }
 
 create_docker_network()
 {
-  echo "Creating network $(network_name)"
-  local -r msg=$(docker network create $(network_name))
+  echo "Creating network $(docker_network_name)"
+  local -r msg=$(docker network create $(docker_network_name))
 }
 
 remove_docker_network()
 {
-  docker network remove $(network_name) > /dev/null 2>&1 || true
+  docker network remove $(docker_network_name) > /dev/null 2>&1 || true
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 # runner service to pass '6*9' starting files to
 # - - - - - - - - - - - - - - - - - - - - - - -
-runner_name()
+runner_container_name()
 {
   echo traffic-light-runner
 }
 
-start_runner()
+start_runner_container()
 {
   local -r image="${CYBER_DOJO_RUNNER_IMAGE}:${CYBER_DOJO_RUNNER_TAG}"
   local -r port="${CYBER_DOJO_RUNNER_PORT}"
-  echo "Creating $(runner_name) service"
+  echo 'Creating runner service'
   local -r cid=$(docker run \
      --detach \
      --env NO_PROMETHEUS=true \
      --init \
-     --name $(runner_name) \
-     --network $(network_name) \
+     --name $(runner_container_name) \
+     --network $(docker_network_name) \
      --network-alias runner \
      --publish "${port}:${port}" \
      --read-only \
@@ -327,9 +331,42 @@ start_runner()
        "${image}")
 }
 
-remove_runner()
+remove_runner_container()
 {
-  docker rm --force $(runner_name) > /dev/null 2>&1 || true
+  docker rm --force $(runner_container_name) > /dev/null 2>&1 || true
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+# language-start-points holding starting files
+# - - - - - - - - - - - - - - - - - - - - - - -
+lsp_container_name()
+{
+  echo traffic-light-lsp
+}
+
+start_lsp_container()
+{
+  local -r image="$(start_point_image_name)"
+  local -r port="${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
+  echo 'Creating languages-start-points service'
+  local -r cid=$(docker run \
+     --detach \
+     --env NO_PROMETHEUS=true \
+     --init \
+     --name $(lsp_container_name) \
+     --network $(docker_network_name) \
+     --network-alias languages-start-point \
+     --publish "${port}:${port}" \
+     --read-only \
+     --restart no \
+     --tmpfs /tmp \
+     --user root \
+       "${image}")
+}
+
+remove_lsp_container()
+{
+  docker rm --force $(lsp_container_name) > /dev/null 2>&1 || true
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -337,7 +374,7 @@ readonly READY_FILENAME='/tmp/curl-ready-output'
 
 wait_until_ready()
 {
-  local -r name="traffic-light-${1}"
+  local -r name="${1}"
   local -r port="${2}"
   local -r max_tries=20
   printf "Waiting until ${name} is ready"
@@ -392,7 +429,7 @@ assert_traffic_light()
     --env SRC_DIR=$(src_dir_abs) \
     --init \
     --name traffic-light \
-    --network $(network_name) \
+    --network $(docker_network_name) \
     --read-only \
     --restart no \
     --rm \
@@ -442,46 +479,6 @@ EOF
   docker push "${start_point_image_name}:${tag}"
   echo "Successfully pushed ${start_point_image_name}:${tag} to dockerhub"
   docker logout
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# notify github projects that use the built image as their base FROM image
-# - - - - - - - - - - - - - - - - - - - - - - -
-notify_dependent_projects()
-{
-  echo 'Notifying dependent projects'
-
-  local -r commit_push=github_automated_commit_push.sh
-  local -r curled_path="${TMP_DIR}/${commit_push}"
-  local -r github_org=https://raw.githubusercontent.com/cyber-dojo
-  local -r url="${github_org}/cyber-dojo/master/sh/circle-ci/${commit_push}"
-
-  curl \
-    --fail \
-    --output "${curled_path}" \
-    --silent \
-    "${url}"
-  chmod 700 "${curled_path}"
-
-  local -r from_org=cyber-dojo-languages
-  local -r from_repo="${CIRCLE_PROJECT_REPONAME}" # eg java
-  local -r from_sha="${CIRCLE_SHA1}" # eg a9334c964f81800a910dc3d301543262161fbbff
-  local -r to_org=cyber-dojo-languages
-
-  ${curled_path} \
-    "${from_org}" "${from_repo}" "${from_sha}" \
-    "${to_org}" $(dependent_projects)
-
-  echo 'Successfully notified dependent projects'
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-dependent_projects()
-{
-  docker run \
-    --rm \
-    --volume "$(src_dir_abs):/data:ro" \
-      cyberdojofoundation/image_dependents
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -539,7 +536,6 @@ if on_CI && ! scheduled_CI && ! testing_myself; then
     build_start_point_image_and_push_to_dockerhub # TODO: split any rely on previous build
     # push_start_point_images_to_dockerhub
   fi
-  # notify_dependent_projects # Off
 else
   echo Not pushing image to dockerhub
   echo Not notifying dependent repos
