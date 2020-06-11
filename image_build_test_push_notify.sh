@@ -33,6 +33,7 @@ show_use_short()
   echo ''
   echo '  SRC_DIR defaults to ${PWD}'
   echo '  SRC_DIR/docker/Dockerfile.base must exist'
+  echo '  SRC_DIR must contain a git repo'
   echo ''
 }
 
@@ -95,6 +96,11 @@ exit_non_zero_unless_good_SRC_DIR()
   if [ ! -f "${SRC_DIR}/docker/Dockerfile.base" ]; then
     show_use_short
     echo "error: ${SRC_DIR}/docker/Dockerfile.base does not exist"
+    exit 42
+  fi
+  if [ ! $(cd ${SRC_DIR} && git rev-parse HEAD 2> /dev/null) ]; then
+    show_use_short
+    echo "error: ${SRC_DIR} is not in a git repo"
     exit 42
   fi
 }
@@ -514,12 +520,13 @@ export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
 exit_non_zero_unless_good_SRC_DIR ${*}
 exit_non_zero_unless_docker_installed
-set_git_repo_url
+set_git_repo_url # TODO: DROP
 build_cdl_image
 tag_cdl_image_with_commit_sha
 
 if has_start_point; then
   create_start_point_image # TODO: build_start_point_image
+  # tag_start_point_image_with_commit_sha
   check_red_amber_green
 else
   echo 'No ${SRC_DIR}/start_point/ dir so assuming base-language repo'
@@ -530,6 +537,7 @@ if on_CI && ! scheduled_CI && ! testing_myself; then
   push_cdl_images_to_dockerhub
   if has_start_point; then
     build_start_point_image_and_push_to_dockerhub # TODO: split any rely on previous build
+    # push_start_point_images_to_dockerhub
   fi
   # notify_dependent_projects # Off
 else
