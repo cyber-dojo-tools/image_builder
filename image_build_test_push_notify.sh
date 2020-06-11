@@ -47,7 +47,7 @@ show_use_long()
   The name of the docker-image is:
     the 'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
     otherwise of \${SRC_DIR}/docker/image_name.json.
-  Embeds an env-var inside this image as follows:
+  Embeds an env-var of the git commit sha inside this image:
     SHA=\$(cd \${SRC_DIR} && git rev-parse HEAD)
 
   If \${SRC_DIR}/start_point/ exists:
@@ -63,7 +63,7 @@ show_use_long()
        https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
   If running on the CI/CD pipeine:
-    *) Tags the docker-image with TAG=${SHA:0:7}
+    *) Tags the docker-image with TAG=\${SHA:0:7}
 
     *) Creates a 2nd docker image containing \${SRC_DIR}/start_point/ with
        the 'image_name' property in mainfest.json tagged with ${TAG}.
