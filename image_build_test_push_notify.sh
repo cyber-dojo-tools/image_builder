@@ -41,8 +41,9 @@ show_use_long()
 {
   show_use_short
   cat <<- EOF
-  Builds a docker-image from \${SRC_DIR}/docker/Dockerfile.base
-  augmented to fulfil the runner service's requirements.
+  Creates \${SRC_DIR}/docker/Dockerfile from \${SRC_DIR}/docker/Dockerfile.base
+    augmented to fulfil the runner service's requirements.
+  Uses \${SRC_DIR}/docker/Dockerfile to build a docker image.
   The name of the docker-image is:
     the 'image_name' property of \${SRC_DIR}/start_point/manifest.json, if it exists,
     otherwise of \${SRC_DIR}/docker/image_name.json.
@@ -152,10 +153,10 @@ set_git_repo_url()
     cp -r "$(src_dir_abs)" "${TMP_DIR}"
     echo "Committing the changes in ${url}"
     cd ${url}
-    git config user.email "cyber-dojo-machine-user@cyber-dojo.org"
-    git config user.name "CyberDojoMachineUser"
+    git config user.email 'cyber-dojo-machine-user@cyber-dojo.org'
+    git config user.name 'CyberDojoMachineUser'
     git add .
-    git commit -m "Save"
+    git commit -m 'Save'
     echo "Using ${url}"
     GIT_REPO_URL="${url}"
   fi
@@ -177,10 +178,8 @@ git_commit_tag()
 # - - - - - - - - - - - - - - - - - - - - - - -
 build_cdl_image()
 {
-  # Create new Dockerfile containing extra
-  # commands to fulfil the runner's requirements.
-  echo "Building docker-image $(image_name)"
-  cat "${GIT_REPO_URL}/docker/Dockerfile.base" \
+  echo "Creating file $(src_dir_abs)/docker/Dockerfile from $(src_dir_abs)/docker/Dockerfile.base"
+  cat "$(src_dir_abs)/docker/Dockerfile.base" \
     | \
       docker run \
         --interactive \
@@ -188,18 +187,15 @@ build_cdl_image()
         --volume /var/run/docker.sock:/var/run/docker.sock \
         cyberdojofoundation/image_dockerfile_augmenter \
     > \
-      "${GIT_REPO_URL}/docker/Dockerfile"
+      "$(src_dir_abs)/docker/Dockerfile"
 
-  # Write new Dockerfile to stdout in case of debugging
-  cat "${GIT_REPO_URL}/docker/Dockerfile"
-
-  # Build the augmented docker-image.
+  echo "Building image $(image_name) from $(src_dir_abs)/docker/Dockerfile"
   docker build \
     --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
-    --file "${GIT_REPO_URL}/docker/Dockerfile" \
+    --file "$(src_dir_abs)/docker/Dockerfile" \
     --force-rm \
     --tag "$(image_name)" \
-    "${GIT_REPO_URL}/docker"
+    "$(src_dir_abs)/docker"
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - -
@@ -311,7 +307,7 @@ start_runner()
   echo "Creating $(runner_name) service"
   local -r cid=$(docker run \
      --detach \
-     --env NO_PROMETHEUS \
+     --env NO_PROMETHEUS=true \
      --init \
      --name $(runner_name) \
      --network $(network_name) \
@@ -386,7 +382,7 @@ assert_traffic_light()
 {
   local -r colour="${1}" # eg red
   docker run \
-    --env NO_PROMETHEUS \
+    --env NO_PROMETHEUS=true \
     --env SRC_DIR=$(src_dir_abs) \
     --init \
     --name traffic-light \
