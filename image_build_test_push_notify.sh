@@ -40,7 +40,7 @@ show_use_short()
 show_use_long()
 {
   show_use_short
-  define TEXT <<- EOF
+  cat <<- EOF
   Builds a docker-image from \${SRC_DIR}/docker/Dockerfile.base
   augmented to fulfil the runner service's requirements.
   The name of the docker-image is:
@@ -72,19 +72,6 @@ show_use_long()
     *) Pushes both docker-images (tagged to ${TAG}) to dockerhub
 
 EOF
-  printf "${TEXT}"
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-define()
-{
-  o=;
-  while IFS="\n" read -r a
-  do
-    o="$o$a"'
-';
-  done
-  eval "$1=\$o"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
