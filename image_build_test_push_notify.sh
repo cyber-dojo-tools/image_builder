@@ -200,7 +200,6 @@ build_cdl_image()
     --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
     --compress \
     --file "$(src_dir_abs)/docker/Dockerfile" \
-    --force-rm \
     --tag "$(image_name)" \
     "$(src_dir_abs)/docker"
 }
