@@ -19,7 +19,7 @@ remove_tmp_dir() { rm -rf "${TMP_DIR}" > /dev/null; }
 trap_handler()
 {
   remove_tmp_dir
-  remove_start_point_image
+  remove_lsp_image
   remove_runner_container
   remove_lsp_container
   remove_docker_network
@@ -249,24 +249,6 @@ has_start_point()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-start_point_image_name()
-{
-  echo test_start_point_image
-}
-
-create_start_point_image()
-{
-  local -r name=$(start_point_image_name)
-  echo "Building ${name}"
-  "$(cyber_dojo)" start-point create "${name}" --languages "${GIT_REPO_URL}"
-}
-
-remove_start_point_image()
-{
-  docker image remove --force $(start_point_image_name) > /dev/null 2>&1 || true
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
 check_red_amber_green()
 {
   echo 'Checking red|amber|green traffic-lights'
@@ -275,6 +257,7 @@ check_red_amber_green()
   start_runner_container
   wait_until_ready "$(runner_container_name)" "${CYBER_DOJO_RUNNER_PORT}"
   # start 2nd service needed by image_hiker
+  build_lsp_image
   start_lsp_container
   wait_until_ready "$(lsp_container_name)" "${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
   # now check red|amber|green
@@ -337,8 +320,25 @@ remove_runner_container()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# language-start-points holding starting files
+# language-start-points service to serve starting files
 # - - - - - - - - - - - - - - - - - - - - - - -
+lsp_image_name()
+{
+  echo test_language_start_point_image
+}
+
+build_lsp_image()
+{
+  local -r name=$(lsp_image_name)
+  echo "Building ${name}"
+  "$(cyber_dojo)" start-point build "${name}" --languages "${GIT_REPO_URL}"
+}
+
+remove_lsp_image()
+{
+  docker image remove --force $(lsp_image_name) > /dev/null 2>&1 || true
+}
+
 lsp_container_name()
 {
   echo traffic-light-lsp
@@ -346,7 +346,7 @@ lsp_container_name()
 
 start_lsp_container()
 {
-  local -r image="$(start_point_image_name)"
+  local -r image="$(lsp_image_name)"
   local -r port="${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
   echo 'Creating languages-start-points service'
   local -r cid=$(docker run \
@@ -418,8 +418,9 @@ ready()
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 # check red->amber->green progression of '6 * 9'
-# Works via a volume-mount and not via a git-clone
-# so uncommitted changes in SRC_DIR will be seen.
+# Works via a volume-mount and not via a git-clone so
+# 1. uncommitted changes in SRC_DIR will be seen.
+# 2. start_point/options.json can be used if needed.
 # - - - - - - - - - - - - - - - - - - - - - - -
 assert_traffic_light()
 {
@@ -437,48 +438,6 @@ assert_traffic_light()
     --user nobody \
     --volume $(src_dir_abs):$(src_dir_abs):ro \
       cyberdojofoundation/image_hiker:latest "${colour}"
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-build_start_point_image_and_push_to_dockerhub()
-{
-  local -r start_point_dir="${SRC_DIR}/start_point"
-  local -r commit_sha="$(git_commit_sha)"
-  local -r tag="${commit_sha:0:7}"
-
-  # Get the untagged manifest.json image_name
-  # and tag the image_name inside manifest.json
-  local -r start_point_image_name=$( \
-    docker run \
-      --volume "${start_point_dir}:/start_point:rw" \
-      --rm \
-      cyberdojofoundation/image_manifest_tagger \
-      "${tag}")
-
-  # Prepare a Dockerfile ready to build a start_point/ image
-cat << EOF > "${TMP_DIR}/Dockerfile"
-FROM busybox:latest
-COPY . /start_point
-ENV SHA=${commit_sha}
-EOF
-
-  # Build the start_point/ image
-  docker build \
-    --compress \
-    --file "${TMP_DIR}/Dockerfile" \
-    --tag "${start_point_image_name}" \
-    "${start_point_dir}"
-
-  # Push the start_point/ image to dockerhub
-  docker tag "${start_point_image_name}" "${start_point_image_name}:${tag}"
-  # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
-  echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-  echo "Pushing ${start_point_image_name} to dockerhub"
-  docker push "${start_point_image_name}"
-  echo "Successfully pushed ${start_point_image_name} to dockerhub"
-  docker push "${start_point_image_name}:${tag}"
-  echo "Successfully pushed ${start_point_image_name}:${tag} to dockerhub"
-  docker logout
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -517,13 +476,11 @@ export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
 exit_non_zero_unless_good_SRC_DIR ${*}
 exit_non_zero_unless_docker_installed
-set_git_repo_url # TODO: DROP
+set_git_repo_url
 build_cdl_image
 tag_cdl_image_with_commit_sha
 
 if has_start_point; then
-  create_start_point_image # TODO: build_start_point_image
-  # tag_start_point_image_with_commit_sha
   check_red_amber_green
 else
   echo 'No ${SRC_DIR}/start_point/ dir so assuming base-language repo'
@@ -532,10 +489,6 @@ fi
 
 if on_CI && ! scheduled_CI && ! testing_myself; then
   push_cdl_images_to_dockerhub
-  if has_start_point; then
-    build_start_point_image_and_push_to_dockerhub # TODO: split any rely on previous build
-    # push_start_point_images_to_dockerhub
-  fi
 else
   echo Not pushing image to dockerhub
   echo Not notifying dependent repos
