@@ -32,9 +32,9 @@ show_use_short()
 {
   echo "Use: ${MY_NAME} [SRC_DIR|-h|--help]"
   echo ''
-  echo '  SRC_DIR defaults to ${PWD}'
-  echo '  SRC_DIR/docker/Dockerfile.base must exist'
-  echo '  SRC_DIR must contain a git repo'
+  echo '  SRC_DIR defaults to ${PWD}.'
+  echo '  SRC_DIR/docker/Dockerfile.base must exist.'
+  echo '  SRC_DIR must contain a git repo.'
   echo ''
 }
 
@@ -43,6 +43,7 @@ show_use_long()
 {
   show_use_short
   cat <<- EOF
+  Step 1.
   Creates \${SRC_DIR}/docker/Dockerfile from \${SRC_DIR}/docker/Dockerfile.base
     augmented to fulfil the runner service's requirements.
   Uses \${SRC_DIR}/docker/Dockerfile to build a docker image.
@@ -52,27 +53,25 @@ show_use_long()
   Embeds an env-var of the git commit sha inside this image:
     SHA=\$(cd \${SRC_DIR} && git rev-parse HEAD)
 
+  Step 2.
   If \${SRC_DIR}/start_point/ exists:
     *) Attempts to build a start-point image from the git-cloneable \${SRC_DIR}.
-       $ cyber-dojo start-point create ... --languages \${SRC_DIR}
+       $ cyber-dojo start-point build ... --languages \${SRC_DIR}
 
     *) Verifies the red|amber|green traffic-lights for \${SRC_DIR}/start_point/ files
-       o) unmodified, give a red traffic-light.
-       o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
-       o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
+       run against the image created in Step 1.
+         o) unmodified, give a red traffic-light.
+         o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
+         o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
        If there is no \${SRC_DIR}/start_point/ file containing '6 * 9',
        looks for the file \${SRC_DIR}/start_point/options.json. For example, see:
        https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
+  Step 3.
   If running on the CI/CD pipeine:
     *) Tags the docker-image with TAG=\${SHA:0:7}
-
-    *) Creates a 2nd docker image containing \${SRC_DIR}/start_point/ with
-       the 'image_name' property in mainfest.json tagged with ${TAG}.
-       The name of this 2nd docker image is the same as the 1st docker image
-       except its registry is cyberdojostartpoints
-
-    *) Pushes both docker-images (tagged to ${TAG}) to dockerhub
+    *) Pushes the docker-image (tagged to \${TAG}) to dockerhub
+    *) Pushes the docker-image (tagged to latest) to dockerhub
 
 EOF
 }
@@ -107,13 +106,21 @@ exit_non_zero_unless_good_SRC_DIR()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+exit_non_zero_unless_git_installed()
+{
+  if ! hash git 2> /dev/null; then
+    echo error: git is not installed
+    exit 42
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 exit_non_zero_unless_docker_installed()
 {
-  :
-  #if [ ! -x docker ]; then
-  #  echo error: docker is not installed
-  #  exit 42
-  #fi
+  if ! hash docker; then
+    echo error: docker is not installed
+    exit 42
+  fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -237,8 +244,8 @@ scheduled_CI()
 # - - - - - - - - - - - - - - - - - - - - - - -
 testing_myself()
 {
-  # Don't push CDL images or notify dependent repos
-  # if building CDL images as part of image_builder's own tests.
+  # Don't push CDL images if building CDL images
+  # as part of image_builder's own tests.
   [ "${CIRCLE_PROJECT_REPONAME}" = 'image_builder' ]
 }
 
@@ -253,14 +260,14 @@ check_red_amber_green()
 {
   echo 'Checking red|amber|green traffic-lights'
   create_docker_network
-  # start 1st service needed by image_hiker
+  # start runner service needed by image_hiker
   start_runner_container
   wait_until_ready "$(runner_container_name)" "${CYBER_DOJO_RUNNER_PORT}"
-  # start 2nd service needed by image_hiker
+  # start languages-start-points service needed by image_hiker
   build_lsp_image
   start_lsp_container
   wait_until_ready "$(lsp_container_name)" "${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
-  # now check red|amber|green
+  # now use image_hiker to check red|amber|green
   assert_traffic_light red
   assert_traffic_light amber
   assert_traffic_light green
@@ -316,7 +323,7 @@ start_runner_container()
 
 remove_runner_container()
 {
-  docker rm --force $(runner_container_name) > /dev/null 2>&1 || true
+  docker container rm --force $(runner_container_name) > /dev/null 2>&1 || true
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -366,7 +373,7 @@ start_lsp_container()
 
 remove_lsp_container()
 {
-  docker rm --force $(lsp_container_name) > /dev/null 2>&1 || true
+  docker container rm --force $(lsp_container_name) > /dev/null 2>&1 || true
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -418,13 +425,13 @@ ready()
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 # check red->amber->green progression of '6 * 9'
-# Works via a volume-mount and not via a git-clone so
-# 1. uncommitted changes in SRC_DIR will be seen.
-# 2. start_point/options.json can be used if needed.
+# Works via a volume-mount (and not via a git-clone) so
+#   o) uncommitted changes in SRC_DIR will be seen.
+#   o) start_point/options.json can be used if needed.
 # - - - - - - - - - - - - - - - - - - - - - - -
 assert_traffic_light()
 {
-  local -r colour="${1}" # eg red
+  local -r colour="${1}" # red|amber|green
   docker run \
     --env NO_PROMETHEUS=true \
     --env SRC_DIR=$(src_dir_abs) \
@@ -474,8 +481,9 @@ versioner_env_vars()
 # - - - - - - - - - - - - - - - - - - - - - - -
 export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
-exit_non_zero_unless_good_SRC_DIR ${*}
+exit_non_zero_unless_git_installed
 exit_non_zero_unless_docker_installed
+exit_non_zero_unless_good_SRC_DIR ${*}
 set_git_repo_url
 build_cdl_image
 tag_cdl_image_with_commit_sha
