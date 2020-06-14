@@ -462,6 +462,7 @@ check_version()
 tag_cdl_image_with_commit_sha()
 {
   docker tag $(image_name) $(image_name):$(git_commit_tag)
+  echo "Successfully tagged to $(image_name):$(git_commit_tag)"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
