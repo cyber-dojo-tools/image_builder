@@ -343,7 +343,6 @@ lsp_container_name()
 
 start_lsp_container()
 {
-  local -r image="$(lsp_image_name)"
   local -r port="${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
   echo 'Creating languages-start-points service'
   local -r cid=$(docker run \
@@ -358,7 +357,7 @@ start_lsp_container()
      --restart no \
      --tmpfs /tmp \
      --user root \
-       "${image}")
+       "$(lsp_image_name)")
 }
 
 remove_lsp_container()
