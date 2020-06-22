@@ -24,6 +24,7 @@ show_use_short()
   echo '  GIT_REPO_DIR defaults to ${PWD}.'
   echo '  GIT_REPO_DIR must hold a git repo.'
   echo '  GIT_REPO_DIR/docker/Dockerfile.base must exist.'
+  echo '  GIT_REPO_DIR/docker/image_name.json must exist.'
   echo ''
 }
 
@@ -38,9 +39,7 @@ show_use_long()
 
   Step 2.
   Uses \${GIT_REPO_DIR}/docker/Dockerfile to build a docker image.
-  The name of the docker-image is:
-    the 'image_name' property of \${GIT_REPO_DIR}/start_point/manifest.json, if it exists,
-    otherwise of \${GIT_REPO_DIR}/docker/image_name.json.
+  The name of the docker-image is the 'image_name' property of \${GIT_REPO_DIR}/docker/image_name.json.
   Embeds an env-var of the git commit sha inside this image:
     SHA=\$(cd \${GIT_REPO_DIR} && git rev-parse HEAD)
 
@@ -63,20 +62,23 @@ exit_zero_if_show_help()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-exit_non_zero_unless_docker_installed()
+exit_non_zero_unless_installed()
 {
-  if ! hash docker; then
-    echo error: docker is not installed
+  local -r name="${1}"
+  if ! installed "${name}"; then
+    stderr "ERROR: ${name} is not installed"
     exit 42
   fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-exit_non_zero_unless_git_installed()
+installed()
 {
-  if ! hash git 2> /dev/null; then
-    echo error: git is not installed
-    exit 42
+  local -r name="${1}"
+  if hash "${name}" 2> /dev/null; then
+    true
+  else
+    false
   fi
 }
 
@@ -89,14 +91,19 @@ exit_non_zero_unless_good_GIT_REPO_DIR()
     stderr "ERROR: ${git_repo_dir} does not exist."
     exit 42
   fi
+  if [ ! $(cd ${git_repo_dir} && git rev-parse HEAD 2> /dev/null) ]; then
+    show_use_short
+    stderr "ERROR: ${git_repo_dir} is not in a git repo."
+    exit 42
+  fi
   if [ ! -f "${git_repo_dir}/docker/Dockerfile.base" ]; then
     show_use_short
     stderr "ERROR: ${git_repo_dir}/docker/Dockerfile.base does not exist."
     exit 42
   fi
-  if [ ! $(cd ${git_repo_dir} && git rev-parse HEAD 2> /dev/null) ]; then
+  if [ ! -f "${git_repo_dir}/docker/image_name.json" ]; then
     show_use_short
-    stderr "ERROR: ${git_repo_dir} is not in a git repo."
+    stderr "ERROR: ${git_repo_dir}/docker/image_name.json does not exist."
     exit 42
   fi
 }
@@ -190,10 +197,7 @@ build_cdl_image()
 #- - - - - - - - - - - - - - - - - - - - - - -
 image_name()
 {
-  docker run \
-    --rm \
-    --volume "${GIT_REPO_DIR}:/data:ro" \
-    cyberdojofoundation/image_namer
+  cat "${GIT_REPO_DIR}/docker/image_name.json" | jq --raw-output .image_name
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -265,8 +269,9 @@ versioner_env_vars()
 # - - - - - - - - - - - - - - - - - - - - - - -
 export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
-exit_non_zero_unless_docker_installed
-exit_non_zero_unless_git_installed
+exit_non_zero_unless_installed docker
+exit_non_zero_unless_installed git
+exit_non_zero_unless_installed jq
 exit_non_zero_unless_good_GIT_REPO_DIR ${*}
 set_git_repo_dir ${*}
 build_cdl_image
