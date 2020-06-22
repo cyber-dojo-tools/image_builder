@@ -44,7 +44,7 @@ show_use_long()
     SHA=\$(cd \${GIT_REPO_DIR} && git rev-parse HEAD)
 
   Step 3.
-  If running on the CI/CD pipeine:
+  If running on the CI/CD pipeine (but not from CI cron trigger):
     *) Tags the docker-image with TAG=\${SHA:0:7}
     *) Pushes the docker-image (tagged to \${TAG}) to dockerhub
     *) Pushes the docker-image (tagged to latest) to dockerhub
@@ -86,6 +86,7 @@ installed()
 exit_non_zero_unless_good_GIT_REPO_DIR()
 {
   local -r git_repo_dir="${1:-${PWD}}"
+  local filename
   if [ ! -d "${git_repo_dir}" ]; then
     show_use_short
     stderr "ERROR: ${git_repo_dir} does not exist."
@@ -96,16 +97,24 @@ exit_non_zero_unless_good_GIT_REPO_DIR()
     stderr "ERROR: ${git_repo_dir} is not in a git repo."
     exit 42
   fi
-  if [ ! -f "${git_repo_dir}/docker/Dockerfile.base" ]; then
+  filename="${git_repo_dir}/docker/Dockerfile.base"
+  if [ ! -f "${filename}" ]; then
     show_use_short
-    stderr "ERROR: ${git_repo_dir}/docker/Dockerfile.base does not exist."
+    stderr "ERROR: ${filename} does not exist."
     exit 42
   fi
-  if [ ! -f "${git_repo_dir}/docker/image_name.json" ]; then
+  filename="${git_repo_dir}/docker/image_name.json"
+  if [ ! -f "${filename}" ]; then
     show_use_short
-    stderr "ERROR: ${git_repo_dir}/docker/image_name.json does not exist."
+    stderr "ERROR: ${filename} does not exist."
     exit 42
   fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+stderr()
+{
+  >&2 echo "${1}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -133,12 +142,6 @@ set_git_repo_dir()
     echo "Using ${url}"
     GIT_REPO_DIR="${url}"
   fi
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-stderr()
-{
-  >&2 echo "${1}"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
