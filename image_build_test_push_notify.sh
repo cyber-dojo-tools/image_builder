@@ -225,21 +225,11 @@ testing_myself()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-has_start_point()
-{
-  [ -d "${GIT_REPO_DIR}/start_point" ]
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
 check_version()
 {
-  echo 'No ${GIT_REPO_DIR}/start_point/ dir so assuming base-language repo'
   local -r script="${GIT_REPO_DIR}/check_version.sh"
   if [ -f "${script}" ]; then
     "${script}"
-  else
-    stderr "ERROR: missing script: /check_version.sh"
-    exit 42
   fi
 }
 
@@ -280,9 +270,7 @@ set_git_repo_dir ${*}
 build_cdl_image
 tag_cdl_image_with_commit_sha
 
-if ! has_start_point; then
-  check_version
-fi
+check_version
 
 if on_CI && ! scheduled_CI && ! testing_myself; then
   push_cdl_images_to_dockerhub
