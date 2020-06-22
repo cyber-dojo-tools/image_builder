@@ -12,16 +12,7 @@
 
 readonly TMP_DIR=$(mktemp -d ~/tmp-cyber-dojo.image_builder.XXXXXX)
 remove_tmp_dir() { rm -rf "${TMP_DIR}" > /dev/null; }
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-trap_handler()
-{
-  remove_tmp_dir
-  remove_lsp_image
-  remove_runner_container
-  remove_lsp_container
-  remove_docker_network
-}
+trap_handler() { remove_tmp_dir; }
 trap trap_handler EXIT
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -44,26 +35,14 @@ show_use_long()
   Step 1.
   Creates \${GIT_REPO_DIR}/docker/Dockerfile from \${GIT_REPO_DIR}/docker/Dockerfile.base
     augmented to fulfil the runner service's requirements.
+
+  Step 2.
   Uses \${GIT_REPO_DIR}/docker/Dockerfile to build a docker image.
   The name of the docker-image is:
     the 'image_name' property of \${GIT_REPO_DIR}/start_point/manifest.json, if it exists,
     otherwise of \${GIT_REPO_DIR}/docker/image_name.json.
   Embeds an env-var of the git commit sha inside this image:
     SHA=\$(cd \${GIT_REPO_DIR} && git rev-parse HEAD)
-
-  Step 2.
-  If \${GIT_REPO_DIR}/start_point/ exists:
-    *) Attempts to build a start-point image from the git-cloneable \${GIT_REPO_DIR}.
-       $ cyber-dojo start-point build ... --languages \${GIT_REPO_DIR}
-
-    *) Verifies the red|amber|green traffic-lights for \${GIT_REPO_DIR}/start_point/ files
-       run against the image created in Step 1.
-         o) unmodified, give a red traffic-light.
-         o) with '6 * 9' replaced by '6 * 9sd', give an amber traffic-light.
-         o) with '6 * 9' replaced by '6 * 7', give a green traffic-light.
-       If there is no \${GIT_REPO_DIR}/start_point/ file containing '6 * 9',
-       looks for the file \${GIT_REPO_DIR}/start_point/options.json. For example, see:
-       https://github.com/cyber-dojo-languages/nasm-assert/tree/master/start_point
 
   Step 3.
   If running on the CI/CD pipeine:
@@ -245,216 +224,10 @@ has_start_point()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-check_red_amber_green()
-{
-  echo 'Checking red|amber|green traffic-lights'
-  create_docker_network
-  # start runner service needed by image_hiker
-  start_runner_container
-  wait_until_ready "$(runner_container_name)" "${CYBER_DOJO_RUNNER_PORT}"
-  # start languages-start-points service needed by image_hiker
-  build_lsp_image
-  start_lsp_container
-  wait_until_ready "$(lsp_container_name)" "${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
-  # now use image_hiker to check red|amber|green
-  assert_traffic_light red
-  assert_traffic_light amber
-  assert_traffic_light green
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# network to host containers
-# - - - - - - - - - - - - - - - - - - - - - - -
-docker_network_name()
-{
-  echo traffic-light
-}
-
-create_docker_network()
-{
-  echo "Creating network $(docker_network_name)"
-  local -r msg=$(docker network create $(docker_network_name))
-}
-
-remove_docker_network()
-{
-  docker network remove $(docker_network_name) > /dev/null 2>&1 || true
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# runner service to pass '6*9' starting files to
-# - - - - - - - - - - - - - - - - - - - - - - -
-runner_container_name()
-{
-  echo traffic-light-runner
-}
-
-start_runner_container()
-{
-  local -r image="${CYBER_DOJO_RUNNER_IMAGE}:${CYBER_DOJO_RUNNER_TAG}"
-  local -r port="${CYBER_DOJO_RUNNER_PORT}"
-  echo 'Creating runner service'
-  local -r cid=$(docker run \
-     --detach \
-     --env NO_PROMETHEUS=true \
-     --init \
-     --name $(runner_container_name) \
-     --network $(docker_network_name) \
-     --network-alias runner \
-     --publish "${port}:${port}" \
-     --read-only \
-     --restart no \
-     --tmpfs /tmp \
-     --user root \
-     --volume /var/run/docker.sock:/var/run/docker.sock \
-       "${image}")
-}
-
-remove_runner_container()
-{
-  docker container rm --force $(runner_container_name) > /dev/null 2>&1 || true
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# language-start-points service to serve starting files
-# - - - - - - - - - - - - - - - - - - - - - - -
-lsp_image_name()
-{
-  echo test_language_start_point_image
-}
-
-build_lsp_image()
-{
-  local -r name=$(lsp_image_name)
-  local -r tag="$(git_commit_tag)"
-  echo "Building ${name}"
-  "$(cyber_dojo)" start-point build "${name}" --languages "${tag}@${GIT_REPO_DIR}"
-}
-
-remove_lsp_image()
-{
-  docker image remove --force $(lsp_image_name) > /dev/null 2>&1 || true
-}
-
-lsp_container_name()
-{
-  echo traffic-light-lsp
-}
-
-start_lsp_container()
-{
-  local -r port="${CYBER_DOJO_LANGUAGES_START_POINTS_PORT}"
-  echo 'Creating languages-start-points service'
-  local -r cid=$(docker run \
-     --detach \
-     --env NO_PROMETHEUS=true \
-     --init \
-     --name $(lsp_container_name) \
-     --network $(docker_network_name) \
-     --network-alias languages-start-point \
-     --publish "${port}:${port}" \
-     --read-only \
-     --restart no \
-     --tmpfs /tmp \
-     --user root \
-       "$(lsp_image_name)")
-}
-
-remove_lsp_container()
-{
-  docker container rm --force $(lsp_container_name) > /dev/null 2>&1 || true
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-wait_until_ready()
-{
-  local -r name="${1}"
-  local -r port="${2}"
-  local -r max_tries=20
-  printf "Waiting until ${name} is ready"
-  for _ in $(seq ${max_tries})
-  do
-    if ready $(ip_address) ${port} ; then
-      printf '.OK\n'
-      return
-    else
-      printf .
-      sleep 0.2
-    fi
-  done
-  printf 'FAIL\n'
-  echo "${name} not ready after ${max_tries} tries"
-  if [ -f "${READY_FILENAME}" ]; then
-    echo "$(cat "${READY_FILENAME}")"
-  fi
-  docker logs ${name}
-  exit 42
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-ip_address()
-{
-  if [ -n "${DOCKER_MACHINE_NAME}" ]; then
-    docker-machine ip ${DOCKER_MACHINE_NAME}
-  else
-    echo localhost
-  fi
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-ready()
-{
-  local -r ip_address="${1}"
-  local -r port="${2}"
-  local -r path=ready?
-  rm -f "$(ready_filename)"
-  local -r curl_cmd="curl \
-    --output $(ready_filename) \
-    --silent \
-    --fail \
-    --data {} \
-    -X GET http://$(ip_address):${port}/${path}"
-  if ${curl_cmd} && [ "$(cat "$(ready_filename)")" = '{"ready?":true}' ]; then
-    true
-  else
-    false
-  fi
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-ready_filename()
-{
-  echo /tmp/curl-ready-output
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-# check red->amber->green progression of '6 * 9'
-# Works via a volume-mount (and not via a git-clone) so
-#   o) uncommitted changes in GIT_REPO_DIR will be seen.
-#   o) start_point/options.json can be used if needed.
-# - - - - - - - - - - - - - - - - - - - - - - -
-assert_traffic_light()
-{
-  local -r colour="${1}" # red|amber|green
-  docker run \
-    --env NO_PROMETHEUS=true \
-    --env SRC_DIR=${GIT_REPO_DIR} \
-    --init \
-    --name traffic-light \
-    --network $(docker_network_name) \
-    --read-only \
-    --restart no \
-    --rm \
-    --tmpfs /tmp \
-    --user nobody \
-    --volume ${GIT_REPO_DIR}:${GIT_REPO_DIR}:ro \
-      cyberdojofoundation/image_hiker:latest "${colour}"
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
 check_version()
 {
   echo 'No ${GIT_REPO_DIR}/start_point/ dir so assuming base-language repo'
+  # TODO: check the script exists before calling it
   "${GIT_REPO_DIR}/check_version.sh"
 }
 
@@ -492,15 +265,13 @@ exit_non_zero_unless_docker_installed
 exit_non_zero_unless_good_GIT_REPO_DIR ${*}
 set_git_repo_dir ${*}
 build_cdl_image
-tag_cdl_image_with_commit_sha
 
-if has_start_point; then
-  check_red_amber_green
-else
+if ! has_start_point; then
   check_version
 fi
 
 if on_CI && ! scheduled_CI && ! testing_myself; then
+  tag_cdl_image_with_commit_sha
   push_cdl_images_to_dockerhub
 else
   echo Not pushing image to dockerhub
