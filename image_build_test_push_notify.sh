@@ -63,6 +63,24 @@ exit_zero_if_show_help()
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
+exit_non_zero_unless_docker_installed()
+{
+  if ! hash docker; then
+    echo error: docker is not installed
+    exit 42
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
+exit_non_zero_unless_git_installed()
+{
+  if ! hash git 2> /dev/null; then
+    echo error: git is not installed
+    exit 42
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - -
 exit_non_zero_unless_good_GIT_REPO_DIR()
 {
   local -r git_repo_dir="${1:-${PWD}}"
@@ -79,24 +97,6 @@ exit_non_zero_unless_good_GIT_REPO_DIR()
   if [ ! $(cd ${git_repo_dir} && git rev-parse HEAD 2> /dev/null) ]; then
     show_use_short
     stderr "ERROR: ${git_repo_dir} is not in a git repo."
-    exit 42
-  fi
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-exit_non_zero_unless_git_installed()
-{
-  if ! hash git 2> /dev/null; then
-    echo error: git is not installed
-    exit 42
-  fi
-}
-
-# - - - - - - - - - - - - - - - - - - - - - - -
-exit_non_zero_unless_docker_installed()
-{
-  if ! hash docker; then
-    echo error: docker is not installed
     exit 42
   fi
 }
@@ -227,8 +227,13 @@ has_start_point()
 check_version()
 {
   echo 'No ${GIT_REPO_DIR}/start_point/ dir so assuming base-language repo'
-  # TODO: check the script exists before calling it
-  "${GIT_REPO_DIR}/check_version.sh"
+  local -r script="${GIT_REPO_DIR}/check_version.sh"
+  if [ -f "${script}" ]; then
+    "${script}"
+  else
+    stderr "ERROR: missing script: /check_version.sh"
+    exit 42
+  fi
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -260,8 +265,8 @@ versioner_env_vars()
 # - - - - - - - - - - - - - - - - - - - - - - -
 export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
-exit_non_zero_unless_git_installed
 exit_non_zero_unless_docker_installed
+exit_non_zero_unless_git_installed
 exit_non_zero_unless_good_GIT_REPO_DIR ${*}
 set_git_repo_dir ${*}
 build_cdl_image
