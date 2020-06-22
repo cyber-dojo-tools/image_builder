@@ -265,13 +265,13 @@ exit_non_zero_unless_docker_installed
 exit_non_zero_unless_good_GIT_REPO_DIR ${*}
 set_git_repo_dir ${*}
 build_cdl_image
+tag_cdl_image_with_commit_sha
 
 if ! has_start_point; then
   check_version
 fi
 
 if on_CI && ! scheduled_CI && ! testing_myself; then
-  tag_cdl_image_with_commit_sha
   push_cdl_images_to_dockerhub
 else
   echo Not pushing image to dockerhub
