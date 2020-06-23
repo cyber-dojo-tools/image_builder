@@ -200,7 +200,10 @@ build_cdl_image()
 #- - - - - - - - - - - - - - - - - - - - - - -
 image_name()
 {
-  cat "${GIT_REPO_DIR}/docker/image_name.json" | jq --raw-output .image_name
+  docker run \
+    --rm \
+    --volume "${GIT_REPO_DIR}:/data:ro" \
+    cyberdojofoundation/image_namer:2639960
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -264,7 +267,6 @@ export $(versioner_env_vars)
 exit_zero_if_show_help ${*}
 exit_non_zero_unless_installed docker
 exit_non_zero_unless_installed git
-exit_non_zero_unless_installed jq
 exit_non_zero_unless_good_GIT_REPO_DIR ${*}
 set_git_repo_dir ${*}
 build_cdl_image
