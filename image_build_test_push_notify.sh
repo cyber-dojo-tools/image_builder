@@ -274,7 +274,7 @@ tag_cdl_image_with_commit_sha
 
 check_version
 
-if on_CI && ! scheduled_CI && ! testing_myself; then
+if on_CI && ! testing_myself; then
   push_cdl_images_to_dockerhub
 else
   echo Not pushing image to dockerhub
