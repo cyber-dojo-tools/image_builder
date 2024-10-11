@@ -249,7 +249,7 @@ push_cdl_images_to_dockerhub()
   echo "Pushing $(image_name) to dockerhub"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
   echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-  docker push $(image_name)
+  docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to dockerhub"
   docker push $(image_name):$(git_commit_tag)
   echo "Successfully pushed $(image_name):$(git_commit_tag) to dockerhub"
