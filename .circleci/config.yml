@@ -2,7 +2,7 @@ version: 2
 jobs:
   build-publish-trigger:
     machine:
-      image: ubuntu-1604:201903-01
+      image: default
     steps:
       - checkout
       - run:
