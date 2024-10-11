@@ -1,0 +1,20 @@
+name: Main
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    env: 
+      DOCKER_PASS: ${{ secrets.DOCKER_FOUNDATION_PASS }}
+      DOCKER_USER: ${{ secrets.DOCKER_FOUNDATION_USER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and publish image
+        run:
+          ./pipe_build_up_test.sh
