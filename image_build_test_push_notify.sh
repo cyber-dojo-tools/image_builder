@@ -1,7 +1,7 @@
 #!/bin/bash -Ee
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# Curl'd and run in CircleCI scripts of all repos
+# Curl'd and run in CircleCI/Github Actions scripts of all repos
 # of the cyber-dojo-languages github organization.
 #
 # Note: TMP_DIR is off ~ and not /tmp because if we are
@@ -246,13 +246,14 @@ tag_cdl_image_with_commit_sha()
 # - - - - - - - - - - - - - - - - - - - - - - -
 push_cdl_images_to_dockerhub()
 {
-  echo "Pushing $(image_name) to dockerhub"
+  echo "Pushing $(image_name) to Container Registry"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
-  echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-  docker push $(image_name):latest
-  echo "Successfully pushed $(image_name) to dockerhub"
-  docker push $(image_name):$(git_commit_tag)
-  echo "Successfully pushed $(image_name):$(git_commit_tag) to dockerhub"
+
+  echo "${PACKAGES_TOKEN}" | docker login ghcr.io --username "${PACKAGES_USERNAME}" --password-stdin
+  docker push ghcr.io/$(image_name):latest
+  echo "Successfully pushed $(image_name) to Container Registry"
+  docker push ghcr.io/$(image_name):$(git_commit_tag)
+  echo "Successfully pushed $(image_name):$(git_commit_tag) to Container Registry"
   docker logout
 }
 

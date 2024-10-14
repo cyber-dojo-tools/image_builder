@@ -9,8 +9,8 @@ jobs:
   build-publish:
     runs-on: ubuntu-latest
     env: 
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_FOUNDATION_PASS }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_FOUNDATION_USER }}
+      PACKAGES_TOKEN: ${{ secrets.DOCKER_FOUNDATION_PASS }}
+      PACKAGES_USERNAME: ${{ github.actor }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
