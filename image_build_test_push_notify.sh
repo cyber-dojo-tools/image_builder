@@ -239,8 +239,8 @@ check_version()
 # - - - - - - - - - - - - - - - - - - - - - - -
 tag_cdl_image_with_commit_sha()
 {
-  docker tag $(image_name) $(image_name):$(git_commit_tag)
-  echo "Successfully tagged to $(image_name):$(git_commit_tag)"
+  docker tag $(image_name) ghcr.io/$(image_name):$(git_commit_tag)
+  echo "Successfully tagged to ghcr.io/$(image_name):$(git_commit_tag)"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -248,7 +248,6 @@ push_cdl_images_to_dockerhub()
 {
   echo "Pushing $(image_name) to Container Registry"
   # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
-  echo "name: ${PACKAGES_USERNAME}"
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
   docker push ghcr.io/$(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
