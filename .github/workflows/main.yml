@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       PACKAGES_TOKEN: ${{ secrets.DOCKER_FOUNDATION_PASS }}
-      PACKAGES_USERNAME: ${{ github.actor }}
+      PACKAGES_USERNAME: ${{ secrets.PACKAGES_USERNAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
