@@ -9,7 +9,7 @@ jobs:
   build-publish:
     runs-on: ubuntu-latest
     env: 
-      PACKAGES_TOKEN: ${{ secrets.DOCKER_FOUNDATION_PASS }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
       PACKAGES_USERNAME: ${{ secrets.PACKAGES_USERNAME }}
     steps:
       - name: Checkout
