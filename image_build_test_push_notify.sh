@@ -46,8 +46,8 @@ show_use_long()
   Step 3.
   If running on the CI/CD pipeine (but not from CI cron trigger):
     *) Tags the docker-image with TAG=\${SHA:0:7}
-    *) Pushes the docker-image (tagged to \${TAG}) to dockerhub
-    *) Pushes the docker-image (tagged to latest) to dockerhub
+    *) Pushes the docker-image (tagged to \${TAG}) to the Github Container Registry
+    *) Pushes the docker-image (tagged to latest) to the Github Container Registry
 
 EOF
 }
@@ -209,22 +209,16 @@ image_name()
 # - - - - - - - - - - - - - - - - - - - - - - -
 on_CI()
 {
-  [ -n "${CIRCLE_SHA1}" ] || [ -n "${CI:-}" ]
+  [ -n "${CI:-}" ]
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - -
-scheduled_CI()
-{
-  # when CI is running for a commit, this is the commit's username
-  [ "${CIRCLE_USERNAME}" == "" ]
-}
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 testing_myself()
 {
   # Don't push CDL images if building CDL images
   # as part of image_builder's own tests.
-  [ "${CIRCLE_PROJECT_REPONAME}" = 'image_builder' ]
+  [ "${REPO_NAME}" = 'image_builder' ]
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
@@ -239,21 +233,21 @@ check_version()
 # - - - - - - - - - - - - - - - - - - - - - - -
 tag_cdl_image_with_commit_sha()
 {
-  docker tag $(image_name) ghcr.io/$(image_name):$(git_commit_tag)
-  echo "Successfully tagged to ghcr.io/$(image_name):$(git_commit_tag)"
-  docker tag $(image_name) ghcr.io/$(image_name):latest
-  echo "Successfully tagged to ghcr.io/$(image_name):latest"
+  docker tag $(image_name) $(image_name):$(git_commit_tag)
+  echo "Successfully tagged to $(image_name):$(git_commit_tag)"
+  docker tag $(image_name) $(image_name):latest
+  echo "Successfully tagged to $(image_name):latest"
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-push_cdl_images_to_dockerhub()
+push_cdl_images_to_registry()
 {
   echo "Pushing $(image_name) to Container Registry"
-  # DOCKER_PASSWORD, DOCKER_USERNAME must be in the CI context
+  # PACKAGES_TOKEN and PACKAGES_USERNAME must be set in the Github Actions workflow
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
-  docker push ghcr.io/$(image_name):latest
+  docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
-  docker push ghcr.io/$(image_name):$(git_commit_tag)
+  docker push $(image_name):$(git_commit_tag)
   echo "Successfully pushed $(image_name):$(git_commit_tag) to Container Registry"
   docker logout
 }
@@ -277,8 +271,8 @@ tag_cdl_image_with_commit_sha
 check_version
 
 if on_CI && ! testing_myself; then
-  push_cdl_images_to_dockerhub
+  push_cdl_images_to_registry
 else
-  echo Not pushing image to dockerhub
+  echo Not pushing image to the Github Container Registry
   echo Not notifying dependent repos
 fi
