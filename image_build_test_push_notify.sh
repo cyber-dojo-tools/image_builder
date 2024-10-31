@@ -268,8 +268,7 @@ push_cdl_images_to_registry()
   echo "Pushing $(image_name) to Container Registry"
   # PACKAGES_TOKEN and PACKAGES_USERNAME must be set in the Github Actions workflow
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
-  docker build \
-  --builder container-builder \
+  docker buildx build \
    --push \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):latest .
