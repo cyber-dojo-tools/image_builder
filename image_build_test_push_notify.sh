@@ -188,11 +188,34 @@ build_cdl_image()
     > \
       "${GIT_REPO_DIR}/docker/Dockerfile"
 
+  exists=$(docker buildx ls | grep container-builder | wc -l)
+
+  if [ $exists -eq 0 ]; then
+    docker buildx create \
+      --name container-builder \
+      --driver docker-container \
+      --bootstrap --use
+  fi
+
   echo "Building image $(image_name) from ${GIT_REPO_DIR}/docker/Dockerfile"
   docker build \
+    --builder container-builder \
+    --platform linux/amd64,linux/arm64,linux/arm/v7 \
     --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
     --compress \
     --file "${GIT_REPO_DIR}/docker/Dockerfile" \
+    --tag "$(image_name)" \
+    "${GIT_REPO_DIR}/docker"
+
+  # docker build \
+  #   --load \
+  #   --platform linux/arm64 \
+  #   --tag "$(image_name)" \
+  #   "${GIT_REPO_DIR}/docker"
+
+  docker buildx build \
+    --load \
+    --platform linux/amd64 \
     --tag "$(image_name)" \
     "${GIT_REPO_DIR}/docker"
 }
@@ -245,9 +268,17 @@ push_cdl_images_to_registry()
   echo "Pushing $(image_name) to Container Registry"
   # PACKAGES_TOKEN and PACKAGES_USERNAME must be set in the Github Actions workflow
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
-  docker push $(image_name):latest
+  docker build \
+   --push \
+   --platform linux/amd64,linux/arm64,linux/arm/v7 \
+   --tag $(image_name):latest
+  #docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
-  docker push $(image_name):$(git_commit_tag)
+  docker build \
+   --push \
+   --platform linux/amd64,linux/arm64,linux/arm/v7 \
+   --tag $(image_name):$(git_commit_tag)
+  #docker push $(image_name):$(git_commit_tag)
   echo "Successfully pushed $(image_name):$(git_commit_tag) to Container Registry"
   docker logout
 }
