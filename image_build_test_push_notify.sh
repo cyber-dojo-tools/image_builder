@@ -200,7 +200,7 @@ build_cdl_image()
   echo "Building image $(image_name) from ${GIT_REPO_DIR}/docker/Dockerfile"
   docker build \
     --builder container-builder \
-    --platform linux/amd64,linux/arm64,linux/arm/v7 \
+    --platform linux/amd64,linux/arm64 \
     --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
     --compress \
     --file "${GIT_REPO_DIR}/docker/Dockerfile" \
@@ -270,13 +270,13 @@ push_cdl_images_to_registry()
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
   docker build \
    --push \
-   --platform linux/amd64,linux/arm64,linux/arm/v7 \
+   --platform linux/amd64,linux/arm64 \
    --tag $(image_name):latest
   #docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
   docker build \
    --push \
-   --platform linux/amd64,linux/arm64,linux/arm/v7 \
+   --platform linux/amd64,linux/arm64 \
    --tag $(image_name):$(git_commit_tag)
   #docker push $(image_name):$(git_commit_tag)
   echo "Successfully pushed $(image_name):$(git_commit_tag) to Container Registry"
