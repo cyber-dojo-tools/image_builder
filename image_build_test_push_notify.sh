@@ -275,8 +275,7 @@ push_cdl_images_to_registry()
    --tag $(image_name):latest .
   #docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
-  docker build \
-   --builder container-builder \
+  docker buildx build \
    --push \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):$(git_commit_tag) .
