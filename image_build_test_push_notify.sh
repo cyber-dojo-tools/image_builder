@@ -213,7 +213,7 @@ build_cdl_image()
   #   --tag "$(image_name)" \
   #   "${GIT_REPO_DIR}/docker"
 
-  docker buildx build \
+  docker build \
     --load \
     --platform linux/amd64 \
     --tag "$(image_name)" \
@@ -269,12 +269,14 @@ push_cdl_images_to_registry()
   # PACKAGES_TOKEN and PACKAGES_USERNAME must be set in the Github Actions workflow
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
   docker build \
+  --builder container-builder \
    --push \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):latest .
   #docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
   docker build \
+   --builder container-builder \
    --push \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):$(git_commit_tag) .
