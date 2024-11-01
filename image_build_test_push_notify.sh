@@ -278,12 +278,14 @@ push_cdl_images_to_registry()
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
   docker buildx build \
    --push \
+   --provenance=false \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):latest \
     "${GIT_REPO_DIR}/docker"
   echo "Successfully pushed $(image_name) to Container Registry"
   docker buildx build \
    --push \
+   --provenance=false \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):$(git_commit_tag) \
     "${GIT_REPO_DIR}/docker"
