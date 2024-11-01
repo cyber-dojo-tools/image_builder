@@ -236,6 +236,12 @@ on_CI()
   [ -n "${CI:-}" ]
 }
 
+# - - - - - - - - - - - - - - - - - - - - - - -
+scheduled_CI()
+{
+  # when CI is running for a commit, this is the commit's username
+  [ "${TYPE}" = 'schedule' ]
+}
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 testing_myself()
@@ -302,7 +308,7 @@ tag_cdl_image_with_commit_sha
 
 check_version
 
-if on_CI && ! testing_myself; then
+if on_CI && ! scheduled_CI && ! testing_myself; then
   push_cdl_images_to_registry
 else
   echo Not pushing image to the Github Container Registry
