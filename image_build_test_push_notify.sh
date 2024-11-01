@@ -214,6 +214,7 @@ build_cdl_image()
   #   "${GIT_REPO_DIR}/docker"
 
   docker build \
+    --builder container-builder \
     --load \
     --platform linux/amd64 \
     --tag "$(image_name)" \
@@ -273,14 +274,12 @@ push_cdl_images_to_registry()
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):latest \
     "${GIT_REPO_DIR}/docker"
-  #docker push $(image_name):latest
   echo "Successfully pushed $(image_name) to Container Registry"
   docker buildx build \
    --push \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):$(git_commit_tag) \
     "${GIT_REPO_DIR}/docker"
-  #docker push $(image_name):$(git_commit_tag)
   echo "Successfully pushed $(image_name):$(git_commit_tag) to Container Registry"
   docker logout
 }
