@@ -205,6 +205,7 @@ build_cdl_image()
     --compress \
     --file "${GIT_REPO_DIR}/docker/Dockerfile" \
     --tag "$(image_name)" \
+    --provenance=false \
     "${GIT_REPO_DIR}/docker"
 
   # docker build \
