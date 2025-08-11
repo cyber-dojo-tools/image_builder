@@ -184,7 +184,7 @@ build_cdl_image()
         --interactive \
         --rm \
         --volume /var/run/docker.sock:/var/run/docker.sock \
-        cyberdojofoundation/image_dockerfile_augmenter \
+        ghcr.io/cyber-dojo-tools/image_dockerfile_augmenter \
     > \
       "${GIT_REPO_DIR}/docker/Dockerfile"
 

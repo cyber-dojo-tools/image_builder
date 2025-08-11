@@ -2,7 +2,7 @@
 
 [image_build_test_push_notify.sh](https://github.com/cyber-dojo-languages/image_builder/blob/master/image_build_test_push_notify.sh) is the script (containing docker commands) which all the
 [cyber-dojo-languages](https://github.com/cyber-dojo-languages) repos
-run in their `.circleci/config.yml` file.
+run in their workflow file.
 
 There are two kinds of repos in the cyber-dojo-languages github organization:
 - baseLanguage repos
