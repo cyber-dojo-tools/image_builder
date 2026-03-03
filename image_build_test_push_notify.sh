@@ -179,8 +179,6 @@ build_cdl_image()
 {
   echo "Creating file ${GIT_REPO_DIR}/docker/Dockerfile from ${GIT_REPO_DIR}/docker/Dockerfile.base"
 
-  docker pull --platform=linux/amd64 ghcr.io/cyber-dojo-tools/image_dockerfile_augmenter
-
   cat "${GIT_REPO_DIR}/docker/Dockerfile.base" \
     | \
       docker run \
@@ -201,6 +199,7 @@ build_cdl_image()
   fi
 
   echo "Building image $(image_name) from ${GIT_REPO_DIR}/docker/Dockerfile"
+
   docker build \
     --builder container-builder \
     --platform linux/amd64,linux/arm64 \
@@ -210,12 +209,6 @@ build_cdl_image()
     --tag "$(image_name)" \
     --provenance=false \
     "${GIT_REPO_DIR}/docker"
-
-  # docker build \
-  #   --load \
-  #   --platform linux/arm64 \
-  #   --tag "$(image_name)" \
-  #   "${GIT_REPO_DIR}/docker"
 
   docker build \
     --builder container-builder \
@@ -277,22 +270,28 @@ tag_cdl_image_with_commit_sha()
 push_cdl_images_to_registry()
 {
   echo "Pushing $(image_name) to Container Registry"
+
   # PACKAGES_TOKEN and PACKAGES_USERNAME must be set in the Github Actions workflow
   echo "${PACKAGES_TOKEN}" | docker login ghcr.io -u "${PACKAGES_USERNAME}" --password-stdin
+
   docker buildx build \
    --push \
    --provenance=false \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):latest \
     "${GIT_REPO_DIR}/docker"
+
   echo "Successfully pushed $(image_name) to Container Registry"
+
   docker buildx build \
    --push \
    --provenance=false \
    --platform linux/amd64,linux/arm64 \
    --tag $(image_name):$(git_commit_tag) \
     "${GIT_REPO_DIR}/docker"
+
   echo "Successfully pushed $(image_name):$(git_commit_tag) to Container Registry"
+
   docker logout
 }
 
