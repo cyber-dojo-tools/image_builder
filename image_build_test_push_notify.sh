@@ -2,7 +2,7 @@
 set -Eeu
 
 # - - - - - - - - - - - - - - - - - - - - - - -
-# Curl'd and run in CircleCI/Github Actions scripts of all repos
+# Curl'd and run in Github Actions scripts of all repos
 # of the cyber-dojo-languages github organization.
 #
 # Note: TMP_DIR is off ~ and not /tmp because if we are
