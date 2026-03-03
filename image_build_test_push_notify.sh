@@ -178,6 +178,9 @@ cyber_dojo()
 build_cdl_image()
 {
   echo "Creating file ${GIT_REPO_DIR}/docker/Dockerfile from ${GIT_REPO_DIR}/docker/Dockerfile.base"
+
+  docker pull --platform=linux/amd64 ghcr.io/cyber-dojo-tools/image_dockerfile_augmenter
+
   cat "${GIT_REPO_DIR}/docker/Dockerfile.base" \
     | \
       docker run \
