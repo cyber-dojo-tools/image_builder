@@ -15,7 +15,8 @@ repo_url()
     local github_org=https://github.com/cyber-dojo-languages
     local repo_url="${github_org}/${name}"
     mkdir -p "${curled_path}"
-    git clone --single-branch --branch main --depth 1 "${repo_url}" "${curled_path}"
+    #git clone --single-branch --branch main --depth 1 "${repo_url}" "${curled_path}"
+    git clone "${repo_url}" "${curled_path}"
     echo "${curled_path}"
   else
     echo "${curled_path}"
