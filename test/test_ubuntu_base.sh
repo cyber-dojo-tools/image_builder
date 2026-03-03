@@ -2,7 +2,7 @@
 
 test_Ubuntu()
 {
-  language_base_test Ubuntu haskell
+  language_base_test Ubuntu nasm
 }
 
 MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

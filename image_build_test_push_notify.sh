@@ -1,4 +1,5 @@
-#!/bin/bash -Ee
+#!/usr/bin/env bash
+set -Eeu
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 # Curl'd and run in CircleCI/Github Actions scripts of all repos

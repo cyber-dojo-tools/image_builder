@@ -2,7 +2,7 @@
 
 test_Ubuntu()
 {
-  language_testFramework_test Ubuntu haskell-hunit
+  language_testFramework_test Ubuntu nasm-assert
 }
 
 MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
