@@ -203,7 +203,7 @@ build_cdl_image()
 
   docker build \
     --builder container-builder \
-    --platform linux/amd64,linux/arm64 \
+    --platform linux/amd64 \
     --build-arg GIT_COMMIT_SHA="$(git_commit_sha)" \
     --compress \
     --file "${GIT_REPO_DIR}/docker/Dockerfile" \
